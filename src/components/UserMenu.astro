@@ -1,0 +1,103 @@
+---
+const { user } = Astro.locals;
+
+const email = user?.email || "user@example.com";
+const fullName = user?.user_metadata?.full_name || email.split("@")[0];
+const initials = fullName.slice(0, 2).toUpperCase();
+---
+
+<div class="relative w-full group">
+  <div
+    class="absolute bottom-full left-0 w-full bg-white dark:bg-gray-800 dark:border-gray-700 overflow-hidden z-50 transition-all duration-200 origin-bottom opacity-0 invisible translate-y-2 pointer-events-none group-focus-within:opacity-100 group-focus-within:visible group-focus-within:scale-100 group-focus-within:translate-y-0 group-focus-within:pointer-events-auto"
+  >
+    <div class="">
+      <button
+        id="theme-toggle"
+        class="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors"
+      >
+        <span class="dark:hidden">Dark Mode</span>
+        <span class="hidden dark:inline">Light Mode</span>
+      </button>
+
+      <a
+        href="/admin/settings"
+        class="px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors"
+      >
+        User Settings
+      </a>
+
+      <form
+        action="/auth/logout"
+        method="POST"
+        class="w-full border-t border-gray-200"
+      >
+        <button
+          type="submit"
+          class="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 transition-colors"
+        >
+          Logout
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <button
+    class="flex items-center gap-3 w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors outline-none"
+  >
+    <div
+      class="h-10 w-10 shrink-0 rounded-full bg-indigo-600 flex items-center justify-center text-white text-sm font-bold shadow-sm"
+    >
+      {initials}
+    </div>
+
+    <div class="flex flex-col text-left overflow-hidden">
+      <strong
+        class="block text-sm font-medium text-gray-900 dark:text-white truncate"
+      >
+        {fullName}
+      </strong>
+      <span class="block text-xs text-gray-500 dark:text-gray-400 truncate">
+        {email}
+      </span>
+    </div>
+
+    <svg
+      class="ml-auto h-4 w-4 text-gray-400 transition-transform duration-200 group-focus-within:rotate-180"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M19 9l-7 7-7-7"></path>
+    </svg>
+  </button>
+</div>
+
+<script is:inline>
+  // Apply theme on load based on local storage or system preference
+  document.documentElement.classList.toggle(
+    "dark",
+    localStorage.theme === "dark" ||
+      (!("theme" in localStorage) &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches),
+  );
+
+  const themeBtn = document.getElementById("theme-toggle");
+
+  if (themeBtn) {
+    themeBtn.addEventListener("click", () => {
+      const isDark = document.documentElement.classList.contains("dark");
+
+      if (isDark) {
+        document.documentElement.classList.remove("dark");
+        localStorage.theme = "light";
+      } else {
+        document.documentElement.classList.add("dark");
+        localStorage.theme = "dark";
+      }
+    });
+  }
+</script>

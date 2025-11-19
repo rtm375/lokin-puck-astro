@@ -1,0 +1,43 @@
+---
+import "../assets/css/global.css";
+import Header from "../components/Header.astro";
+import Sidebar from "../components/sidebar.astro";
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Astro Basics</title>
+  </head>
+  <body>
+    <div class="flex">
+      <aside class="w-3xs">
+        <Sidebar />
+      </aside>
+      <main class="grow">
+        <div class="h-[calc(100dvh-50px)] overflow-y-auto">
+          <div class="flex flex-col gap-y-4">
+            <Header title={title} />
+            <div class="mx-auto w-7xl max-w-full">
+              <slot />
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
+
+<style>
+  html,
+  body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+  }
+</style>

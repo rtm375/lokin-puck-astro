@@ -1,0 +1,10 @@
+---
+export const prerender = false;
+import "../assets/css/global.css";
+import Auth from "../layouts/auth.astro";
+import LoginReact from "../components/client/auth/Login";
+---
+
+<Auth>
+  <LoginReact client:load />
+</Auth>

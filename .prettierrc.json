@@ -1,0 +1,13 @@
+{
+    "name": "lokin-puck-astro",
+    "version": "1.0.0",
+    "devDependencies": {
+        "prettier": "^3.0.0",
+        "prettier-plugin-tailwindcss": "^0.5.0"
+    },
+    "prettier": {
+        "plugins": [
+            "prettier-plugin-tailwindcss"
+        ]
+    }
+}
