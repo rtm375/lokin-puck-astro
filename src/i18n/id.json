@@ -1,0 +1,55 @@
+{
+    "welcome_message": "Selamat Datang",
+    "logout": "Keluar",
+    "dashboard": "Beranda",
+    "websites": "Situs",
+    "billing": "Billing",
+    "profile": "Profil",
+    "common": {
+        "login": "Login",
+        "logout": "Keluar",
+        "register": "Register",
+        "save": "Simpan",
+        "saving": "Menyimpan...",
+        "cancel": "Batal",
+        "edit": "Ubah",
+        "delete": "Hapus",
+        "create": "Buat",
+        "creating": "Membuat...",
+        "optional": "Opsional"
+    },
+    "websites_page": {
+        "title": "Situs web",
+        "create_new": "Buat situs baru",
+        "actions": {
+            "open": "Buka situs",
+            "create": "Buat situs",
+            "creating": "Mebuat situs..."
+        },
+        "website_settings": "Pengaturan",
+        "status_live": "Aktif",
+        "status_draft": "Draf",
+        "modal_title": "Buat situs baru",
+        "field_name": "Nama situs",
+        "field_domain": "Domain",
+        "field_description": "Deskripsi situs",
+        "limit_reached": "Quota situs sudah penuh. <a href='{{url}}' class='underline font-bold'>Beli paket Pro</a> untuk menambahkan lebih banyak situs web."
+    },
+    "user_profile": {
+        "title": "Pengaturan Akun",
+        "profile_title": "Profil Anda",
+        "photo": "Foto",
+        "change_photo_coming_soon": "Ubah (Segera Hadir)",
+        "full_name": "Nama Lengkap",
+        "bio": "Bio",
+        "bio_hint": "Tulis beberapa kalimat tentang diri Anda.",
+        "section_preferences": "Preferensi",
+        "theme": "Tema",
+        "theme_system": "Default Sistem",
+        "theme_light": "Terang",
+        "theme_dark": "Gelap",
+        "language": "Bahasa",
+        "success_message": "Profil berhasil diperbarui",
+        "error_message": "Gagal memperbarui pengaturan"
+    }
+}

@@ -1,17 +1,25 @@
-// src/env.d.ts
-
 /// <reference types="astro/client" />
 
-// Import the types
-import type { SupabaseClient, Session } from "@supabase/supabase-js";
+import type { SupabaseClient, Session, User } from "@supabase/supabase-js";
 
 declare global {
   namespace App {
     interface Locals {
-      // Add your properties here
       supabase: SupabaseClient;
       session: Session | null;
       user: User | null;
+      profile: {
+        id: string;
+        tier: 'free' | 'pro';
+        full_name: string | null;
+        bio: string | null;
+        avatar_url: string | null;
+        preferences: any;
+        storage_used: number;
+      } | null;
+
+      t: (key: string, options?: any) => string;
+      preferences: { theme?: string; language?: string } | null;
     }
   }
 }

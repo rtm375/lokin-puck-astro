@@ -1,8 +1,9 @@
 ---
-const { user } = Astro.locals;
+const { user, t } = Astro.locals;
 
 const email = user?.email || "user@example.com";
 const fullName = user?.user_metadata?.full_name || email.split("@")[0];
+const avatar = user?.user_metadata?.avatar_url;
 const initials = fullName.slice(0, 2).toUpperCase();
 ---
 
@@ -11,19 +12,24 @@ const initials = fullName.slice(0, 2).toUpperCase();
     class="absolute bottom-full left-0 w-full bg-white dark:bg-gray-800 dark:border-gray-700 overflow-hidden z-50 transition-all duration-200 origin-bottom opacity-0 invisible translate-y-2 pointer-events-none group-focus-within:opacity-100 group-focus-within:visible group-focus-within:scale-100 group-focus-within:translate-y-0 group-focus-within:pointer-events-auto"
   >
     <div class="">
-      <button
-        id="theme-toggle"
-        class="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors"
-      >
-        <span class="dark:hidden">Dark Mode</span>
-        <span class="hidden dark:inline">Light Mode</span>
-      </button>
-
       <a
-        href="/admin/settings"
-        class="px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors"
+        href="/admin/profiles"
+        class="flex items-center text-sm gap-2 py-2 px-4 text-gray-800 hover:bg-linear-to-r hover:from-transparent hover:to-gray-100"
       >
-        User Settings
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          ><g fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"
+            ><path
+              d="M16 9a4 4 0 1 1-8 0a4 4 0 0 1 8 0m-2 0a2 2 0 1 1-4 0a2 2 0 0 1 4 0"
+            ></path><path
+              d="M12 1C5.925 1 1 5.925 1 12s4.925 11 11 11s11-4.925 11-11S18.075 1 12 1M3 12c0 2.09.713 4.014 1.908 5.542A8.99 8.99 0 0 1 12.065 14a8.98 8.98 0 0 1 7.092 3.458A9 9 0 1 0 3 12m9 9a8.96 8.96 0 0 1-5.672-2.012A6.99 6.99 0 0 1 12.065 16a6.99 6.99 0 0 1 5.689 2.92A8.96 8.96 0 0 1 12 21"
+            ></path></g
+          ></svg
+        >
+        {t("profile")}
       </a>
 
       <form
@@ -35,19 +41,35 @@ const initials = fullName.slice(0, 2).toUpperCase();
           type="submit"
           class="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 transition-colors"
         >
-          Logout
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            ><g
+              fill="none"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              ><path
+                d="M14 8V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2v-2"
+              ></path><path d="M9 12h12l-3-3m0 6l3-3"></path></g
+            ></svg
+          >
+          {t("common.logout")}
         </button>
       </form>
     </div>
   </div>
 
   <button
-    class="flex items-center gap-3 w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors outline-none"
+    class="flex items-center gap-3 w-full py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors outline-none"
   >
     <div
-      class="h-10 w-10 shrink-0 rounded-full bg-indigo-600 flex items-center justify-center text-white text-sm font-bold shadow-sm"
+      class="h-10 w-10 shrink-0 rounded-full bg-primary/80 flex items-center justify-center text-white text-sm font-bold shadow-sm"
     >
-      {initials}
+      {avatar ? <img src={avatar} class="rounded-full" /> : initials}
     </div>
 
     <div class="flex flex-col text-left overflow-hidden">
@@ -75,29 +97,3 @@ const initials = fullName.slice(0, 2).toUpperCase();
     </svg>
   </button>
 </div>
-
-<script is:inline>
-  // Apply theme on load based on local storage or system preference
-  document.documentElement.classList.toggle(
-    "dark",
-    localStorage.theme === "dark" ||
-      (!("theme" in localStorage) &&
-        window.matchMedia("(prefers-color-scheme: dark)").matches),
-  );
-
-  const themeBtn = document.getElementById("theme-toggle");
-
-  if (themeBtn) {
-    themeBtn.addEventListener("click", () => {
-      const isDark = document.documentElement.classList.contains("dark");
-
-      if (isDark) {
-        document.documentElement.classList.remove("dark");
-        localStorage.theme = "light";
-      } else {
-        document.documentElement.classList.add("dark");
-        localStorage.theme = "dark";
-      }
-    });
-  }
-</script>

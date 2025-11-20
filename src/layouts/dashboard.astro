@@ -1,29 +1,62 @@
 ---
 import "../assets/css/global.css";
 import Header from "../components/Header.astro";
-import Sidebar from "../components/sidebar.astro";
+import Sidebar from "../components/Sidebar.astro";
+
+const { profile } = Astro.locals;
+
+let theme = "system";
+let lang = "en";
+
+if (profile?.preferences) {
+  theme = profile?.preferences.theme || "system";
+  lang = profile?.preferences.language || "en";
+}
 const { title } = Astro.props;
+const explicitClass = theme === "dark" ? "dark" : "";
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={lang} class={explicitClass}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
-    <title>Astro Basics</title>
+    <title>{title}</title>
+    <script is:inline define:vars={{ theme }}>
+      if (theme === "system") {
+        const root = document.documentElement;
+        const systemDark = window.matchMedia(
+          "(prefers-color-scheme: dark)"
+        ).matches;
+
+        if (systemDark) {
+          root.classList.add("dark");
+        } else {
+          root.classList.remove("dark");
+        }
+
+        // Listen for OS changes live
+        window
+          .matchMedia("(prefers-color-scheme: dark)")
+          .addEventListener("change", (e) => {
+            if (e.matches) root.classList.add("dark");
+            else root.classList.remove("dark");
+          });
+      }
+    </script>
   </head>
   <body>
-    <div class="flex">
+    <div class="flex w-full">
       <aside class="w-3xs">
         <Sidebar />
       </aside>
       <main class="grow">
-        <div class="h-[calc(100dvh-50px)] overflow-y-auto">
+        <div class="w-full h-[calc(100dvh-50px)] overflow-y-auto">
           <div class="flex flex-col gap-y-4">
             <Header title={title} />
-            <div class="mx-auto w-7xl max-w-full">
+            <div class="mx-auto max-w-7xl w-full px-6">
               <slot />
             </div>
           </div>
@@ -32,12 +65,3 @@ const { title } = Astro.props;
     </div>
   </body>
 </html>
-
-<style>
-  html,
-  body {
-    margin: 0;
-    width: 100%;
-    height: 100%;
-  }
-</style>

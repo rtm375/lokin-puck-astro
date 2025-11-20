@@ -1,0 +1,56 @@
+{
+    "welcome_message": "Welcome",
+    "logout": "Logout",
+    "dashboard": "Dashboard",
+    "websites": "Websites",
+    "billing": "Billing",
+    "profile": "Profile",
+    "common": {
+        "login": "Login",
+        "logout": "Logout",
+        "register": "Register",
+        "save": "Save",
+        "saving": "Saving...",
+        "cancel": "Cancel",
+        "edit": "Edit",
+        "delete": "Delete",
+        "create": "Create",
+        "creating": "Creating...",
+        "optional": "Optional"
+    },
+    "websites_page": {
+        "title": "Websites",
+        "create_new": "Create new website",
+        "actions": {
+            "open": "Open website",
+            "create": "Create website",
+            "creating": "Creating website..."
+        },
+        "edit_website": "Edit Website",
+        "website_settings": "Settings",
+        "status_live": "Live",
+        "status_draft": "Draft",
+        "modal_title": "Create New Website",
+        "field_name": "Website Name",
+        "field_domain": "Domain",
+        "field_description": "Description",
+        "limit_reached": "Limit reached. You can only have 1 website on the free plan. <a href='{{url}}' class='underline font-bold'>Upgrade to Pro</a> to add more."
+    },
+    "user_profile": {
+        "title": "Account Settings",
+        "profile_title": "Your profile",
+        "photo": "Photo",
+        "change_photo_coming_soon": "Change (Coming Soon)",
+        "full_name": "Full Name",
+        "bio": "Bio",
+        "bio_hint": "Write a few sentences about yourself.",
+        "section_preferences": "Preferences",
+        "theme": "Theme",
+        "theme_system": "System Default",
+        "theme_light": "Light",
+        "theme_dark": "Dark",
+        "language": "Language",
+        "success_message": "Profile updated successfully",
+        "error_message": "Failed to update settings"
+    }
+}
