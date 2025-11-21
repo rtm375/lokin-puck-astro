@@ -1,0 +1,10 @@
+---
+import Layout from "../../layouts/dashboard.astro";
+import ProfilesComponent from "../../components/client/Profile";
+export const prerender = false;
+const { user, t } = Astro.locals;
+---
+
+<Layout title={t("user_profile.title")}>
+  <ProfilesComponent client:load />
+</Layout>

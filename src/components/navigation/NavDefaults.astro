@@ -1,0 +1,80 @@
+---
+import { isActive } from "../../utils";
+const { url } = Astro;
+const { t } = Astro.locals;
+---
+
+<li>
+  <a
+    href="/admin/dashboard"
+    class=`${isActive(url.pathname, "/admin/dashboard") ? 'bg-linear-to-r from-transparent to-gray-100 ' : ''} flex items-center gap-2 py-2 px-4 text-gray-800 hover:bg-linear-to-r hover:from-transparent hover:to-gray-100`
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      ><path
+        fill="none"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="1.5"
+        d="M6.625 2.75a3.875 3.875 0 1 0 0 7.75a3.875 3.875 0 0 0 0-7.75m10.75 0a3.875 3.875 0 1 0 0 7.75a3.875 3.875 0 0 0 0-7.75M6.625 13.5a3.875 3.875 0 1 0 0 7.75a3.875 3.875 0 0 0 0-7.75m10.75 0a3.875 3.875 0 1 0 0 7.75a3.875 3.875 0 0 0 0-7.75"
+      ></path></svg
+    >
+    <span class="text-sm font-medium">
+      {t("navigations.defaults.dashboard")}
+    </span>
+  </a>
+</li>
+
+<li>
+  <a
+    href="/admin/websites"
+    class=`${isActive(url.pathname, "/admin/websites") ? 'bg-linear-to-r from-transparent to-gray-100 ' : ''} flex items-center gap-2 py-2 px-4 text-gray-800 hover:bg-linear-to-r hover:from-transparent hover:to-gray-100`
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 48 48"
+      ><g fill="none" stroke="currentColor" stroke-width="3"
+        ><path
+          stroke-linejoin="round"
+          d="M3 24a21 21 0 1 0 42 0a21 21 0 1 0-42 0"></path><path
+          stroke-linejoin="round"
+          d="M15 24a9 21 0 1 1 18 0a9 21 0 1 1-18 0"></path><path
+          stroke-linecap="round"
+          d="M4.5 31h39m-39-14h39"></path></g
+      ></svg
+    >
+    <span class="text-sm font-medium">
+      {t("navigations.defaults.websites")}
+    </span>
+  </a>
+</li>
+<li>
+  <a
+    href="/admin/templates"
+    class=`${isActive(url.pathname, "/admin/templates") ? 'bg-linear-to-r from-transparent to-gray-100 ' : ''} flex items-center gap-2 py-2 px-4 text-gray-800 hover:bg-linear-to-r hover:from-transparent hover:to-gray-100`
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      ><path
+        fill="none"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M4 5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zm0 8a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zm10-1h6m-6 4h6m-6 4h6"
+      ></path></svg
+    >
+    <span class="text-sm font-medium">
+      {t("navigations.defaults.templates")}
+    </span>
+  </a>
+</li>

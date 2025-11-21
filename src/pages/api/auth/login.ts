@@ -1,4 +1,4 @@
-import { getSupabaseClient } from '../../lib/supabase-client';
+import { getSupabaseClient } from '../../../lib/supabase-client';
 import type { APIRoute } from 'astro';
 
 export const prerender = false;
@@ -16,7 +16,7 @@ export const POST: APIRoute = async ({ request, cookies, url }) => {
 
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider,
-      options: { redirectTo: `${url.origin}/auth/callback` }
+      options: { redirectTo: `${url.origin}/api/auth/callback` }
     });
 
     if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400 });

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { useTranslation } from '../../../i18n/client'; // Import the hook
+import React, { useState, useEffect } from 'react';
+import { useTranslation } from '../../../i18n/client';
+import { slugify } from '../../../utils';
 
 export enum Status {
   ONLINE = 'ONLINE',
@@ -10,6 +11,7 @@ export enum Status {
 interface Website {
   id: string;
   name: string;
+  slug: string;
   description: string | null;
   status: Status,
   created_at: string;
@@ -28,7 +30,11 @@ export default function WebsitesList({ initialWebsites, tier, currentLang = 'en'
   const [isLoading, setIsLoading] = useState(false);
   const { t, loaded } = useTranslation(currentLang);
   // Form State
-  const [formData, setFormData] = useState({ name: '', description: '' });
+  const [formData, setFormData] = useState({ name: '', slug: '', description: '' });
+
+  useEffect(() => {
+    setFormData(prev => ({ ...prev, slug: slugify(prev.name) }));
+  }, [formData.name]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +51,7 @@ export default function WebsitesList({ initialWebsites, tier, currentLang = 'en'
       if (!res.ok) throw new Error(data.error || 'Failed to create website');
       setWebsites([data, ...websites]);
       setIsModalOpen(false);
-      setFormData({ name: '', description: '' });
+      setFormData({ name: '', slug: '', description: '' });
     } catch (err: any) {
       alert(err.message);
     } finally {
@@ -69,7 +75,7 @@ export default function WebsitesList({ initialWebsites, tier, currentLang = 'en'
               <div className="opacity-0 group-hover:opacity-100 absolute inset-0 bg-black/10 transition-opacity flex items-center justify-center">
                 <div className="inline-flex shadow-sm rounded-md">
                   <a
-                    href={`/admin/websites/${site.id}/editor`}
+                    href={`/admin/websites/${site.slug}/pages`}
                     className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:border-primary focus:ring-1 focus:ring-primary"
                   >
                     {t('websites_page.actions.open')}
@@ -126,6 +132,30 @@ export default function WebsitesList({ initialWebsites, tier, currentLang = 'en'
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">{t('websites_page.field_slug')}</label>
+                <div className="mt-1 flex rounded-md shadow-sm">
+                  <input
+                    type="text"
+                    required
+                    disabled={tier == 'free' && websites.length > 0}
+                    className="mt-1 block w-full rounded-l-md border border-gray-300 px-3 py-2 shadow-sm focus:border-primary focus:outline-none focus:ring-primary sm:text-sm"
+                    value={formData.slug}
+                    onChange={(e) => {
+                      setFormData({ ...formData, slug: e.target.value });
+                    }}
+                  />
+                  <input
+                    type="text"
+                    disabled={tier == 'free' && websites.length > 0}
+                    className="mt-1 w-20 pointer-events-none block rounded-r-md border border-gray-300 px-3 py-2 shadow-sm focus:border-primary focus:outline-none focus:ring-primary sm:text-sm"
+                    value=".lokin.id"
+                    readOnly
+                  />
+                </div>
+                <p className="mt-1 text-xs text-gray-500">Unique address for your site dashboard.</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">{t('websites_page.field_description')} ({t('common.optional')})</label>

@@ -1,4 +1,4 @@
-import { getSupabaseClient } from '../../lib/supabase-client';
+import { getSupabaseClient } from '../../../lib/supabase-client';
 import type { APIRoute } from 'astro';
 
 export const prerender = false;

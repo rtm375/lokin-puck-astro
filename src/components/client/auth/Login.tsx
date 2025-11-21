@@ -53,7 +53,7 @@ export default function Login() {
     formData.append("password", password);
 
     try {
-      const res = await fetch("/auth/login", {
+      const res = await fetch("/api/auth/login", {
         method: "POST",
         body: formData,
       });
@@ -82,7 +82,7 @@ export default function Login() {
     formData.append("provider", "google");
 
     try {
-      const res = await fetch("/auth/login", {
+      const res = await fetch("/api/auth/login", {
         method: "POST",
         body: formData,
       });

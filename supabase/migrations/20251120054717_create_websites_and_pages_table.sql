@@ -1,3 +1,9 @@
+-- Enable the "pg_hashids" extension
+create extension pg_hashids with schema extensions;
+
+-- Disable the "pg_hashids" extension
+drop extension if exists pg_hashids;
+
 -- 1. Create Tables
 create table public.websites (
   id uuid default gen_random_uuid() primary key,

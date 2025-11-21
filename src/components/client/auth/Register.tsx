@@ -16,7 +16,7 @@ export default function Register() {
     formData.append("password", password);
 
     try {
-      const res = await fetch("/auth/register", {
+      const res = await fetch("/api/auth/register", {
         method: "POST",
         body: formData,
       });
@@ -45,7 +45,7 @@ export default function Register() {
     formData.append("provider", "google");
 
     try {
-      const res = await fetch("/auth/login", {
+      const res = await fetch("/api/auth/login", {
         method: "POST",
         body: formData,
       });

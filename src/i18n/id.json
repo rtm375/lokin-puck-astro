@@ -1,10 +1,24 @@
 {
     "welcome_message": "Selamat Datang",
     "logout": "Keluar",
-    "dashboard": "Beranda",
-    "websites": "Situs",
-    "billing": "Billing",
-    "profile": "Profil",
+    "navigations": {
+        "defaults": {
+            "dashboard": "Beranda",
+            "websites": "Situs",
+            "templates": "Sample",
+            "billing": "Tagihan",
+            "profile": "Profil"
+        },
+        "websites": {
+            "pages": "Halaman",
+            "media": "Galeri",
+            "products": "Produk",
+            "forms": "Formulir",
+            "appearance": "Tampilan",
+            "users": "Pengguna",
+            "settings": "Pengaturan"
+        }
+    },
     "common": {
         "login": "Login",
         "logout": "Keluar",
@@ -31,6 +45,7 @@
         "status_draft": "Draf",
         "modal_title": "Buat situs baru",
         "field_name": "Nama situs",
+        "field_slug": "Name subdomain",
         "field_domain": "Domain",
         "field_description": "Deskripsi situs",
         "limit_reached": "Quota situs sudah penuh. <a href='{{url}}' class='underline font-bold'>Beli paket Pro</a> untuk menambahkan lebih banyak situs web."

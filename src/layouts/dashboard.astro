@@ -2,8 +2,17 @@
 import "../assets/css/global.css";
 import Header from "../components/Header.astro";
 import Sidebar from "../components/Sidebar.astro";
+import { ClientRouter } from "astro:transitions";
+const { profile, supabase, user } = Astro.locals;
 
-const { profile } = Astro.locals;
+let websites;
+if (user) {
+  const { data } = await supabase
+    .from("websites")
+    .select("id, name, slug")
+    .eq("user_uid", user.id);
+  websites = data;
+}
 
 let theme = "system";
 let lang = "en";
@@ -12,7 +21,8 @@ if (profile?.preferences) {
   theme = profile?.preferences.theme || "system";
   lang = profile?.preferences.language || "en";
 }
-const { title } = Astro.props;
+
+const { title, type } = Astro.props;
 const explicitClass = theme === "dark" ? "dark" : "";
 ---
 
@@ -24,6 +34,7 @@ const explicitClass = theme === "dark" ? "dark" : "";
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
+    <ClientRouter />
     <script is:inline define:vars={{ theme }}>
       if (theme === "system") {
         const root = document.documentElement;
@@ -49,8 +60,8 @@ const explicitClass = theme === "dark" ? "dark" : "";
   </head>
   <body>
     <div class="flex w-full">
-      <aside class="w-3xs">
-        <Sidebar />
+      <aside class="w-52">
+        <Sidebar type={type} websites={websites} />
       </aside>
       <main class="grow">
         <div class="w-full h-[calc(100dvh-50px)] overflow-y-auto">

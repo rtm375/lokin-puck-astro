@@ -2,25 +2,14 @@ import type { APIRoute } from 'astro';
 export const prerender = false;
 
 export const POST: APIRoute = async ({ request, locals }) => {
-  const { supabase, user } = locals;
+  const { supabase, user, profile } = locals;
 
   if (!user) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
   }
 
-  // 1. Fetch User Profile & Current Usage
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('tier')
-    .eq('id', user.id)
-    .single();
-
-  if (profileError || !profile) {
-    return new Response(JSON.stringify({ error: 'Profile not found' }), { status: 500 });
-  }
-
   // 2. Enforce Limits
-  if (profile.tier === 'free') {
+  if (profile?.tier === 'free') {
     const { count, error: countError } = await supabase
       .from('websites')
       .select('*', { count: 'exact', head: true }) // Head true means we only get the count, not data
@@ -40,7 +29,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
   // 3. Proceed with Creation
   const body = await request.json();
-  const { name, description } = body;
+  const { name, slug, description } = body;
 
   if (!name) {
     return new Response(JSON.stringify({ error: 'Name are required' }), { status: 400 });
@@ -50,6 +39,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     .from('websites')
     .insert({
       name,
+      slug,
       description,
       user_uid: user.id,
       settings: {}

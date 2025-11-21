@@ -1,10 +1,33 @@
 import { defineMiddleware } from 'astro:middleware'
 import { getSupabaseClient } from './lib/supabase-client';
 import { initI18n } from './i18n/client';
+import { jwtVerify } from 'jose';
+import type { User } from '@supabase/supabase-js';
 
 export const onRequest = defineMiddleware(async ({ request, cookies, locals, url, redirect }, next) => {
   const supabase = getSupabaseClient(request, cookies);
-  const { data: { user }, error } = await supabase.auth.getUser();
+  
+  let user: User | null = null;  
+  const { data: { session } } = await supabase.auth.getSession();
+  const accessToken = session?.access_token;
+  const secret = new TextEncoder().encode(import.meta.env.SUPABASE_JWT_SECRET);
+
+  if (accessToken && secret) {
+    try {
+      const { payload } = await jwtVerify(accessToken, secret);
+      user = {
+        id: payload.sub as string,
+        email: payload.email as string,
+        user_metadata: payload.user_metadata as any
+      } as User;
+    } catch (e) {
+      const { data, error } = await supabase.auth.getUser();      
+      if (!error) user = data.user;
+    }
+  } else {
+    const { data, error } = await supabase.auth.getUser();
+    if (!error) user = data.user;
+  }
 
   locals.supabase = supabase;
   locals.user = user;
@@ -14,32 +37,10 @@ export const onRequest = defineMiddleware(async ({ request, cookies, locals, url
 
   let lang = 'en';
   let preferences = { theme: 'system', language: 'en' };
-  let profile = null;
-
-  if (user && isAppRoute) {
-    const { data } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .maybeSingle();
-
-    profile = data;
-
-    if (data?.preferences) {
-      preferences = {
-        theme: data.preferences.theme || 'system',
-        language: data.preferences.language || 'en'
-      };
-      lang = preferences.language;
-    }
-  }
-
-  locals.profile = profile;
   locals.preferences = preferences;
-  
   locals.t = await initI18n(lang);
 
-  const isLoggedIn = !!user && !error;
+  const isLoggedIn = !!user;
 
   if (isAppRoute) {
     if (!isLoggedIn) {

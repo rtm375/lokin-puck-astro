@@ -1,37 +1,35 @@
-import React, { useState } from 'react';
-import { useTranslation } from '../../i18n/client'; // Import the hook
-
-interface Profile {
-  id: string;
-  full_name: string | null;
-  bio: string | null;
-  avatar_url: string | null;
-  preferences: {
-    theme?: string;
-    language?: string;
-    [key: string]: any;
-  } | null;
-  email?: string;
-}
+import React, { useState, useEffect } from 'react';
+import { useTranslation } from '../../i18n/client';
+import { useUseProfileStore } from '../../stores/useProfileStore'; // Import store
 
 interface UserSettingsProps {
-  initialProfile: Profile;
-  currentLang?: string; // Add this prop
+  currentLang?: string;
 }
 
-export default function UserSettings({ initialProfile, currentLang = 'en' }: UserSettingsProps) {
-  // Pass the language to the hook for immediate synchronous translation
+export default function UserSettings({ currentLang = 'en' }: UserSettingsProps) {
   const { t, loaded } = useTranslation(currentLang);
+  
+  const { profile, setProfile } = useUseProfileStore();
   
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   const [formData, setFormData] = useState({
-    full_name: initialProfile.full_name || '',
-    bio: initialProfile.bio || '',
-    theme: initialProfile.preferences?.theme || 'system',
-    language: initialProfile.preferences?.language || 'en',
+    full_name: '',
+    bio: '',
+    theme: 'system',
+    language: 'en',
   });
+  useEffect(() => {
+    if (profile) {
+      setFormData({
+        full_name: profile.full_name || '',
+        bio: profile.bio || '',
+        theme: profile.preferences?.theme || 'system',
+        language: profile.preferences?.language || 'en',
+      });
+    }
+  }, [profile]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +37,7 @@ export default function UserSettings({ initialProfile, currentLang = 'en' }: Use
     setMessage(null);
 
     try {
-      const res = await fetch('/api/profiles', {
+      const res = await fetch('/api/profile/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -48,10 +46,21 @@ export default function UserSettings({ initialProfile, currentLang = 'en' }: Use
       const data = await res.json();
 
       if (!res.ok) throw new Error(data.error || t('user_profile.error_message'));
+      if (profile) {
+        setProfile({
+            ...profile, 
+            full_name: formData.full_name,
+            bio: formData.bio,
+            preferences: {
+                ...profile.preferences,
+                theme: formData.theme,
+                language: formData.language
+            }
+        });
+      }
 
       setMessage({ type: 'success', text: t('user_profile.success_message') });
-      
-      if (formData.language !== initialProfile.preferences?.language) {
+      if (formData.language !== profile?.preferences?.language) {
          window.location.reload();
       }
 
@@ -59,16 +68,20 @@ export default function UserSettings({ initialProfile, currentLang = 'en' }: Use
       setMessage({ type: 'error', text: err.message });
     } finally {
       setIsLoading(false);
-      window.location.reload()
     }
   };
 
-  // Now this will render immediately on server (loaded=true)
   if (!loaded) return <div className="p-10 text-center">Loading...</div>;
+  if (!profile) return (
+    <div className="w-full p-10 flex justify-center">
+        <div className="animate-pulse flex space-x-4">
+            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+        </div>
+    </div>
+  );
 
   return (
     <div className="w-full flex justify-start mx-auto py-10">
-
       <div className="w-xl max-w-full bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl">
         <form onSubmit={handleSubmit}>
           <div className="px-4 py-6 sm:p-8">
@@ -136,8 +149,8 @@ export default function UserSettings({ initialProfile, currentLang = 'en' }: Use
                   <select
                     id="language"
                     name="language"
-                    value={formData.theme}
-                    onChange={(e) => setFormData({ ...formData, theme: e.target.value })}
+                    value={formData.language}
+                    onChange={(e) => setFormData({ ...formData, language: e.target.value })}
                     className="mt-0.5 py-1.5 px-3 w-full rounded border-gray-300 shadow-sm sm:text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white"
                   >
                     <option value="en">English</option>
