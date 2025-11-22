@@ -12,24 +12,12 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const body = await request.json();
     const { full_name, bio, theme, language } = body;
 
-    // 1. Fetch existing profile preferences to merge them
-    const { data: currentProfile, error: fetchError } = await supabase
-      .from('profiles')
-      .select('preferences')
-      .eq('id', user.id)
-      .maybeSingle();
-
-    if (fetchError) throw new Error(fetchError.message);
-
-    const existingPreferences = currentProfile?.preferences || {};
-
     // 2. Prepare Update Payload
     // Note: We do NOT need 'id' in the payload for a simple update
     const updates = {
       full_name,
       bio,
       preferences: {
-        ...existingPreferences,
         theme,
         language
       },
@@ -46,7 +34,12 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     if (error) throw new Error(error.message);
 
-    return new Response(JSON.stringify(data), { status: 200 });
+    return new Response(JSON.stringify(data), { 
+      status: 200,
+      headers: {
+        'Set-Cookie': `lang=${language}; Path=/; Max-Age=31536000; HttpOnly; SameSite=Lax`
+      }
+    });
 
   } catch (error: any) {
     return new Response(JSON.stringify({ error: error.message }), { status: 400 });

@@ -1,12 +1,10 @@
-import type { APIRoute } from "astro";
 import { getSupabaseClient } from "@lib/supabase-client";
+import type { APIRoute } from "astro";
 export const prerender = false;
 
-export const GET: APIRoute = async ({ request, cookies }) => {
-  // 1. Initialize Supabase with the user's cookies
+export const GET: APIRoute = async ({ request, cookies, locals }) => {
   const supabase = getSupabaseClient(request, cookies);
 
-  // 2. Check who is making the request
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -14,24 +12,27 @@ export const GET: APIRoute = async ({ request, cookies }) => {
   if (!user) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
   }
 
-  // 3. Fetch the profile securely on the server
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .maybeSingle();
+  const { data: websites, error } = await supabase
+    .from("websites")
+    .select("id, name, slug")
+    .eq("user_uid", user.id);
 
   if (error) {
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
   }
 
-  // 4. Return JSON to the client
-  return new Response(JSON.stringify(data), {
+  return new Response(JSON.stringify(websites), {
     status: 200,
     headers: {
       "Content-Type": "application/json",

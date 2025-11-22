@@ -1,35 +1,12 @@
 ---
-import Layout from "../../layouts/dashboard.astro";
-import WebsitesList from "../../components/client/website/WebsiteLists";
+import Layout from "@layouts/dashboard.astro";
+import WebsitesList from "@components/client/website/WebsiteLists";
 
 export const prerender = false;
 
-const { supabase, user, profile, t } = Astro.locals;
-
-if (!user) {
-  return Astro.redirect("/login");
-}
-
-// Fetch websites server-side
-const { data: websites, error } = await supabase
-  .from("websites")
-  .select("*")
-  .eq("user_uid", user.id)
-  .order("created_at", { ascending: false });
-
-if (error) {
-  console.error("Error fetching websites:", error);
-}
-
-const tier = profile?.tier;
-const currentLang = profile?.preferences?.language || "en";
+const { t } = Astro.locals;
 ---
 
 <Layout title={t("websites_page.title")}>
-  <WebsitesList
-    client:load
-    initialWebsites={websites || []}
-    tier={tier || "free"}
-    currentLang={currentLang}
-  />
+  <WebsitesList client:load />
 </Layout>

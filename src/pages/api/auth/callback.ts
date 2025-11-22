@@ -29,12 +29,33 @@ export const GET: APIRoute = async ({ request, cookies, redirect }) => {
       }
     )
 
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    const { data: sessionData, error } = await supabase.auth.exchangeCodeForSession(code)
 
-    if (!error) {
+    if (!error && sessionData.user) {
+      let lang = 'en';
+      const langCookie = cookies.get('lang')?.value;
+
+      if (langCookie) {
+        lang = langCookie;
+      } else {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('preferences')
+          .eq('id', sessionData.user.id)
+          .single();
+        
+        if (profile && profile.preferences?.language) {
+          lang = profile.preferences.language;
+        }
+        cookies.set('lang', lang, {
+          path: '/',
+          maxAge: 31536000,
+          httpOnly: true,
+          sameSite: 'lax',
+        });
+      }
       return redirect(next)
     }
   }
-
   return redirect('/auth/auth-code-error')
 }

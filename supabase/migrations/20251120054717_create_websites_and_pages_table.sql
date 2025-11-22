@@ -29,11 +29,16 @@ create table public.website_collaborators (
 
 create table public.pages (
   id uuid default gen_random_uuid() primary key,
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  updated_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  title text,
+  status text default 'draft' check (status in ('draft', 'published')),
+  description text,
+  image_url text,
+  head_code text,
   website_id uuid not null references public.websites(id) on delete cascade,
   path text not null,
   data jsonb default '{}'::jsonb,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null,
   unique(website_id, path)
 );
 

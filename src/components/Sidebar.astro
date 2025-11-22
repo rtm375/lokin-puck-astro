@@ -1,10 +1,9 @@
 ---
 import { Image } from "astro:assets";
-import Logo from "../assets/images/logo-light.svg";
-import UserMenu from "../components/UserMenu.astro";
-import NavDefaults from "../components/navigation/NavDefaults.astro";
-import NavWebsites from "../components/navigation/NavWebsites.astro";
-const { type, websites } = Astro.props;
+import Logo from "@/assets/images/logo-light.svg";
+import UserMenu from "@components/UserMenu.astro";
+import NavDefaults from "@components/navigation/NavDefaults.astro";
+const { type } = Astro.props;
 ---
 
 <div
@@ -15,7 +14,7 @@ const { type, websites } = Astro.props;
       <Image src={Logo} class="max-h-7 w-auto" alt="Lokin Builder" />
     </span>
     <ul class="space-y-1">
-      {type === "websites" ? <NavWebsites websites={websites} /> : <NavDefaults />}
+      <NavDefaults />
     </ul>
   </div>
   <div class="sticky inset-x-0 bottom-0 border-t border-gray-200">

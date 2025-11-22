@@ -1,5 +1,5 @@
-import { getSupabaseClient } from '../../../lib/supabase-client';
-import type { APIRoute } from 'astro';
+import { getSupabaseClient } from "@lib/supabase-client";
+import type { APIRoute } from "astro";
 
 export const prerender = false;
 
@@ -10,7 +10,9 @@ export const POST: APIRoute = async ({ request, cookies, url }) => {
   const name = formData.get("name")?.toString();
 
   if (!email || !password) {
-    return new Response(JSON.stringify({ error: "missing_fields" }), { status: 400 });
+    return new Response(JSON.stringify({ error: "missing_fields" }), {
+      status: 400,
+    });
   }
 
   const supabase = getSupabaseClient(request, cookies);
@@ -24,10 +26,16 @@ export const POST: APIRoute = async ({ request, cookies, url }) => {
   });
 
   if (error) {
-    return new Response(JSON.stringify({ error: error.message, error_code: error.code }), { status: error.status });
+    return new Response(
+      JSON.stringify({ error: error.message, error_code: error.code }),
+      { status: error.status },
+    );
   }
 
-  return new Response(JSON.stringify({
-    redirect: "/login?message=check_email_confirmation"
-  }), { status: 200 });
+  return new Response(
+    JSON.stringify({
+      redirect: "/login?message=check_email_confirmation",
+    }),
+    { status: 200 },
+  );
 };

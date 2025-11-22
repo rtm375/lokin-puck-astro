@@ -8,16 +8,6 @@ declare global {
       supabase: SupabaseClient;
       session: Session | null;
       user: User | null;
-      profile: {
-        id: string;
-        tier: 'free' | 'pro';
-        full_name: string | null;
-        bio: string | null;
-        avatar_url: string | null;
-        preferences: any;
-        storage_used: number;
-      } | null;
-
       t: (key: string, options?: any) => string;
       preferences: { theme?: string; language?: string } | null;
     }

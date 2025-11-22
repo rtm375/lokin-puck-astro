@@ -10,6 +10,8 @@
             "profile": "Profil"
         },
         "websites": {
+            "all": "Semua situs",
+            "editing": "Situs sekarang:",
             "pages": "Halaman",
             "media": "Galeri",
             "products": "Produk",

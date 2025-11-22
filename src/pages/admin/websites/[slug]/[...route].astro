@@ -1,11 +1,9 @@
 ---
 import "@/assets/css/global.css";
-import Header from "@components/Header.astro";
-import Sidebar from "@components/Sidebar.astro";
-import { ClientRouter } from "astro:transitions";
-const { preferences } = Astro.locals;
-
-const { title, type } = Astro.props;
+import { Websites } from "@components/client/website/Websites";
+const { preferences, user } = Astro.locals;
+const { title } = Astro.props;
+export const prerender = false;
 ---
 
 <!doctype html>
@@ -16,7 +14,6 @@ const { title, type } = Astro.props;
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
-    <ClientRouter />
     <script is:inline>
       const root = document.documentElement;
       let theme = "system";
@@ -24,12 +21,7 @@ const { title, type } = Astro.props;
 
       try {
         const profileStore = JSON.parse(localStorage.getItem("profile"));
-        if (
-          profileStore &&
-          profileStore.state &&
-          profileStore.state.profile &&
-          profileStore.state.profile.preferences
-        ) {
+        if (profileStore && profileStore.state && profileStore.state.profile && profileStore.state.profile.preferences) {
           theme = profileStore.state.profile.preferences.theme || "system";
           lang = profileStore.state.profile.preferences.language || "en";
         }
@@ -41,9 +33,7 @@ const { title, type } = Astro.props;
 
       const applyTheme = (selectedTheme) => {
         if (selectedTheme === "system") {
-          const systemDark = window.matchMedia(
-            "(prefers-color-scheme: dark)"
-          ).matches;
+          const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
           if (systemDark) {
             root.classList.add("dark");
           } else {
@@ -60,29 +50,13 @@ const { title, type } = Astro.props;
 
       // Listen for OS changes live if system theme is selected initially
       if (theme === "system") {
-        window
-          .matchMedia("(prefers-color-scheme: dark)")
-          .addEventListener("change", (e) => {
-            applyTheme("system"); // Re-apply system theme logic on change
-          });
+        window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
+          applyTheme("system"); // Re-apply system theme logic on change
+        });
       }
     </script>
   </head>
   <body>
-    <div class="flex w-full">
-      <aside class="w-52">
-        <Sidebar type={type} />
-      </aside>
-      <main class="grow">
-        <div class="w-full h-[calc(100dvh-50px)] overflow-y-auto">
-          <div class="flex flex-col gap-y-4">
-            <Header title={title} />
-            <div class="mx-auto max-w-7xl w-full px-6">
-              <slot />
-            </div>
-          </div>
-        </div>
-      </main>
-    </div>
+    <Websites user={user} client:only="react" />
   </body>
 </html>

@@ -10,6 +10,8 @@
             "profile": "Profile"
         },
         "websites": {
+            "all": "All websites",
+            "editing": "Current website:",
             "pages": "Pages",
             "media": "Media",
             "products": "Products",

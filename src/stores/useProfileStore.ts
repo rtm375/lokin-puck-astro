@@ -1,27 +1,24 @@
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 
 interface UserState {
   profile: any | null;
-  fetchProfile: (userId: string) => Promise<void>;
+  fetchProfile: () => Promise<void>;
   setProfile: (profile: any) => void; // <--- NEW ACTION
 }
 
-export const useUseProfileStore = create<UserState>()(
+export const useProfileStore = create<UserState>()(
   persist(
     (set, get) => ({
       profile: null,
-      
+
       setProfile: (profile) => set({ profile }),
 
-      fetchProfile: async (userId: string) => {
-        console.log('test');
-        
-        const current = get().profile;
-        if (current && current.id === userId) return;
+      fetchProfile: async () => {
+        if (get().profile) return;
 
         try {
-          const response = await fetch('/api/profile');
+          const response = await fetch("/api/profile/get");
           if (response.ok) {
             const data = await response.json();
             if (data) {
@@ -34,8 +31,10 @@ export const useUseProfileStore = create<UserState>()(
       },
     }),
     {
-      name: 'profile', 
-      storage: createJSONStorage(() => localStorage),
-    }
-  )
+      name: "profile",
+      storage: createJSONStorage(() => {
+        return localStorage;
+      }),
+    },
+  ),
 );
