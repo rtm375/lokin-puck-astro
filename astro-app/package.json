@@ -1,0 +1,42 @@
+{
+  "name": "lokin-puck-astro",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "db": "pnpx supabase"
+  },
+  "dependencies": {
+    "@astrojs/react": "^4.4.2",
+    "@aws-sdk/client-s3": "^3.937.0",
+    "@measured/puck": "^0.20.2",
+    "@supabase/ssr": "^0.7.0",
+    "@supabase/supabase-js": "^2.83.0",
+    "@tiptap/extension-color": "^3.11.0",
+    "@tiptap/extension-text-align": "^3.11.0",
+    "@tiptap/extension-text-style": "^3.11.0",
+    "@tiptap/react": "^3.11.0",
+    "@tiptap/starter-kit": "^3.11.0",
+    "@types/react": "^19.2.6",
+    "@types/react-dom": "^19.2.3",
+    "@unocss/reset": "^66.5.9",
+    "astro": "^5.15.9",
+    "date-fns": "^4.1.0",
+    "i18next": "^25.6.3",
+    "jose": "^6.1.2",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-router-dom": "^7.9.6",
+    "unocss": "^66.5.9",
+    "zustand": "^5.0.8"
+  },
+  "devDependencies": {
+    "@iconify/react": "^6.0.2",
+    "prettier": "^3.6.2",
+    "prettier-plugin-tailwindcss": "^0.7.1",
+    "supabase": "^2.58.5"
+  }
+}
