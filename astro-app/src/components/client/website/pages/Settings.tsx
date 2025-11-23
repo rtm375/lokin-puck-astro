@@ -54,6 +54,46 @@ export default function Settings() {
     }
   };
 
+  const handleVerify = async (domain: string) => {
+    const btn = document.getElementById(
+      `verify-btn-${domain}`,
+    ) as HTMLButtonElement;
+    if (btn) {
+      btn.disabled = true;
+      btn.innerText = "Checking...";
+    }
+
+    try {
+      const res = await fetch(`/api/websites/${slug}/domains/verify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ domain }),
+      });
+
+      const data = await res.json();
+      if (data.verified) {
+        // Update local state
+        setDomains(
+          domains.map((d) =>
+            d.domain === domain ? { ...d, status: "active" } : d,
+          ),
+        );
+        alert("Domain verified successfully!");
+      } else {
+        alert(
+          "Domain verification failed. Please ensure your CNAME record is set correctly.",
+        );
+      }
+    } catch (err) {
+      alert("Error verifying domain");
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = "Verify";
+      }
+    }
+  };
+
   // Delete Domain
   const handleDelete = async (domain: string) => {
     if (!confirm(`Remove ${domain}?`)) return;
@@ -113,12 +153,30 @@ export default function Settings() {
               </div>
 
               {d.type === "custom" && (
-                <button
-                  onClick={() => handleDelete(d.domain)}
-                  className="text-gray-400 hover:text-red-600 p-2"
-                >
-                  <Icon icon="mingcute:delete-2-line" width={20} />
-                </button>
+                <div className="flex items-center gap-2">
+                  {/* {d.status === "pending" && (
+                    <button
+                      id={`verify-btn-${d.domain}`}
+                      onClick={() => handleVerify(d.domain)}
+                      className="text-xs bg-white border border-gray-300 text-gray-700 px-2 py-1 rounded hover:bg-gray-50"
+                    >
+                      Verify
+                    </button>
+                  )} */}
+                  <button
+                    id={`verify-btn-${d.domain}`}
+                    onClick={() => handleVerify(d.domain)}
+                    className="text-xs bg-white border border-gray-300 text-gray-700 px-2 py-1 rounded hover:bg-gray-50"
+                  >
+                    Verify
+                  </button>
+                  <button
+                    onClick={() => handleDelete(d.domain)}
+                    className="text-gray-400 hover:text-red-600 p-2"
+                  >
+                    <Icon icon="mingcute:delete-2-line" width={20} />
+                  </button>
+                </div>
               )}
             </div>
           ))}
@@ -149,9 +207,13 @@ export default function Settings() {
             <li>Add the domain above.</li>
             <li>
               Create a CNAME record in your DNS provider pointing to{" "}
-              <code>sites.lokin.cloud</code>
+              <code>sites.lokin.id</code>
             </li>
-            <li>Wait for verification (usually takes a few minutes).</li>
+            <li>Click verify button</li>
+            <li>
+              If not verified, wait for verification (usually takes a few
+              minutes up to 48 hours).
+            </li>
           </ol>
         </div>
       </div>

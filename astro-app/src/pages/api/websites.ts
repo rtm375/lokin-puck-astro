@@ -1,4 +1,5 @@
 import type { APIRoute } from "astro";
+import { syncToKV } from "@/lib/cloudflare";
 export const prerender = false;
 
 export const GET: APIRoute = async ({ locals }) => {
@@ -100,7 +101,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     });
   }
 
-  const defaultDomain = `${slug}.lokin.cloud`;
+  const defaultDomain = `${slug}.lokin.id`;
 
   const { error: domainError } = await supabase.from("domains").insert({
     domain: defaultDomain,
@@ -112,6 +113,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
   if (domainError) {
     console.error("Failed to create default domain:", domainError);
+  }
+
+  if (website?.id) {
+    await syncToKV(slug, website.id);
   }
 
   return new Response(JSON.stringify(website), { status: 201 });

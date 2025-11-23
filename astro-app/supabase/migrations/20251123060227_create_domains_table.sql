@@ -1,6 +1,6 @@
 -- 1. Create Domains Table
 create table public.domains (
-  domain text primary key, -- e.g., "mypizza.com" or "user.lokin.cloud"
+  domain text primary key,
   website_id uuid not null references public.websites(id) on delete cascade,
   
   -- Verification status for custom domains
