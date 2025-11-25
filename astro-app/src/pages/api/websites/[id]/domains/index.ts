@@ -1,27 +1,17 @@
-import { getSupabaseClient } from "@/lib/supabase-client";
 import type { APIRoute } from "astro";
 
 export const prerender = false;
 
 // GET: List domains
-export const GET: APIRoute = async ({ request, params, cookies }) => {
-  const supabase = getSupabaseClient(request, cookies);
-  const { slug } = params;
-
-  // 1. Get Website ID
-  const { data: website } = await supabase
-    .from("websites")
-    .select("id")
-    .eq("slug", slug)
-    .single();
-
-  if (!website) return new Response("Not found", { status: 404 });
+export const GET: APIRoute = async ({ request, params, locals }) => {
+  const { supabase } = locals;
+  const { id } = params;
 
   // 2. Get Domains
   const { data: domains } = await supabase
     .from("domains")
     .select("*")
-    .eq("website_id", website.id);
+    .eq("website_id", id);
 
   return new Response(JSON.stringify([...(domains || [])]), {
     status: 200,
@@ -29,25 +19,17 @@ export const GET: APIRoute = async ({ request, params, cookies }) => {
 };
 
 // POST: Add Custom Domain
-export const POST: APIRoute = async ({ request, params, cookies }) => {
-  const supabase = getSupabaseClient(request, cookies);
-  const { slug } = params;
+export const POST: APIRoute = async ({ request, params, locals }) => {
+  const { supabase } = locals;
+  const { id } = params;
   const body = await request.json();
-
-  const { data: website } = await supabase
-    .from("websites")
-    .select("id")
-    .eq("slug", slug)
-    .single();
-
-  if (!website) return new Response("Not found", { status: 404 });
 
   // Add to DB
   const { data, error } = await supabase
     .from("domains")
     .insert({
       domain: body.domain,
-      website_id: website.id,
+      website_id: id,
       type: "custom",
       status: "pending", // In real app, trigger Cloudflare Custom Hostname API here
     })
@@ -65,12 +47,15 @@ export const POST: APIRoute = async ({ request, params, cookies }) => {
 };
 
 // DELETE
-export const DELETE: APIRoute = async ({ request, cookies }) => {
-  const supabase = getSupabaseClient(request, cookies);
+export const DELETE: APIRoute = async ({ request, locals }) => {
+  const { supabase } = locals;
   const url = new URL(request.url);
   const domain = url.searchParams.get("domain");
 
-  if (!domain) return new Response("Missing domain", { status: 400 });
+  if (!domain)
+    return new Response(locals.t("api.domains.missing_domain"), {
+      status: 400,
+    });
 
   const { error } = await supabase
     .from("domains")

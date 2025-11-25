@@ -14,7 +14,7 @@ export const HeroSlider: ComponentConfig<Props["HeroSlider"]> = {
   defaultProps: {
     slides: [
       {
-        imageUrl: "https://via.placeholder.com/800x400",
+        imageUrl: "https://placehold.co/600x400",
         caption: "Slide 1",
       },
     ],

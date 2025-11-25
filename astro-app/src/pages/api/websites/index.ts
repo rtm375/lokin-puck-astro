@@ -6,9 +6,12 @@ export const GET: APIRoute = async ({ locals }) => {
   const { supabase, user } = locals;
 
   if (!user) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
-    });
+    return new Response(
+      JSON.stringify({ error: locals.t("api.unauthorized") }),
+      {
+        status: 401,
+      },
+    );
   }
 
   const { data: websites, error } = await supabase
@@ -19,9 +22,12 @@ export const GET: APIRoute = async ({ locals }) => {
 
   if (error) {
     console.error("Error fetching websites:", error);
-    return new Response(JSON.stringify({ error: "Failed to fetch websites" }), {
-      status: 500,
-    });
+    return new Response(
+      JSON.stringify({ error: locals.t("api.websites.fetch_error") }),
+      {
+        status: 500,
+      },
+    );
   }
 
   return new Response(JSON.stringify(websites), { status: 200 });
@@ -43,9 +49,12 @@ export const POST: APIRoute = async ({ request, locals }) => {
     .single();
 
   if (profileError) {
-    return new Response(JSON.stringify({ error: "Could not fetch profile" }), {
-      status: 500,
-    });
+    return new Response(
+      JSON.stringify({ error: locals.t("api.profile.fetch_error") }),
+      {
+        status: 500,
+      },
+    );
   }
 
   if (profile?.tier === "free") {
@@ -63,8 +72,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     if (count !== null && count >= 1) {
       return new Response(
         JSON.stringify({
-          error:
-            "Free Plan Limit Reached. Please upgrade to Pro to create more websites.",
+          error: locals.t("api.websites.limit_reached"),
         }),
         { status: 403 },
       );
@@ -72,11 +80,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
   }
 
   const body = await request.json();
-  const { name, slug, description } = body;
+  const { name, subdomain, description } = body;
 
-  if (!name || !slug) {
+  if (!name || !subdomain) {
     return new Response(
-      JSON.stringify({ error: "Name and slug are required" }),
+      JSON.stringify({ error: locals.t("api.websites.validation_required") }),
       {
         status: 400,
       },
@@ -87,7 +95,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     .from("websites")
     .insert({
       name,
-      slug,
+      subdomain,
       description,
       user_uid: user.id,
       settings: {},
@@ -101,13 +109,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
     });
   }
 
-  const defaultDomain = `${slug}.lokin.id`;
+  const defaultDomain = `${subdomain}.lokin.id`;
 
   const { error: domainError } = await supabase.from("domains").insert({
     domain: defaultDomain,
     website_id: website.id,
     type: "subdomain",
-    status: "active", // Subdomains are active immediately
+    status: "active",
     is_primary: true,
   });
 
@@ -116,7 +124,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   }
 
   if (website?.id) {
-    await syncToKV(slug, website.id);
+    await syncToKV(defaultDomain, website.id);
   }
 
   return new Response(JSON.stringify(website), { status: 201 });

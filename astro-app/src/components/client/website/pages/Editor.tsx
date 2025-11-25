@@ -2,64 +2,111 @@ import { Puck, type Data } from "@measured/puck";
 import "@measured/puck/puck.css";
 import { config } from "@lib/puck.config";
 import { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { useParams, useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { useEditorData } from "@stores/useEditorData";
+import { useWebsitesStore } from "@/stores/useWebsitesStore";
+import { usePagesStore, type Page } from "@/stores/usePagesStore";
 
 export default function PuckEditor() {
-  const { slug, pagePath } = useParams<{ slug: string; pagePath: string }>();
+  const { t } = useTranslation();
+  const { subdomain: websiteSubdomain, pagePath } = useParams<{
+    subdomain: string;
+    pagePath: string;
+  }>();
+
+  const { websites, fetchWebsites } = useWebsitesStore();
   const navigate = useNavigate();
 
-  // FIX: Selectors to prevent re-renders on store updates
-  const setPageData = useEditorData((state) => state.setPageData);
-  const getPageData = useEditorData((state) => state.getPageData);
-  const clearPageData = useEditorData((state) => state.clearPageData);
+  // Fetch websites on mount if empty (cold start)
+  useEffect(() => {
+    if (websites.length === 0) {
+      fetchWebsites();
+    }
+  }, [websites.length, fetchWebsites]);
 
-  const storageKey = `${slug}-${pagePath}`;
+  const currentWebsite = websites.find((w) => w.subdomain === websiteSubdomain);
+  const websiteId = currentWebsite?.id;
+
+  const { pages, fetchPages, isLoading: pagesLoading } = usePagesStore();
+
+  // Fetch pages on mount
+  useEffect(() => {
+    if (websiteId) {
+      fetchPages(websiteId);
+    }
+  }, [websiteId, fetchPages]);
+
+  // Find the page by path to get its ID
+  const currentPage = pages.find((p) => p.path === pagePath);
+  const pageId = currentPage?.id;
+
+  const { setPageData, getPageData, clearPageData, fetchEditorData } =
+    useEditorData();
+
+  const storageKey = `${websiteSubdomain}-${pagePath}`;
 
   const [initialData, setInitialData] = useState<Data | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  // 1. Load Data
+  // 1. Load Data - wait for pages to load first
   useEffect(() => {
+    // Check if website exists
+    if (!websiteId) {
+      setIsLoading(false);
+      return;
+    }
+
+    // Wait for pages to finish loading
+    if (pagesLoading) return;
+
+    // If pages loaded but page not found, show error
+    if (!pageId && pages.length > 0) {
+      setIsLoading(false);
+      return;
+    }
+
+    // Need pageId to proceed
+    if (!pageId) return;
+
     const loadPage = async () => {
-      if (!slug || !pagePath) return;
+      // Fetch from store (with smart caching) using pageId
+      const dbData = await fetchEditorData(websiteId, pageId);
 
-      try {
-        const res = await fetch(
-          `/api/websites/${slug}/pages/${pagePath}/editor-data`,
-        );
-        if (!res.ok) throw new Error("Failed to load page");
-        const dbPage = await res.json();
-
-        const dbData = dbPage.data || {
-          root: { props: { title: dbPage.title || "New Page" } },
-          content: [],
-          zones: {},
-        };
-
-        // Check local storage for unsaved work
-        const localData = getPageData(storageKey);
-
-        if (localData) {
-          console.log("Restored unsaved changes from local storage");
-          setInitialData(localData);
-          setHasUnsavedChanges(true);
-        } else {
-          setInitialData(dbData);
-        }
-      } catch (error) {
-        console.error(error);
-        alert("Could not load page data");
-      } finally {
+      if (!dbData) {
         setIsLoading(false);
+        return;
       }
+
+      // Check local storage for unsaved work
+      const localData = getPageData(storageKey);
+
+      if (localData) {
+        setInitialData(localData);
+        setHasUnsavedChanges(true);
+      } else {
+        setInitialData(dbData);
+      }
+
+      setIsLoading(false);
     };
 
     loadPage();
-  }, [slug, pagePath]); // Removed getPageData from deps as it's stable now
+  }, [
+    websites.length,
+    websiteId,
+    websiteSubdomain,
+    pageId,
+    pagesLoading,
+    pages.length,
+    pagePath,
+    storageKey,
+    fetchEditorData,
+    getPageData,
+  ]);
 
   // 2. Optimized Change Handler
   const handleChange = useCallback(
@@ -74,10 +121,15 @@ export default function PuckEditor() {
 
   // 3. Publish
   const handlePublish = async (data: Data) => {
+    if (!pageId) {
+      alert(t("websites_page.editor.page_not_found"));
+      return;
+    }
+
     setIsSaving(true);
     try {
       const res = await fetch(
-        `/api/websites/${slug}/pages/${pagePath}/editor-save`,
+        `/api/websites/${websiteId}/pages/${pageId}/editor-save`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -89,38 +141,64 @@ export default function PuckEditor() {
 
       clearPageData(storageKey);
       setHasUnsavedChanges(false);
-      console.log("Published successfully");
+      console.log(t("websites_page.editor.publish_success"));
     } catch (error) {
       console.error(error);
-      alert("Failed to save page");
+      alert(t("websites_page.editor.save_error"));
     } finally {
       setIsSaving(false);
     }
   };
 
   const handlePreview = () => {
-    window.open(`/admin/websites/${slug}/pages/${pagePath}/preview`, "_blank");
+    window.open(
+      `/admin/websites/${websiteSubdomain}/pages/${pagePath}/preview`,
+      "_blank",
+    );
   };
 
   if (isLoading)
-    return <div className="p-10 text-center">Loading editor...</div>;
+    return (
+      <div className="p-10 text-center">
+        {t("websites_page.editor.loading")}
+      </div>
+    );
+
   if (!initialData)
-    return <div className="p-10 text-center">Error loading editor</div>;
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-10 text-center">
+        <div className="text-red-600 mb-4">
+          {!websiteId
+            ? t("websites_page.editor.error_website_not_found", {
+                subdomain: `/${websiteSubdomain}`,
+              })
+            : t("websites_page.editor.error_page_not_found", {
+                path: `/${pagePath}`,
+              })}
+        </div>
+        <button
+          onClick={() => (window.location.href = "/admin/websites")}
+          className="cursor-pointer text-sm text-primary hover:underline"
+        >
+          ← {t("websites_page.editor.back_to_dashboard")}
+        </button>
+      </div>
+    );
 
   return (
     <div className="h-screen w-full bg-white flex flex-col">
       <div className="bg-white border-b border-gray-200 px-4 h-12 flex items-center justify-between shrink-0 z-10">
         <button
-          onClick={() => navigate(`/admin/websites/${slug}/pages`)}
+          onClick={() => navigate(`/admin/websites/${websiteSubdomain}/pages`)}
           className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1 font-medium"
         >
           <Icon icon="lucide:arrow-left" width={16} />
-          Back to Dashboard
+          {t("websites_page.editor.back_to_dashboard")}
         </button>
 
         {hasUnsavedChanges && (
           <span className="text-xs text-amber-600 font-medium bg-amber-50 px-2 py-1 rounded">
-            Unsaved changes stored locally
+            {t("websites_page.editor.unsaved_changes")}
           </span>
         )}
       </div>
@@ -131,7 +209,7 @@ export default function PuckEditor() {
           data={initialData}
           onPublish={handlePublish}
           onChange={handleChange}
-          headerPath={slug}
+          headerPath={websiteSubdomain}
           overrides={{
             headerActions: ({ children }) => (
               <div className="flex items-center gap-2">
@@ -141,7 +219,9 @@ export default function PuckEditor() {
                   title="Preview (Includes unsaved changes)"
                 >
                   <Icon icon="iconoir:eye" width={18} />
-                  <span className="hidden sm:inline">Preview</span>
+                  <span className="hidden sm:inline">
+                    {t("websites_page.editor.preview")}
+                  </span>
                 </button>
                 {children}
               </div>

@@ -1,20 +1,20 @@
 import type { APIRoute } from "astro";
-import { getSupabaseClient } from "@lib/supabase-client";
+
 export const prerender = false;
 
-export const GET: APIRoute = async ({ request, cookies }) => {
+export const GET: APIRoute = async ({ locals }) => {
   // 1. Initialize Supabase with the user's cookies
-  const supabase = getSupabaseClient(request, cookies);
+  const { supabase, user } = locals;
 
   // 2. Check who is making the request
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
 
   if (!user) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
-    });
+    return new Response(
+      JSON.stringify({ error: locals.t("api.unauthorized") }),
+      {
+        status: 401,
+      },
+    );
   }
 
   // 3. Fetch the profile securely on the server
@@ -25,9 +25,12 @@ export const GET: APIRoute = async ({ request, cookies }) => {
     .maybeSingle();
 
   if (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-    });
+    return new Response(
+      JSON.stringify({ error: locals.t("api.profile.fetch_error") }),
+      {
+        status: 500,
+      },
+    );
   }
 
   // 4. Return JSON to the client

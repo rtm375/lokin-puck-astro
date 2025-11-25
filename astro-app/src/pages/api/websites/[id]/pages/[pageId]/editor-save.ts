@@ -6,7 +6,6 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { config } from "@/lib/puck.config";
 import { generateCss } from "@/lib/css-engine";
 import { scriptRegistry } from "@/lib/script-registry";
-import { getSupabaseClient } from "@/lib/supabase-client";
 
 export const prerender = false;
 
@@ -19,26 +18,21 @@ const R2 = new S3Client({
   },
 });
 
-export const POST: APIRoute = async ({ request, params, cookies }) => {
+export const POST: APIRoute = async ({ request, params, locals }) => {
   try {
-    const supabase = getSupabaseClient(request, cookies);
-    const { slug, pageId } = params;
+    const { supabase } = locals;
+    const { id, pageId } = params;
     const body = await request.json();
     const puckData: Data = body.data;
 
     if (!puckData) return new Response("Missing Data", { status: 400 });
 
-    const { data: website } = await supabase
-      .from("websites")
-      .select("id")
-      .eq("slug", slug)
-      .single();
-
-    if (!website) return new Response("Website not found", { status: 404 });
+    // Website ID is already in params.id
+    const websiteId = id;
 
     // 1. Render React to Static HTML
     const contentHtml = renderToStaticMarkup(
-      React.createElement(Render, {
+      React.createElement(Render as any, {
         config: config,
         data: puckData as Data,
       }),
@@ -88,13 +82,28 @@ export const POST: APIRoute = async ({ request, params, cookies }) => {
         </html>
       `;
 
-    // 5. Upload to R2
-    // Remove leading slash from path to avoid double slashes
-    const cleanPath = pageId === "home" || pageId === "index" ? "" : pageId;
+    // 5. Get page data using pageId to retrieve the path for R2 storage
+    const { data: page, error: fetchError } = await supabase
+      .from("pages")
+      .select("id, path")
+      .eq("website_id", websiteId)
+      .eq("id", pageId)
+      .single();
+
+    if (fetchError || !page) {
+      return new Response(JSON.stringify({ error: "Page not found" }), {
+        status: 404,
+      });
+    }
+
+    // Use the page's path for R2 storage key
+    const pagePath = page.path;
+    const cleanPath =
+      pagePath === "home" || pagePath === "index" ? "" : pagePath;
     // e.g., sites/123e4567-e89b.../about/index.html
     const storageKey = cleanPath
-      ? `sites/${website.id}/${cleanPath}/index.html`
-      : `sites/${website.id}/index.html`;
+      ? `sites/${websiteId}/${cleanPath}/index.html`
+      : `sites/${websiteId}/index.html`;
 
     await R2.send(
       new PutObjectCommand({
@@ -106,27 +115,15 @@ export const POST: APIRoute = async ({ request, params, cookies }) => {
       }),
     );
 
-    const { data: page, error: fetchError } = await supabase
-      .from("pages")
-      .select(`id, websites!inner(slug)`)
-      .eq("websites.slug", slug)
-      .eq("path", pageId)
-      .single();
-
-    if (fetchError || !page) {
-      return new Response(JSON.stringify({ error: "Page not found" }), {
-        status: 404,
-      });
-    }
-
-    // 2. Update
+    // Update page data using pageId
     const { error } = await supabase
       .from("pages")
       .update({
         data: body.data,
         updated_at: new Date().toISOString(),
       })
-      .eq("id", page.id);
+      .eq("id", pageId)
+      .eq("website_id", websiteId);
 
     if (error) {
       return new Response(JSON.stringify({ error: error.message }), {

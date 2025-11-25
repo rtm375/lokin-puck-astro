@@ -1,56 +1,44 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useParams, Link } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { format } from "date-fns";
 
-interface Page {
-  id: string;
-  title: string;
-  path: string;
-  status: "draft" | "published";
-  updated_at: string;
-  image_url?: string;
-  description?: string;
-  head_code?: string;
-}
+import { useWebsitesStore } from "@/stores/useWebsitesStore";
+import { usePagesStore, type Page } from "@/stores/usePagesStore";
 
 export default function Pages() {
-  const { slug: websiteSlug } = useParams<{ slug: string }>();
-  const [pages, setPages] = useState<Page[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { t } = useTranslation();
+  const { subdomain: websiteSubdomain } = useParams<{ subdomain: string }>();
+  const { websites } = useWebsitesStore();
+  const currentWebsite = websites.find((w) => w.subdomain === websiteSubdomain);
+  const websiteId = currentWebsite?.id;
+
+  const { pages, isLoading, fetchPages, addPage, updatePage, deletePage } =
+    usePagesStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPage, setEditingPage] = useState<Page | null>(null);
 
-  const fetchPages = async () => {
-    try {
-      const res = await fetch(`/api/websites/${websiteSlug}/pages`);
-      const data = await res.json();
-      if (res.ok) setPages(data);
-    } catch (error) {
-      console.error("Failed to fetch pages", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
-    if (websiteSlug) fetchPages();
-  }, [websiteSlug]);
+    if (websiteId) {
+      fetchPages(websiteId);
+    }
+  }, [websiteId, fetchPages]);
 
   // --- Actions ---
   const handleDelete = async (pageId: string) => {
-    if (!confirm("Are you sure you want to delete this page?")) return;
+    if (!confirm(t("websites_page.pages.confirm_delete"))) return;
 
     try {
-      const res = await fetch(`/api/websites/${websiteSlug}/pages/${pageId}`, {
+      const res = await fetch(`/api/websites/${websiteId}/pages/${pageId}`, {
         method: "DELETE",
       });
       if (res.ok) {
-        setPages((prev) => prev.filter((p) => p.id !== pageId));
+        deletePage(pageId);
         if (editingPage?.id === pageId) setIsModalOpen(false);
       }
     } catch (error) {
-      alert("Failed to delete page");
+      alert(t("websites_page.pages.delete_error"));
     }
   };
 
@@ -68,13 +56,15 @@ export default function Pages() {
     <div className="w-full">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-gray-800">Pages</h2>
+        <h2 className="text-xl font-bold text-gray-800">
+          {t("websites_page.pages.title")}
+        </h2>
         <button
           onClick={openCreateModal}
           className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-medium rounded-md hover:opacity-90 transition"
         >
           <Icon icon="mingcute:add-fill" width={18} />
-          Add New
+          {t("websites_page.pages.add_new")}
         </button>
       </div>
 
@@ -84,19 +74,19 @@ export default function Pages() {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
-                Preview
+                {t("websites_page.pages.table.preview")}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Title
+                {t("websites_page.pages.table.title")}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
-                Status
+                {t("websites_page.pages.table.status")}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">
-                Last Edited
+                {t("websites_page.pages.table.last_edited")}
               </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
-                Actions
+                {t("websites_page.pages.table.actions")}
               </th>
             </tr>
           </thead>
@@ -107,7 +97,7 @@ export default function Pages() {
                   colSpan={5}
                   className="px-6 py-10 text-center text-gray-500"
                 >
-                  Loading pages...
+                  {t("websites_page.pages.table.loading")}
                 </td>
               </tr>
             ) : pages.length === 0 ? (
@@ -116,7 +106,7 @@ export default function Pages() {
                   colSpan={5}
                   className="px-6 py-10 text-center text-gray-500"
                 >
-                  No pages found. Create your first page!
+                  {t("websites_page.pages.table.empty")}
                 </td>
               </tr>
             ) : (
@@ -143,10 +133,10 @@ export default function Pages() {
                   <td className="px-6 py-4">
                     <div className="flex flex-col">
                       <Link
-                        to={`/admin/websites/${websiteSlug}/pages/${page.path}/editor`}
+                        to={`/admin/websites/${websiteSubdomain}/pages/${page.path}/editor`}
                         className="text-sm font-medium text-gray-900 hover:text-primary hover:underline"
                       >
-                        {page.title || "Untitled Page"}
+                        {page.title || t("websites_page.pages.table.untitled")}
                       </Link>
                       <span className="text-xs text-gray-400 font-mono mt-0.5">
                         /{page.path}
@@ -163,7 +153,9 @@ export default function Pages() {
                           : "bg-gray-50 text-gray-600 border-gray-200"
                       }`}
                     >
-                      {page.status === "published" ? "Active" : "Draft"}
+                      {page.status === "published"
+                        ? t("websites_page.pages.table.active")
+                        : t("websites_page.pages.table.draft")}
                     </span>
                   </td>
 
@@ -176,7 +168,7 @@ export default function Pages() {
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Link
-                        to={`/admin/websites/${websiteSlug}/pages/${page.path}/editor`}
+                        to={`/admin/websites/${websiteSubdomain}/pages/${page.path}/editor`}
                         className="p-1.5 text-gray-500 hover:text-primary hover:bg-primary/10 rounded-md transition"
                         title="Open Editor"
                       >
@@ -204,14 +196,13 @@ export default function Pages() {
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           page={editingPage}
-          websiteSlug={websiteSlug!}
+          websiteSubdomain={websiteSubdomain!}
+          websiteId={websiteId}
           onSuccess={(updatedPage, isNew) => {
             if (isNew) {
-              setPages([updatedPage, ...pages]);
+              addPage(updatedPage);
             } else {
-              setPages(
-                pages.map((p) => (p.id === updatedPage.id ? updatedPage : p)),
-              );
+              updatePage(updatedPage);
             }
             setIsModalOpen(false);
           }}
@@ -227,7 +218,8 @@ interface PageSettingsProps {
   isOpen: boolean;
   onClose: () => void;
   page: Page | null;
-  websiteSlug: string;
+  websiteSubdomain: string;
+  websiteId?: string;
   onSuccess: (page: Page, isNew: boolean) => void;
   onDelete: (id: string) => void;
 }
@@ -236,10 +228,12 @@ const PageSettingsModal = ({
   isOpen,
   onClose,
   page,
-  websiteSlug,
+  websiteSubdomain,
+  websiteId,
   onSuccess,
   onDelete,
 }: PageSettingsProps) => {
+  const { t } = useTranslation();
   const isNew = !page;
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -251,7 +245,7 @@ const PageSettingsModal = ({
     head_code: page?.head_code || "",
   });
 
-  // Auto-generate slug from title for new pages
+  // Auto-generate subdomain from title for new pages
   useEffect(() => {
     if (isNew && formData.title) {
       setFormData((prev) => ({
@@ -269,15 +263,15 @@ const PageSettingsModal = ({
     setIsLoading(true);
     try {
       const url = isNew
-        ? `/api/websites/${websiteSlug}/pages`
-        : `/api/websites/${websiteSlug}/pages/${page!.id}`;
+        ? `/api/websites/${websiteId}/pages`
+        : `/api/websites/${websiteId}/pages/${page!.id}`;
 
       const method = isNew ? "POST" : "PATCH";
 
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, websiteId }),
       });
 
       const data = await res.json();
@@ -302,7 +296,9 @@ const PageSettingsModal = ({
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
         <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
           <h3 className="text-lg font-semibold text-gray-800">
-            {isNew ? "Create Page" : "Page Settings"}
+            {isNew
+              ? t("websites_page.pages.modal.create_title")
+              : t("websites_page.pages.modal.edit_title")}
           </h3>
           <button
             onClick={onClose}
@@ -318,7 +314,7 @@ const PageSettingsModal = ({
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Page Title
+                  {t("websites_page.pages.modal.field_title")}
                 </label>
                 <input
                   type="text"
@@ -333,7 +329,7 @@ const PageSettingsModal = ({
 
               <div className="col-span-2 sm:col-span-1">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Slug (URL)
+                  {t("websites_page.pages.modal.field_url")}
                 </label>
                 <div className="flex items-center">
                   <span className="text-gray-400 text-sm mr-1">/</span>
@@ -351,7 +347,7 @@ const PageSettingsModal = ({
 
               <div className="col-span-2 sm:col-span-1">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Status
+                  {t("websites_page.pages.modal.field_status")}
                 </label>
                 <select
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary outline-none text-sm"
@@ -360,8 +356,12 @@ const PageSettingsModal = ({
                     setFormData({ ...formData, status: e.target.value as any })
                   }
                 >
-                  <option value="draft">Draft</option>
-                  <option value="published">Active (Published)</option>
+                  <option value="draft">
+                    {t("websites_page.pages.table.draft")}
+                  </option>
+                  <option value="published">
+                    {t("websites_page.pages.table.active")}
+                  </option>
                 </select>
               </div>
             </div>
@@ -371,12 +371,12 @@ const PageSettingsModal = ({
             {/* SEO & Metadata */}
             <div className="space-y-3">
               <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                SEO & Metadata
+                {t("websites_page.pages.modal.seo_section")}
               </h4>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Meta Description
+                  {t("websites_page.pages.modal.field_meta_desc")}
                 </label>
                 <textarea
                   rows={3}
@@ -390,7 +390,7 @@ const PageSettingsModal = ({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Featured Image URL
+                  {t("websites_page.pages.modal.field_image")}
                 </label>
                 <div className="flex gap-2">
                   <input
@@ -414,7 +414,7 @@ const PageSettingsModal = ({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Custom Head Code
+                  {t("websites_page.pages.modal.field_head")}
                 </label>
                 <textarea
                   rows={3}
@@ -437,7 +437,7 @@ const PageSettingsModal = ({
               onClick={() => onDelete(page!.id)}
               className="text-red-600 hover:text-red-700 text-sm font-medium flex items-center gap-1"
             >
-              <Icon icon="mingcute:delete-2-line" /> Delete
+              <Icon icon="mingcute:delete-2-line" /> {t("common.delete")}
             </button>
           ) : (
             <div></div>
@@ -449,7 +449,7 @@ const PageSettingsModal = ({
               onClick={onClose}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
             >
-              Cancel
+              {t("common.cancel")}
             </button>
             <button
               type="submit"
@@ -458,7 +458,9 @@ const PageSettingsModal = ({
               className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary/90 disabled:opacity-50 flex items-center gap-2"
             >
               {isLoading && <Icon icon="eos-icons:loading" />}
-              {isNew ? "Create Page" : "Save Changes"}
+              {isNew
+                ? t("websites_page.pages.modal.create")
+                : t("websites_page.pages.modal.save")}
             </button>
           </div>
         </div>

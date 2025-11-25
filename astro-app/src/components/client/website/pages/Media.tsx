@@ -1,5 +1,9 @@
 import React from "react";
 
-const Media = () => <div>Media Content</div>;
+import { useTranslation } from "react-i18next";
+const Media = () => {
+  const { t } = useTranslation();
+  return <div>{t("websites_page.placeholders.media")}</div>;
+};
 
 export default Media;

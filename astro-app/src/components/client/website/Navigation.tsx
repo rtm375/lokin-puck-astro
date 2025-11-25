@@ -1,25 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { Icon } from "@iconify/react";
 import { NavLink, useParams, Link } from "react-router-dom";
-import { useTranslation } from "@/i18n/client";
+import { useTranslation } from "react-i18next";
 import { useProfileStore } from "@/stores/useProfileStore";
-
-interface Website {
-  id: string;
-  name: string;
-  slug: string;
-}
+import { useWebsitesStore, type Website } from "@/stores/useWebsitesStore";
 
 interface NavWebsitesProps {
   user: any;
 }
 
 const NavWebsites = ({ user }: NavWebsitesProps) => {
-  const { slug } = useParams<{ slug: string }>();
+  const { subdomain } = useParams<{ subdomain: string }>();
   const { profile, fetchProfile } = useProfileStore();
-  const currentLanguage = profile?.preferences?.language || "en";
-  const { t } = useTranslation(currentLanguage);
-  const [websites, setWebsites] = useState<Website[]>([]);
+  // const currentLanguage = profile?.preferences?.language || "en";
+  const { t } = useTranslation();
+  const { websites, fetchWebsites } = useWebsitesStore();
   const [currentWebsite, setCurrentWebsite] = useState<Website | null>(null);
 
   useEffect(() => {
@@ -29,29 +24,17 @@ const NavWebsites = ({ user }: NavWebsitesProps) => {
   }, [profile, fetchProfile]);
 
   useEffect(() => {
-    const fetchUserAndWebsites = async () => {
-      try {
-        const response = await fetch("/api/websites/user-websites");
-        if (!response.ok) {
-          throw new Error("Failed to fetch websites");
-        }
-        const data = await response.json();
-        setWebsites((data as Website[]) || []);
-      } catch (error) {
-        console.error("Error fetching websites:", error);
-        setWebsites([]);
-      }
-    };
-
-    fetchUserAndWebsites();
-  }, []);
+    if (websites.length === 0) {
+      fetchWebsites();
+    }
+  }, [websites.length, fetchWebsites]);
 
   useEffect(() => {
-    if (websites.length > 0 && slug) {
-      const foundWebsite = websites.find((w) => w.slug === slug);
+    if (websites.length > 0 && subdomain) {
+      const foundWebsite = websites.find((w) => w.subdomain === subdomain);
       setCurrentWebsite(foundWebsite || null);
     }
-  }, [websites, slug]);
+  }, [websites, subdomain]);
 
   const email = user?.email || "user@example.com";
   const fullName =
@@ -102,7 +85,7 @@ const NavWebsites = ({ user }: NavWebsitesProps) => {
                 <span className="flex w-full overflow-hidden rounded group-hover:rounded-t group-hover:rounded-b-none border border-gray-300 bg-white shadow-sm dark:divide-gray-600 dark:border-gray-600 dark:bg-gray-800">
                   <button
                     type="button"
-                    className="px-3 py-1.5 text-left flex-1 text-sm font-medium transition-colors hover:bg-gray-50 hover:text-gray-900 focus:relative dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-white"
+                    className="px-3 py-1.5 text-left flex-1 text-sm font-medium transition-colors hover:bg-gray-50 hover:text-gray-900 focus:relative dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-white truncate"
                   >
                     {currentWebsite?.name || "..."}
                   </button>
@@ -125,8 +108,8 @@ const NavWebsites = ({ user }: NavWebsitesProps) => {
                   {websites.map((website) => (
                     <div key={website.id}>
                       <Link
-                        to={`/admin/websites/${website.slug}/pages`}
-                        className="block px-3 py-2 text-sm font-medium transition-colors hover:bg-gray-50 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-white"
+                        to={`/admin/websites/${website.subdomain}/pages`}
+                        className="block px-3 py-2 text-sm font-medium transition-colors hover:bg-gray-50 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-white truncate"
                         role="menuitem"
                       >
                         {website.name}
@@ -145,7 +128,7 @@ const NavWebsites = ({ user }: NavWebsitesProps) => {
           </li>
           <li>
             <NavLink
-              to={`/admin/websites/${slug}/pages`}
+              to={`/admin/websites/${subdomain}/pages`}
               className={getLinkClass}
               end
             >
@@ -158,7 +141,7 @@ const NavWebsites = ({ user }: NavWebsitesProps) => {
           </li>
           <li>
             <NavLink
-              to={`/admin/websites/${slug}/media`}
+              to={`/admin/websites/${subdomain}/media`}
               className={getLinkClass}
             >
               <Icon
@@ -174,7 +157,7 @@ const NavWebsites = ({ user }: NavWebsitesProps) => {
           </li>
           <li>
             <NavLink
-              to={`/admin/websites/${slug}/products`}
+              to={`/admin/websites/${subdomain}/products`}
               className={getLinkClass}
             >
               <Icon
@@ -190,7 +173,7 @@ const NavWebsites = ({ user }: NavWebsitesProps) => {
           </li>
           <li>
             <NavLink
-              to={`/admin/websites/${slug}/forms`}
+              to={`/admin/websites/${subdomain}/forms`}
               className={getLinkClass}
             >
               <Icon
@@ -206,7 +189,7 @@ const NavWebsites = ({ user }: NavWebsitesProps) => {
           </li>
           <li>
             <NavLink
-              to={`/admin/websites/${slug}/appearance`}
+              to={`/admin/websites/${subdomain}/appearance`}
               className={getLinkClass}
             >
               <Icon
@@ -222,7 +205,7 @@ const NavWebsites = ({ user }: NavWebsitesProps) => {
           </li>
           <li>
             <NavLink
-              to={`/admin/websites/${slug}/users`}
+              to={`/admin/websites/${subdomain}/users`}
               className={getLinkClass}
             >
               <Icon
@@ -238,7 +221,7 @@ const NavWebsites = ({ user }: NavWebsitesProps) => {
           </li>
           <li>
             <NavLink
-              to={`/admin/websites/${slug}/settings`}
+              to={`/admin/websites/${subdomain}/settings`}
               className={getLinkClass}
             >
               <Icon

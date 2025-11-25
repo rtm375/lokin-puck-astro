@@ -6,6 +6,7 @@ import {
   useParams,
   Navigate,
 } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import NavWebsites from "./Navigation";
 import Pages from "./pages/Pages";
 import PuckEditor from "./pages/Editor";
@@ -16,12 +17,14 @@ import Forms from "./pages/Forms";
 import Appearance from "./pages/Appearance";
 import Users from "./pages/Users";
 import Settings from "./pages/Settings";
+import { LanguageProvider } from "@/i18n/LanguageProvider";
 
 export const Websites = ({ user }: { user: any }) => {
   // The Main Dashboard Layout (Sidebar + Content)
   const DashboardLayout = () => {
-    const { slug } = useParams();
-    if (!slug) return null;
+    const { t } = useTranslation();
+    const { subdomain } = useParams();
+    if (!subdomain) return null;
 
     return (
       <div className="flex w-full h-screen overflow-hidden">
@@ -34,7 +37,7 @@ export const Websites = ({ user }: { user: any }) => {
             <div className="py-8 md:px-0 bg-white border-b border-gray-200 mb-6">
               <div className="mx-auto max-w-7xl px-6">
                 <h1 className="text-2xl font-bold text-gray-900">
-                  Web Dashboard
+                  {t("dashboard.title")}
                 </h1>
               </div>
             </div>
@@ -50,7 +53,7 @@ export const Websites = ({ user }: { user: any }) => {
 
   const router = createBrowserRouter([
     {
-      path: "/admin/websites/:slug",
+      path: "/admin/websites/:subdomain",
       children: [
         // 1. Full Screen Editor Route (No Sidebar)
         {
@@ -82,7 +85,9 @@ export const Websites = ({ user }: { user: any }) => {
 
   return (
     <React.StrictMode>
-      <RouterProvider router={router} />
+      <LanguageProvider>
+        <RouterProvider router={router} />
+      </LanguageProvider>
     </React.StrictMode>
   );
 };

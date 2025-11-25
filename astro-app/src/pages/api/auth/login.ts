@@ -1,13 +1,12 @@
-import { getSupabaseClient } from "@lib/supabase-client";
 import type { APIRoute } from "astro";
 
 export const prerender = false;
 
-export const POST: APIRoute = async ({ request, cookies, url }) => {
+export const POST: APIRoute = async ({ request, cookies, url, locals }) => {
   const formData = await request.formData();
   const provider = formData.get("provider")?.toString();
 
-  const supabase = getSupabaseClient(request, cookies);
+  const { supabase } = locals;
 
   // OAuth
   if (provider === "google") {
@@ -81,7 +80,10 @@ export const POST: APIRoute = async ({ request, cookies, url }) => {
     });
   }
 
-  return new Response(JSON.stringify({ error: "invalid_request" }), {
-    status: 400,
-  });
+  return new Response(
+    JSON.stringify({ error: locals.t("api.auth.invalid_request") }),
+    {
+      status: 400,
+    },
+  );
 };

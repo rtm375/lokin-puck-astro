@@ -396,7 +396,7 @@ input:where([type="button"], [type="reset"], [type="submit"]),
 .block{display:block;}</style>
           </head>
           <body>
-            <div><p class="block"><p>Hello World</p></p><p class="block"><p class="mb-4 last:mb-0"><span style="color: rgb(145, 65, 172);">Hello World</span></p></p><p class="block"><p class="mb-4 last:mb-0"><span style="color: rgb(224, 27, 36);">Hello World</span></p></p><p class="block"><p class="mb-4 last:mb-0"><span style="color: rgb(51, 209, 122);">Hello <strong>World</strong></span></p></p></div>
+            <div><p class="block"><p>Hello World</p></p><p class="block"><p class="mb-4 last:mb-0"><span style="color: rgb(145, 65, 172);">Hello <strong>World</strong></span></p></p><p class="block"><p class="mb-4 last:mb-0"><span style="color: rgb(224, 27, 36);">Hello World</span></p></p><p class="block"><p class="mb-4 last:mb-0"><span style="color: rgb(51, 209, 122);">Hello <strong>World</strong></span></p></p></div>
             
           </body>
         </html>

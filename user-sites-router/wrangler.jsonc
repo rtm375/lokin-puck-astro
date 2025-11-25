@@ -6,12 +6,6 @@
 	"observability": {
 		"enabled": true
 	},
-	// "routes": [
-	// 	{
-	// 		"pattern": "sites.lokin.id",
-	// 		"custom_domain": true
-	// 	}
-	// ],
 	"r2_buckets": [
 		{
 			"binding": "R2_BUCKET",

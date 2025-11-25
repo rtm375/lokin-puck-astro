@@ -1,16 +1,17 @@
-import { getSupabaseClient } from "@/lib/supabase-client";
 import type { APIRoute } from "astro";
-import { log } from "node:console";
 import dns from "node:dns/promises";
 
 export const prerender = false;
 
-export const POST: APIRoute = async ({ request, params, cookies }) => {
-  const supabase = getSupabaseClient(request, cookies);
+export const POST: APIRoute = async ({ request, params, locals }) => {
+  const { supabase } = locals;
   const body = await request.json();
   const { domain } = body;
 
-  if (!domain) return new Response("Missing domain", { status: 400 });
+  if (!domain)
+    return new Response(locals.t("api.domains.missing_domain"), {
+      status: 400,
+    });
 
   const { data: domainRecord } = await supabase
     .from("domains")
@@ -18,7 +19,8 @@ export const POST: APIRoute = async ({ request, params, cookies }) => {
     .eq("domain", domain)
     .single();
 
-  if (!domainRecord) return new Response("Domain not found", { status: 404 });
+  if (!domainRecord)
+    return new Response(locals.t("api.domains.not_found"), { status: 404 });
 
   let isVerified = false;
   const targetCNAME = "sites.lokin.id";
@@ -28,7 +30,6 @@ export const POST: APIRoute = async ({ request, params, cookies }) => {
     if (resolveCname.includes(targetCNAME)) {
       isVerified = true;
     }
-    console.log(resolveCname);
   } catch (error: any) {
     console.log(`DNS lookup failed for ${domain}:`, error.code);
   }
@@ -52,7 +53,7 @@ export const POST: APIRoute = async ({ request, params, cookies }) => {
       JSON.stringify({
         status: "pending",
         verified: false,
-        message: "DNS not propagating yet",
+        message: locals.t("api.domains.dns_pending"),
       }),
       { status: 200 },
     );

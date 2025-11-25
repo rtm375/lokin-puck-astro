@@ -1,17 +1,16 @@
-import { getSupabaseClient } from "@/lib/supabase-client";
 import type { APIRoute } from "astro";
 
 export const prerender = false;
 
-export const GET: APIRoute = async ({ request, params, cookies }) => {
+export const GET: APIRoute = async ({ request, params }) => {
   return new Response(JSON.stringify({ message: "nothings here friends" }), {
     status: 200,
   });
 };
 
 // PATCH: Update Page Settings (Title, SEO, Path, Status)
-export const PATCH: APIRoute = async ({ request, params, cookies }) => {
-  const supabase = getSupabaseClient(request, cookies);
+export const PATCH: APIRoute = async ({ request, params, locals }) => {
+  const { supabase } = locals;
   const { pageId } = params;
   const body = await request.json();
 
@@ -43,8 +42,8 @@ export const PATCH: APIRoute = async ({ request, params, cookies }) => {
 };
 
 // DELETE: Delete Page
-export const DELETE: APIRoute = async ({ request, params, cookies }) => {
-  const supabase = getSupabaseClient(request, cookies);
+export const DELETE: APIRoute = async ({ request, params, locals }) => {
+  const { supabase } = locals;
   const { pageId } = params;
 
   const { error } = await supabase.from("pages").delete().eq("id", pageId);

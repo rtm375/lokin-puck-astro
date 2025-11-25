@@ -1,72 +1,199 @@
 {
-    "welcome_message": "Selamat Datang",
-    "logout": "Keluar",
-    "navigations": {
-        "defaults": {
-            "dashboard": "Beranda",
-            "websites": "Situs",
-            "templates": "Sample",
-            "billing": "Tagihan",
-            "profile": "Profil"
-        },
-        "websites": {
-            "all": "Semua situs",
-            "editing": "Situs sekarang:",
-            "pages": "Halaman",
-            "media": "Galeri",
-            "products": "Produk",
-            "forms": "Formulir",
-            "appearance": "Tampilan",
-            "users": "Pengguna",
-            "settings": "Pengaturan"
-        }
+  "welcome_message": "Selamat Datang",
+  "logout": "Keluar",
+  "navigations": {
+    "defaults": {
+      "dashboard": "Beranda",
+      "websites": "Situs",
+      "templates": "Sample",
+      "billing": "Tagihan",
+      "profile": "Profil"
     },
-    "common": {
-        "login": "Login",
-        "logout": "Keluar",
-        "register": "Register",
-        "save": "Simpan",
-        "saving": "Menyimpan...",
-        "cancel": "Batal",
-        "edit": "Ubah",
-        "delete": "Hapus",
-        "create": "Buat",
-        "creating": "Membuat...",
-        "optional": "Opsional"
-    },
-    "websites_page": {
-        "title": "Situs web",
-        "create_new": "Buat situs baru",
-        "actions": {
-            "open": "Buka situs",
-            "create": "Buat situs",
-            "creating": "Mebuat situs..."
-        },
-        "website_settings": "Pengaturan",
-        "status_live": "Aktif",
-        "status_draft": "Draf",
-        "modal_title": "Buat situs baru",
-        "field_name": "Nama situs",
-        "field_slug": "Name subdomain",
-        "field_domain": "Domain",
-        "field_description": "Deskripsi situs",
-        "limit_reached": "Quota situs sudah penuh. <a href='{{url}}' class='underline font-bold'>Beli paket Pro</a> untuk menambahkan lebih banyak situs web."
-    },
-    "user_profile": {
-        "title": "Pengaturan Akun",
-        "profile_title": "Profil Anda",
-        "photo": "Foto",
-        "change_photo_coming_soon": "Ubah (Segera Hadir)",
-        "full_name": "Nama Lengkap",
-        "bio": "Bio",
-        "bio_hint": "Tulis beberapa kalimat tentang diri Anda.",
-        "section_preferences": "Preferensi",
-        "theme": "Tema",
-        "theme_system": "Default Sistem",
-        "theme_light": "Terang",
-        "theme_dark": "Gelap",
-        "language": "Bahasa",
-        "success_message": "Profil berhasil diperbarui",
-        "error_message": "Gagal memperbarui pengaturan"
+    "websites": {
+      "all": "Semua situs",
+      "editing": "Situs sekarang:",
+      "pages": "Halaman",
+      "media": "Galeri",
+      "products": "Produk",
+      "forms": "Formulir",
+      "appearance": "Tampilan",
+      "users": "Pengguna",
+      "settings": "Pengaturan"
     }
+  },
+  "common": {
+    "login": "Login",
+    "logout": "Keluar",
+    "register": "Register",
+    "save": "Simpan",
+    "saving": "Menyimpan...",
+    "cancel": "Batal",
+    "edit": "Ubah",
+    "delete": "Hapus",
+    "create": "Buat",
+    "creating": "Membuat...",
+    "optional": "Opsional"
+  },
+  "websites_page": {
+    "title": "Situs web",
+    "create_new": "Buat situs baru",
+    "actions": {
+      "open": "Buka situs",
+      "create": "Buat situs",
+      "creating": "Mebuat situs..."
+    },
+    "website_settings": "Pengaturan",
+    "status_live": "Aktif",
+    "status_draft": "Draf",
+    "modal_title": "Buat situs baru",
+    "field_name": "Nama situs",
+    "field_slug": "Name subdomain",
+    "field_domain": "Domain",
+    "field_description": "Deskripsi situs",
+    "limit_reached": "Quota situs sudah penuh. <a href='{{url}}' class='underline font-bold'>Beli paket Pro</a> untuk menambahkan lebih banyak situs web.",
+    "pages": {
+      "title": "Halaman",
+      "add_new": "Tambah Baru",
+      "table": {
+        "preview": "Pratinjau",
+        "title": "Judul",
+        "status": "Status",
+        "last_edited": "Terakhir Diedit",
+        "actions": "Aksi",
+        "loading": "Memuat halaman...",
+        "empty": "Tidak ada halaman ditemukan. Buat halaman pertama Anda!",
+        "untitled": "Halaman Tanpa Judul",
+        "active": "Aktif",
+        "draft": "Draf"
+      },
+      "modal": {
+        "create_title": "Buat Halaman",
+        "edit_title": "Pengaturan Halaman",
+        "field_title": "Judul Halaman",
+        "field_url": "Subdomain (URL)",
+        "field_status": "Status",
+        "seo_section": "SEO & Metadata",
+        "field_meta_desc": "Deskripsi Meta",
+        "field_image": "URL Gambar Unggulan",
+        "field_head": "Kode Head Kustom",
+        "save": "Simpan Perubahan",
+        "create": "Buat Halaman"
+      },
+      "confirm_delete": "Apakah Anda yakin ingin menghapus halaman ini?",
+      "delete_error": "Gagal menghapus halaman"
+    },
+    "settings": {
+      "title": "Pengaturan Situs",
+      "domains": {
+        "title": "Domain",
+        "default_subdomain": "Subdomain Default",
+        "verify": "Verifikasi",
+        "verifying": "Memeriksa...",
+        "add": "Tambah Domain",
+        "adding": "Menambahkan...",
+        "placeholder": "contoh.com",
+        "instructions_title": "Untuk menghubungkan domain kustom:",
+        "instruction_1": "Tambahkan domain di atas.",
+        "instruction_2": "Buat rekam CNAME di penyedia DNS Anda yang mengarah ke",
+        "instruction_3": "Klik tombol verifikasi",
+        "instruction_4": "Jika belum terverifikasi, tunggu verifikasi (biasanya memakan waktu beberapa menit hingga 48 jam).",
+        "success_verify": "Domain berhasil diverifikasi!",
+        "fail_verify": "Verifikasi domain gagal. Pastikan rekam CNAME Anda diatur dengan benar.",
+        "error_add": "Gagal menambahkan domain",
+        "error_verify": "Gagal memverifikasi domain",
+        "error_delete": "Gagal menghapus domain",
+        "confirm_delete": "Hapus {{domain}}?"
+      }
+    },
+    "editor": {
+      "loading": "Memuat editor...",
+      "error_website_not_found": "Error: Situs {{subdomain}} tidak ditemukan",
+      "error_page_not_found": "Error: Halaman {{path}} tidak ditemukan",
+      "back_to_dashboard": "Kembali ke Dasbor",
+      "unsaved_changes": "Perubahan tersimpan secara lokal",
+      "preview": "Pratinjau",
+      "publish_success": "Berhasil diterbitkan",
+      "save_error": "Gagal menyimpan halaman",
+      "page_not_found": "Halaman tidak ditemukan"
+    },
+    "preview": {
+      "loading": "Memuat pratinjau...",
+      "not_found": "Halaman tidak ditemukan",
+      "back_to_editor": "Kembali ke Editor",
+      "previewing": "Pratinjau:",
+      "unsaved_draft": "Draf Belum Disimpan"
+    },
+    "placeholders": {
+      "media": "Konten Media",
+      "products": "Konten Produk",
+      "forms": "Konten Formulir",
+      "appearance": "Konten Tampilan",
+      "users": "Konten Pengguna"
+    }
+  },
+  "user_profile": {
+    "title": "Pengaturan Akun",
+    "profile_title": "Profil Anda",
+    "photo": "Foto",
+    "change_photo_coming_soon": "Ubah (Segera Hadir)",
+    "full_name": "Nama Lengkap",
+    "bio": "Bio",
+    "bio_hint": "Tulis beberapa kalimat tentang diri Anda.",
+    "section_preferences": "Preferensi",
+    "theme": "Tema",
+    "theme_system": "Default Sistem",
+    "theme_light": "Terang",
+    "theme_dark": "Gelap",
+    "language": "Bahasa",
+    "success_message": "Profil berhasil diperbarui",
+    "error_message": "Gagal memperbarui pengaturan"
+  },
+  "api": {
+    "unauthorized": "Tidak diizinkan",
+    "websites": {
+      "fetch_error": "Gagal mengambil data situs",
+      "limit_reached": "Batas Paket Gratis Tercapai. Silakan upgrade ke Pro untuk membuat lebih banyak situs.",
+      "validation_required": "Nama dan subdomain wajib diisi"
+    },
+    "profile": {
+      "fetch_error": "Tidak dapat mengambil profil"
+    },
+    "domains": {
+      "missing_domain": "Domain wajib diisi",
+      "not_found": "Domain tidak ditemukan",
+      "dns_pending": "DNS belum terpropagasi"
+    },
+    "auth": {
+      "invalid_request": "Permintaan tidak valid",
+      "missing_fields": "Data tidak lengkap"
+    }
+  },
+  "dashboard": {
+    "welcome": "Halo",
+    "title": "Dasbor Web"
+  },
+  "auth": {
+    "login_title": "Masuk ke akun Anda",
+    "register_title": "Daftar akun baru",
+    "google_login": "Masuk dengan Google",
+    "google_continue": "Lanjutkan dengan Google",
+    "email_continue": "Atau lanjutkan dengan email",
+    "email_register": "Atau daftar dengan email",
+    "email_label": "Alamat Email",
+    "password_label": "Kata Sandi",
+    "login_button": "Masuk",
+    "login_loading": "Sedang masuk...",
+    "register_button": "Daftar",
+    "register_loading": "Sedang mendaftar...",
+    "no_account": "Belum punya akun?",
+    "has_account": "Sudah punya akun?",
+    "register_link": "Daftar di sini",
+    "login_link": "Masuk di sini",
+    "messages": {
+      "check_email": "Silakan periksa email Anda untuk konfirmasi akun.",
+      "access_denied": "Akses ditolak.",
+      "otp_expired": "Tautan email tidak valid atau sudah kadaluarsa.",
+      "unexpected_error": "Terjadi kesalahan yang tidak terduga."
+    }
+  }
 }

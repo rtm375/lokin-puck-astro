@@ -1,11 +1,14 @@
-import type { APIRoute } from 'astro';
+import type { APIRoute } from "astro";
 export const prerender = false;
 
 export const POST: APIRoute = async ({ request, locals }) => {
   const { supabase, user } = locals;
 
   if (!user) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+    return new Response(
+      JSON.stringify({ error: locals.t("api.unauthorized") }),
+      { status: 401 },
+    );
   }
 
   try {
@@ -19,29 +22,30 @@ export const POST: APIRoute = async ({ request, locals }) => {
       bio,
       preferences: {
         theme,
-        language
+        language,
       },
       updated_at: new Date().toISOString(),
     };
 
     // 3. Perform UPDATE (Since profile exists)
     const { data, error } = await supabase
-      .from('profiles')
+      .from("profiles")
       .update(updates)
-      .eq('id', user.id) // Target the specific user
+      .eq("id", user.id) // Target the specific user
       .select()
       .single();
 
-    if (error) throw new Error(error.message);
+    if (error) throw new Error(locals.t("user_profile.error_message"));
 
-    return new Response(JSON.stringify(data), { 
+    return new Response(JSON.stringify(data), {
       status: 200,
       headers: {
-        'Set-Cookie': `lang=${language}; Path=/; Max-Age=31536000; HttpOnly; SameSite=Lax`
-      }
+        "Set-Cookie": `lang=${language}; Path=/; Max-Age=31536000; HttpOnly; SameSite=Lax`,
+      },
     });
-
   } catch (error: any) {
-    return new Response(JSON.stringify({ error: error.message }), { status: 400 });
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 400,
+    });
   }
 };

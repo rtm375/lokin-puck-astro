@@ -1,8 +1,9 @@
 ---
 import Layout from "@layouts/dashboard.astro";
 export const prerender = false;
+const { t } = Astro.locals;
 ---
 
-<Layout title="Dashboard">
-  <div class="h2">Hello</div>
+<Layout title={t("navigations.defaults.dashboard")}>
+  <div class="h2">{t("dashboard.welcome")}</div>
 </Layout>

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useParams, Link } from "react-router-dom";
 import { Render, type Data } from "@measured/puck";
 import { config } from "@lib/puck.config";
@@ -7,9 +8,13 @@ import { useEditorData } from "@stores/useEditorData";
 import "@measured/puck/puck.css";
 
 export default function PuckPreview() {
-  const { slug, pagePath } = useParams<{ slug: string; pagePath: string }>();
+  const { t } = useTranslation();
+  const { subdomain, pagePath } = useParams<{
+    subdomain: string;
+    pagePath: string;
+  }>();
   const { getPageData } = useEditorData();
-  const storageKey = `${slug}-${pagePath}`;
+  const storageKey = `${subdomain}-${pagePath}`;
 
   const [data, setData] = useState<Data | null>(null);
   const [source, setSource] = useState<"local" | "db" | null>(null);
@@ -17,7 +22,7 @@ export default function PuckPreview() {
 
   useEffect(() => {
     const loadPage = async () => {
-      if (!slug || !pagePath) return;
+      if (!subdomain || !pagePath) return;
 
       // 1. Try Local Storage first (Real-time preview)
       const localData = getPageData(storageKey);
@@ -31,7 +36,7 @@ export default function PuckPreview() {
       // 2. Fallback to Database
       try {
         const res = await fetch(
-          `/api/websites/${slug}/pages/${pagePath}/editor-data`,
+          `/api/websites/${subdomain}/pages/${pagePath}/editor-data`,
         );
         if (!res.ok) throw new Error("Failed to load page");
         const page = await res.json();
@@ -57,11 +62,20 @@ export default function PuckPreview() {
 
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
-  }, [slug, pagePath, getPageData, storageKey]);
+  }, [subdomain, pagePath, getPageData, storageKey]);
 
   if (isLoading)
-    return <div className="p-10 text-center">Loading preview...</div>;
-  if (!data) return <div className="p-10 text-center">Page not found</div>;
+    return (
+      <div className="p-10 text-center">
+        {t("websites_page.preview.loading")}
+      </div>
+    );
+  if (!data)
+    return (
+      <div className="p-10 text-center">
+        {t("websites_page.preview.not_found")}
+      </div>
+    );
 
   return (
     <div className="min-h-screen bg-white">
@@ -69,19 +83,19 @@ export default function PuckPreview() {
       <div className="fixed top-0 left-0 right-0 z-50 h-14 bg-gray-900 text-white flex items-center justify-between px-4 shadow-md">
         <div className="flex items-center gap-3">
           <Link
-            to={`/admin/websites/${slug}/pages/${pagePath}/editor`}
+            to={`/admin/websites/${subdomain}/pages/${pagePath}/editor`}
             className="flex items-center gap-2 text-sm font-medium hover:text-gray-300 transition-colors"
           >
             <Icon icon="lucide:arrow-left" width={18} />
-            Back to Editor
+            {t("websites_page.preview.back_to_editor")}
           </Link>
           <div className="h-4 w-px bg-gray-700 mx-2"></div>
           <span className="text-xs text-gray-400 font-mono">
-            Previewing: /{pagePath}
+            {t("websites_page.preview.previewing")} /{pagePath}
           </span>
           {source === "local" && (
             <span className="ml-2 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500 text-black uppercase tracking-wider">
-              Unsaved Draft
+              {t("websites_page.preview.unsaved_draft")}
             </span>
           )}
         </div>

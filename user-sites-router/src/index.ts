@@ -41,23 +41,16 @@ export default {
       return new Response("Site Not Found (KV Lookup Failed)", { status: 404 });
     }
 
-    // 3. Fetch Content
     let path = url.pathname;
 
-    // If root, explicitly index.html
     if (path === "/") {
       path = "index.html";
-    }
-    // If it ends with /, append index.html
-    else if (path.endsWith("/")) {
+    } else if (path.endsWith("/")) {
       path += "index.html";
-    }
-    // If it doesn't have an extension (like .css, .js, .png), assume it's a page route
-    else if (!path.match(/\.[a-zA-Z0-9]+$/)) {
+    } else if (!path.match(/\.[a-zA-Z0-9]+$/)) {
       path += "/index.html";
     }
 
-    // Remove leading slash if present to match R2 key structure
     if (path.startsWith("/")) {
       path = path.substring(1);
     }

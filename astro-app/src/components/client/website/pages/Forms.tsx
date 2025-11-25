@@ -1,5 +1,9 @@
 import React from "react";
 
-const Forms = () => <div>Forms Content</div>;
+import { useTranslation } from "react-i18next";
+const Forms = () => {
+  const { t } = useTranslation();
+  return <div>{t("websites_page.placeholders.forms")}</div>;
+};
 
 export default Forms;

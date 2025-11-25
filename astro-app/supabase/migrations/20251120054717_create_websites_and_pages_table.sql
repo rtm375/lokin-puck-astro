@@ -7,23 +7,25 @@ drop extension if exists pg_hashids;
 -- 1. Create Tables
 create table public.websites (
   id uuid default gen_random_uuid() primary key,
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  updated_at timestamp with time zone default timezone('utc'::text, now()) not null,
   domain text unique,
+  subdomain text unique,
   name text,
   description text,
   user_uid uuid not null references auth.users(id) on delete cascade,
   settings jsonb default '{}'::jsonb,
   status text not null default 'OFFLINE'
-    check (status in ('MAINTENANCE', 'OFFLINE', 'ONLINE'))
+    check (status in ('MAINTENANCE', 'OFFLINE', 'ONLINE')),
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
 create table public.website_collaborators (
   id uuid default gen_random_uuid() primary key,
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   website_id uuid not null references public.websites(id) on delete cascade,
   user_uid uuid not null references auth.users(id) on delete cascade,
   role text not null check (role in ('editor', 'viewer')),
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null,
   unique(website_id, user_uid)
 );
 
