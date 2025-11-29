@@ -3,7 +3,7 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { Render, type Data } from "@measured/puck";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import { config } from "@/lib/puck.config";
+import { staticConfig } from "@/lib/puck.config";
 import { generateCss } from "@/lib/css-engine";
 import { scriptRegistry } from "@/lib/script-registry";
 
@@ -33,7 +33,7 @@ export const POST: APIRoute = async ({ request, params, locals }) => {
     // 1. Render React to Static HTML
     const contentHtml = renderToStaticMarkup(
       React.createElement(Render as any, {
-        config: config,
+        config: staticConfig,
         data: puckData as Data,
       }),
     );

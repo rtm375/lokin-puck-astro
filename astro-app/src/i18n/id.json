@@ -6,7 +6,7 @@
       "dashboard": "Beranda",
       "websites": "Situs",
       "templates": "Sample",
-      "billing": "Tagihan",
+      "billing": "Penagihan",
       "profile": "Profil"
     },
     "websites": {
@@ -194,6 +194,40 @@
       "access_denied": "Akses ditolak.",
       "otp_expired": "Tautan email tidak valid atau sudah kadaluarsa.",
       "unexpected_error": "Terjadi kesalahan yang tidak terduga."
+    }
+  },
+  "admin": {
+    "navigations": {}
+  },
+  "editor": {
+    "blocks": {
+      "flex": {
+        "title": "Fleksibel",
+        "direction": {
+          "title": "Arah",
+          "row": "Baris",
+          "column": "Kolom"
+        },
+        "justify_content": {
+          "title": "Perataan Konten",
+          "start": "Awal",
+          "center": "Tengah",
+          "end": "Akhir",
+          "stretch": "Rentang"
+        },
+        "align": {
+          "title": "Perataan"
+        },
+        "gap": "Jarak",
+        "wrap": {
+          "title": "Pecah Baris",
+          "wrap": "Pecah",
+          "nowrap": "Tidak Pecah"
+        }
+      },
+      "items": {
+        "title": "Isi"
+      }
     }
   }
 }

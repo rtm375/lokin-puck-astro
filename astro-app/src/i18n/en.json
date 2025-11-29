@@ -196,5 +196,39 @@
       "otp_expired": "Email link is invalid or has expired.",
       "unexpected_error": "An unexpected error occurred."
     }
+  },
+  "admin": {
+    "navigations": {}
+  },
+  "editor": {
+    "blocks": {
+      "flex": {
+        "title": "Flex",
+        "direction": {
+          "title": "Direction",
+          "row": "Row",
+          "column": "Column"
+        },
+        "justify_content": {
+          "title": "Justify Content",
+          "start": "Start",
+          "center": "Center",
+          "end": "End",
+          "stretch": "Stretch"
+        },
+        "align": {
+          "title": "Align"
+        },
+        "gap": "Gap",
+        "wrap": {
+          "title": "Wrap",
+          "wrap": "Wrap",
+          "nowrap": "No Wrap"
+        }
+      },
+      "items": {
+        "title": "Items"
+      }
+    }
   }
 }

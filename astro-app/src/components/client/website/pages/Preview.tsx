@@ -2,12 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams, Link } from "react-router-dom";
 import { Render, type Data } from "@measured/puck";
-import { config } from "@lib/puck.config";
+import { useConfig } from "@lib/puck.config";
 import { Icon } from "@iconify/react";
 import { useEditorData } from "@stores/useEditorData";
 import "@measured/puck/puck.css";
 
 export default function PuckPreview() {
+  const config = useConfig();
   const { t } = useTranslation();
   const { subdomain, pagePath } = useParams<{
     subdomain: string;

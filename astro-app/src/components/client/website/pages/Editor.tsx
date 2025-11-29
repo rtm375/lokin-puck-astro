@@ -1,7 +1,7 @@
 import { Puck, type Data } from "@measured/puck";
 import "@measured/puck/puck.css";
-import { config } from "@lib/puck.config";
-import { useEffect, useState, useCallback } from "react";
+import { useConfig } from "@lib/puck.config";
+import React, { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams, useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
@@ -10,6 +10,7 @@ import { useWebsitesStore } from "@/stores/useWebsitesStore";
 import { usePagesStore, type Page } from "@/stores/usePagesStore";
 
 export default function PuckEditor() {
+  const config = useConfig();
   const { t } = useTranslation();
   const { subdomain: websiteSubdomain, pagePath } = useParams<{
     subdomain: string;
@@ -139,6 +140,9 @@ export default function PuckEditor() {
 
       if (!res.ok) throw new Error("Failed to save");
 
+      const cacheKey = `${websiteId}-${pageId}`;
+      setPageData(cacheKey, data);
+
       clearPageData(storageKey);
       setHasUnsavedChanges(false);
       console.log(t("websites_page.editor.publish_success"));
@@ -211,21 +215,59 @@ export default function PuckEditor() {
           onChange={handleChange}
           headerPath={websiteSubdomain}
           overrides={{
-            headerActions: ({ children }) => (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handlePreview}
-                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-                  title="Preview (Includes unsaved changes)"
-                >
-                  <Icon icon="iconoir:eye" width={18} />
-                  <span className="hidden sm:inline">
-                    {t("websites_page.editor.preview")}
-                  </span>
-                </button>
-                {children}
-              </div>
-            ),
+            iframe: ({ children, document }) => {
+              useEffect(() => {
+                if (!document) return;
+
+                const head = document.head;
+                if (!head) return;
+
+                if (!head.querySelector("#preview-frame-uno")) {
+                  const script = document.createElement("script");
+                  script.id = "preview-frame-uno";
+                  script.src = "https://cdn.jsdelivr.net/npm/@unocss/runtime";
+                  head.appendChild(script);
+                }
+
+                const cleanupStyles = () => {
+                  head
+                    .querySelectorAll('style[data-vite-dev-id*="__uno.css"]')
+                    .forEach((el) => el.remove());
+
+                  head.querySelectorAll("style").forEach((el) => {
+                    if (el.innerHTML.includes("astro-island,astro-slot")) {
+                      el.remove();
+                    }
+                  });
+                };
+
+                cleanupStyles();
+
+                const observer = new MutationObserver(cleanupStyles);
+                observer.observe(head, { childList: true });
+
+                return () => observer.disconnect();
+              }, [document]);
+
+              return <div data-un-cloak="">{children}</div>;
+            },
+            headerActions: ({ children }): React.ReactElement => {
+              return (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handlePreview}
+                    className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                    title="Preview (Includes unsaved changes)"
+                  >
+                    <Icon icon="iconoir:eye" width={18} />
+                    <span className="hidden sm:inline">
+                      {t("websites_page.editor.preview")}
+                    </span>
+                  </button>
+                  {children}
+                </div>
+              );
+            },
           }}
         />
       </div>
