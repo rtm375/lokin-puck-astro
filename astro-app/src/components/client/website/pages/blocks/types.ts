@@ -47,4 +47,13 @@ export type Props = {
   HeroSlider: {
     slides: { imageUrl: string; caption: string }[];
   };
+  GlobalComponent: {
+    componentId: string;
+    data?: any;
+  };
+};
+
+export type RootProps = {
+  title?: string;
+  isFrontPage?: boolean;
 };

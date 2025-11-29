@@ -4,6 +4,7 @@ export default defineConfig({
   content: {
     pipeline: {
       include: [/\.(astro|html|[tj]sx|vue)$/],
+      exclude: "src/pages/sites/**/*.astro",
     },
   },
   presets: [presetWind4()],

@@ -10,18 +10,19 @@ export const createFlexConfig = (
       label: t("editor.blocks.flex.min_height.title"),
       type: "select",
       options: [
-        { label: "1/3 screen", value: "min-h-screen/3" },
-        { label: "2/3 screen", value: "min-h-screen/2" },
+        { label: "1/3 screen", value: "min-h-1/3" },
+        { label: "2/3 screen", value: "min-h-2/3" },
         { label: "Full screen", value: "min-h-screen" },
+        { label: "Default", value: "min-h-20" },
       ],
     },
     width: {
       label: t("editor.blocks.flex.width.title"),
       type: "select",
       options: [
-        { label: "1/3 screen", value: "w-screen/3" },
-        { label: "2/3 screen", value: "w-screen/2" },
-        { label: "Full screen", value: "w-screen" },
+        { label: "1/3 screen", value: "w-1/3" },
+        { label: "2/3 screen", value: "w-2/3" },
+        { label: "Full screen", value: "w-full" },
       ],
     },
     direction: {
@@ -160,8 +161,8 @@ export const createFlexConfig = (
     return { props };
   },
   defaultProps: {
-    minHeight: "min-h-screen",
-    width: "w-screen",
+    minHeight: "h-20",
+    width: "w-full",
     justifyContent: "justify-start",
     direction: "flex-row",
     gap: "gap-24",
@@ -188,7 +189,6 @@ export const createFlexConfig = (
       <Items
         className={`flex ${justifyContent} ${direction} ${gap === "custom" ? `gap-${gapCustom}` : gap} ${wrap} ${spacing.top} ${spacing.bottom} ${minHeight} ${width}`}
         disallow={["Hero", "Stats"]}
-        un-cloak
       />
     );
   },

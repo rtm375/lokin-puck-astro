@@ -7,8 +7,6 @@ export const GET: APIRoute = async ({ request, params, locals }) => {
   const { supabase } = locals;
   const { id, pageId } = params;
 
-  console.log(pageId);
-
   // Optimization: Single Query - use id not path
   const { data: page, error } = await supabase
     .from("pages")

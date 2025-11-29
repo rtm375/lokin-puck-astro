@@ -1,22 +1,7 @@
 import type { APIRoute } from "astro";
-import React from "react";
-import { renderToStaticMarkup } from "react-dom/server";
-import { Render, type Data } from "@measured/puck";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import { staticConfig } from "@/lib/puck.config";
-import { generateCss } from "@/lib/css-engine";
-import { scriptRegistry } from "@/lib/script-registry";
+import { type Data } from "@measured/puck";
 
 export const prerender = false;
-
-const R2 = new S3Client({
-  region: "auto",
-  endpoint: import.meta.env.R2_PUBLIC_DOMAIN,
-  credentials: {
-    accessKeyId: import.meta.env.R2_ACCESS_KEY_ID,
-    secretAccessKey: import.meta.env.R2_SECRET_ACCESS_KEY,
-  },
-});
 
 export const POST: APIRoute = async ({ request, params, locals }) => {
   try {
@@ -30,96 +15,27 @@ export const POST: APIRoute = async ({ request, params, locals }) => {
     // Website ID is already in params.id
     const websiteId = id;
 
-    // 1. Render React to Static HTML
-    const contentHtml = renderToStaticMarkup(
-      React.createElement(Render as any, {
-        config: staticConfig,
-        data: puckData as Data,
-      }),
-    );
+    // R2 Upload removed in favor of Astro SSR
+    // The page is now rendered on-the-fly by src/pages/[...path].astro
 
-    // 2. Generate Minimal CSS
-    const generatedCss = await generateCss(contentHtml);
+    // Extract isFrontPage from root props
+    const isFrontPage = (puckData.root?.props as any)?.isFrontPage === true;
 
-    // 3. Resolve Scripts & External CSS
-    const scripts = new Set<string>();
-    const styles = new Set<string>();
-
-    const scanData = (items: any[]) => {
-      items.forEach((item) => {
-        const type = item.type;
-        if (scriptRegistry[type]) {
-          scriptRegistry[type].forEach((url) => {
-            url.endsWith(".css") ? styles.add(url) : scripts.add(url);
-          });
-        }
-        if (item.props?.children && Array.isArray(item.props.children)) {
-          // Handle nested children if needed
-        }
-      });
-    };
-    if (puckData.content) scanData(puckData.content);
-
-    // 4. Construct Final HTML Document
-    const fullHtml = `
-        <!DOCTYPE html>
-        <html lang="en">
-          <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>${puckData.root.props?.title || "My Page"}</title>
-            ${Array.from(styles)
-              .map((url) => `<link rel="stylesheet" href="${url}">`)
-              .join("")}
-            <style>${generatedCss}</style>
-          </head>
-          <body>
-            ${contentHtml}
-            ${Array.from(scripts)
-              .map((url) => `<script src="${url}" defer></script>`)
-              .join("")}
-          </body>
-        </html>
-      `;
-
-    // 5. Get page data using pageId to retrieve the path for R2 storage
-    const { data: page, error: fetchError } = await supabase
-      .from("pages")
-      .select("id, path")
-      .eq("website_id", websiteId)
-      .eq("id", pageId)
-      .single();
-
-    if (fetchError || !page) {
-      return new Response(JSON.stringify({ error: "Page not found" }), {
-        status: 404,
-      });
+    // If setting as front page, unset any existing front page for this website
+    if (isFrontPage) {
+      await supabase
+        .from("pages")
+        .update({ is_front_page: false })
+        .eq("website_id", websiteId)
+        .eq("is_front_page", true);
     }
-
-    // Use the page's path for R2 storage key
-    const pagePath = page.path;
-    const cleanPath =
-      pagePath === "home" || pagePath === "index" ? "" : pagePath;
-    // e.g., sites/123e4567-e89b.../about/index.html
-    const storageKey = cleanPath
-      ? `sites/${websiteId}/${cleanPath}/index.html`
-      : `sites/${websiteId}/index.html`;
-
-    await R2.send(
-      new PutObjectCommand({
-        Bucket: import.meta.env.R2_BUCKET_NAME,
-        Key: storageKey,
-        Body: fullHtml,
-        ContentType: "text/html",
-        CacheControl: "public, max-age=0, must-revalidate",
-      }),
-    );
 
     // Update page data using pageId
     const { error } = await supabase
       .from("pages")
       .update({
         data: body.data,
+        is_front_page: isFrontPage,
         updated_at: new Date().toISOString(),
       })
       .eq("id", pageId)
@@ -131,10 +47,31 @@ export const POST: APIRoute = async ({ request, params, locals }) => {
       });
     }
 
+    // Construct URL based on domain logic (simplified for now)
+    // We need to fetch the website subdomain to construct the URL
+    const { data: website } = await supabase
+      .from("websites")
+      .select("subdomain")
+      .eq("id", websiteId)
+      .single();
+    const subdomain = website?.subdomain || "";
+
+    // Get page path again if we didn't fetch it above (we removed the fetch block)
+    const { data: page } = await supabase
+      .from("pages")
+      .select("path")
+      .eq("id", pageId)
+      .single();
+    const pagePath = page?.path || "";
+    const cleanPath =
+      pagePath === "home" || pagePath === "index" ? "" : pagePath;
+
+    const url = `https://${subdomain}.lokin.id/${cleanPath}`;
+
     return new Response(
       JSON.stringify({
         success: true,
-        url: `${import.meta.env.PUBLIC_SITES_DOMAIN}/${storageKey.replace("/index.html", "")}`,
+        url: url,
       }),
       { status: 200 },
     );

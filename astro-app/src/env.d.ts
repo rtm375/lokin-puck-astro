@@ -10,6 +10,7 @@ declare global {
       user: User | null;
       t: (key: string, options?: any) => string;
       preferences: { theme?: string; language?: string } | null;
+      websiteId?: string;
     }
   }
 }
