@@ -37,17 +37,16 @@ export function shouldFetch(
  * @param onSuccess - Callback when fetch succeeds
  * @param onError - Optional error handler
  */
+import { api } from "@/lib/api";
+
 export async function fetchData<T>(
   url: string,
   onSuccess: (data: T) => void,
   onError?: (error: Error) => void,
 ): Promise<void> {
   try {
-    const res = await fetch(url);
-    if (res.ok) {
-      const data = await res.json();
-      onSuccess(data);
-    }
+    const data = await api.get<T>(url);
+    onSuccess(data);
   } catch (err) {
     const error = err instanceof Error ? err : new Error(String(err));
     if (onError) {

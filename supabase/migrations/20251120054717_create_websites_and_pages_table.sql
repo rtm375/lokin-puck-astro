@@ -7,6 +7,7 @@ drop extension if exists pg_hashids;
 -- 1. Create Tables
 create table public.websites (
   id uuid default gen_random_uuid() primary key,
+  short_id bigint generated always as identity,
   domain text unique,
   subdomain text unique,
   name text,
@@ -16,7 +17,8 @@ create table public.websites (
   status text not null default 'OFFLINE'
     check (status in ('MAINTENANCE', 'OFFLINE', 'ONLINE')),
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  unique(short_id)
 );
 
 create table public.website_collaborators (
@@ -39,6 +41,7 @@ create table public.pages (
   website_id uuid not null references public.websites(id) on delete cascade,
   path text not null,
   data jsonb default '{}'::jsonb,
+  is_front_page boolean default false,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null,
   unique(website_id, path)
@@ -46,8 +49,8 @@ create table public.pages (
 
 -- 2. Create Indexes
 create index websites_user_uid_idx on public.websites(user_uid);
-create index collaborators_website_user_idx on public.website_collaborators(website_id, user_uid);
 create index pages_website_id_idx on public.pages(website_id);
+create unique index pages_website_front_page_idx on public.pages (website_id) where is_front_page = true;
 
 -- 3. Enable RLS
 alter table public.websites enable row level security;

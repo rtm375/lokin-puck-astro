@@ -19,6 +19,7 @@ interface EditorState {
   setPageData: (key: string, data: Data<Props, RootProps>) => void;
   getPageData: (key: string) => Data<Props, RootProps> | null;
   clearPageData: (key: string) => void;
+  reset: () => void;
 }
 
 export const useEditorData = create<EditorState>()(
@@ -105,6 +106,13 @@ export const useEditorData = create<EditorState>()(
           delete newPages[key];
           return { pages: newPages };
         }),
+      reset: () => {
+        set({
+          pages: {},
+          isLoading: false,
+          fetchingPageKey: null,
+        });
+      },
     }),
     {
       name: "editor-data",

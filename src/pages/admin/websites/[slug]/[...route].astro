@@ -1,4 +1,5 @@
 ---
+import StoreResetListener from "@/components/client/StoreResetListener";
 import { Websites } from "@components/client/website/Websites";
 import "uno.css";
 const { preferences, user } = Astro.locals;
@@ -17,5 +18,6 @@ export const prerender = false;
   </head>
   <body>
     <Websites user={user} client:only="react" />
+    <StoreResetListener client:only="react" />
   </body>
 </html>

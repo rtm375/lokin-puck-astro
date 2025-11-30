@@ -22,6 +22,7 @@ interface ComponentsState {
   addComponent: (component: Component) => void;
   updateComponent: (component: Component) => void;
   deleteComponent: (componentId: string) => void;
+  reset: () => void;
 }
 
 export const useComponentsStore = create<ComponentsState>()(
@@ -63,6 +64,14 @@ export const useComponentsStore = create<ComponentsState>()(
         set((state) => ({
           components: state.components.filter((c) => c.id !== componentId),
         })),
+      reset: () => {
+        set({
+          components: [],
+          isLoading: false,
+          fetchingWebsiteId: null,
+          currentWebsiteId: null,
+        });
+      },
     }),
     {
       name: "components",

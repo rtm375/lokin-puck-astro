@@ -21,7 +21,7 @@ create policy "Users can view components of their websites"
     exists (
       select 1 from websites
       where websites.id = components.website_id
-      and websites.user_uid = auth.uid()
+      and websites.user_uid = (select auth.uid())
     )
   );
 
@@ -31,7 +31,7 @@ create policy "Users can insert components to their websites"
     exists (
       select 1 from websites
       where websites.id = components.website_id
-      and websites.user_uid = auth.uid()
+      and websites.user_uid = (select auth.uid())
     )
   );
 
@@ -41,7 +41,7 @@ create policy "Users can update components of their websites"
     exists (
       select 1 from websites
       where websites.id = components.website_id
-      and websites.user_uid = auth.uid()
+      and websites.user_uid = (select auth.uid())
     )
   );
 
@@ -51,7 +51,7 @@ create policy "Users can delete components of their websites"
     exists (
       select 1 from websites
       where websites.id = components.website_id
-      and websites.user_uid = auth.uid()
+      and websites.user_uid = (select auth.uid())
     )
   );
 

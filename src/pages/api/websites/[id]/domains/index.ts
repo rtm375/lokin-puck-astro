@@ -1,27 +1,39 @@
-import type { APIRoute } from "astro";
+import {
+  apiHandler,
+  requireWebsite,
+  requireAuth,
+  APIError,
+} from "@/lib/server/api-handler";
 
 export const prerender = false;
 
 // GET: List domains
-export const GET: APIRoute = async ({ request, params, locals }) => {
-  const { supabase } = locals;
-  const { id } = params;
+export const GET = apiHandler(async (ctx) => {
+  const { supabase } = ctx.locals;
+  const { id } = ctx.params;
+
+  await requireWebsite(supabase, id);
 
   // 2. Get Domains
-  const { data: domains } = await supabase
+  const { data: domains, error } = await supabase
     .from("domains")
     .select("*")
     .eq("website_id", id);
 
-  return new Response(JSON.stringify([...(domains || [])]), {
-    status: 200,
-  });
-};
+  if (error) throw error;
+
+  return domains || [];
+});
 
 // POST: Add Custom Domain
-export const POST: APIRoute = async ({ request, params, locals }) => {
-  const { supabase } = locals;
-  const { id } = params;
+export const POST = apiHandler(async (ctx) => {
+  const { supabase } = ctx.locals;
+  const { id } = ctx.params;
+  const request = ctx.request;
+
+  requireAuth(ctx.locals);
+  await requireWebsite(supabase, id);
+
   const body = await request.json();
 
   // Add to DB
@@ -36,36 +48,9 @@ export const POST: APIRoute = async ({ request, params, locals }) => {
     .select()
     .single();
 
-  if (error)
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-    });
+  if (error) throw error;
 
   // TODO: Call Cloudflare API to register Custom Hostname for SSL
 
-  return new Response(JSON.stringify(data), { status: 200 });
-};
-
-// DELETE
-export const DELETE: APIRoute = async ({ request, locals }) => {
-  const { supabase } = locals;
-  const url = new URL(request.url);
-  const domain = url.searchParams.get("domain");
-
-  if (!domain)
-    return new Response(locals.t("api.domains.missing_domain"), {
-      status: 400,
-    });
-
-  const { error } = await supabase
-    .from("domains")
-    .delete()
-    .eq("domain", domain);
-
-  if (error)
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-    });
-
-  return new Response(JSON.stringify({ success: true }), { status: 200 });
-};
+  return data;
+});

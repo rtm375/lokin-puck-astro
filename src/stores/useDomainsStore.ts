@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { shouldFetch, fetchData } from "./utils/fetchHelpers";
 
-interface Domain {
+export interface Domain {
   domain: string;
   status: "pending" | "active" | "invalid";
   type: "subdomain" | "custom";
@@ -18,6 +18,7 @@ interface DomainsState {
   addDomain: (domain: Domain) => void;
   updateDomain: (domain: Domain) => void;
   deleteDomain: (domainName: string) => void;
+  reset: () => void;
 }
 
 export const useDomainsStore = create<DomainsState>()((set, get) => ({
@@ -56,4 +57,12 @@ export const useDomainsStore = create<DomainsState>()((set, get) => ({
     set((state) => ({
       domains: state.domains.filter((d) => d.domain !== domainName),
     })),
+  reset: () => {
+    set({
+      domains: [],
+      isLoading: false,
+      fetchingWebsiteId: null,
+      currentWebsiteId: null,
+    });
+  },
 }));

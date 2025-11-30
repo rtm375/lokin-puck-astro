@@ -42,6 +42,9 @@ export const useFileUpload = (): UseFileUploadReturn => {
         });
 
         if (!res.ok) {
+          if (res.status === 401 || res.status === 403 || res.status === 404) {
+            window.dispatchEvent(new CustomEvent("app:reset"));
+          }
           const data = await res.json();
           throw new Error(data.error || "Upload failed");
         }

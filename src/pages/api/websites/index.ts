@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { syncToKV } from "@/lib/cloudflare";
+import { handleSupabaseError } from "../utils";
 export const prerender = false;
 
 export const GET: APIRoute = async ({ locals }) => {
@@ -21,13 +22,7 @@ export const GET: APIRoute = async ({ locals }) => {
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("Error fetching websites:", error);
-    return new Response(
-      JSON.stringify({ error: locals.t("api.websites.fetch_error") }),
-      {
-        status: 500,
-      },
-    );
+    return handleSupabaseError(error, locals.t);
   }
 
   return new Response(JSON.stringify(websites), { status: 200 });
@@ -49,12 +44,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     .single();
 
   if (profileError) {
-    return new Response(
-      JSON.stringify({ error: locals.t("api.profile.fetch_error") }),
-      {
-        status: 500,
-      },
-    );
+    return handleSupabaseError(profileError, locals.t);
   }
 
   if (profile?.tier === "free") {
@@ -64,9 +54,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       .eq("user_uid", user.id);
 
     if (countError) {
-      return new Response(JSON.stringify({ error: countError.message }), {
-        status: 500,
-      });
+      return handleSupabaseError(countError, locals.t);
     }
 
     if (count !== null && count >= 1) {
@@ -104,9 +92,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     .single();
 
   if (websiteError) {
-    return new Response(JSON.stringify({ error: websiteError.message }), {
-      status: 400,
-    });
+    return handleSupabaseError(websiteError, locals.t);
   }
 
   const defaultDomain = `${subdomain}.lokin.id`;

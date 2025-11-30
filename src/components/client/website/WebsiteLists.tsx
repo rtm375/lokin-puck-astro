@@ -5,6 +5,7 @@ import { useProfileStore } from "@stores/useProfileStore";
 import { useWebsitesStore } from "@stores/useWebsitesStore";
 import type { Status, Website } from "@stores/useWebsitesStore";
 import { LanguageProvider } from "@/i18n/LanguageProvider";
+import { api } from "@/lib/api";
 
 export default function WebsitesList() {
   const { profile, fetchProfile } = useProfileStore();
@@ -54,14 +55,7 @@ export default function WebsitesList() {
     setIsLoading(true);
 
     try {
-      const res = await fetch("/api/websites", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to create website");
+      await api.post("/api/websites", formData);
 
       await fetchWebsites(); // Refetch websites to update the store
 

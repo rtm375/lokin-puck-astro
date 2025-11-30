@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useParams, Link } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { format } from "date-fns";
-
+import { api } from "@/lib/api";
 import { useWebsitesStore } from "@/stores/useWebsitesStore";
 import { usePagesStore, type Page } from "@/stores/usePagesStore";
 
@@ -14,29 +14,37 @@ export default function Pages() {
   const currentWebsite = websites.find((w) => w.subdomain === websiteSubdomain);
   const websiteId = currentWebsite?.id;
 
-  const { pages, isLoading, fetchPages, addPage, updatePage, deletePage } =
-    usePagesStore();
+  const {
+    pages,
+    isLoading,
+    fetchPages,
+    addPage,
+    updatePage,
+    deletePage,
+    currentPage,
+    totalPages,
+    total,
+    setCurrentPage,
+  } = usePagesStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPage, setEditingPage] = useState<Page | null>(null);
 
   useEffect(() => {
     if (websiteId) {
-      fetchPages(websiteId);
+      fetchPages(websiteId, currentPage);
     }
-  }, [websiteId, fetchPages]);
+  }, [websiteId, currentPage, fetchPages]);
 
   // --- Actions ---
   const handleDelete = async (pageId: string) => {
     if (!confirm(t("websites_page.pages.confirm_delete"))) return;
 
     try {
-      const res = await fetch(`/api/websites/${websiteId}/pages/${pageId}`, {
-        method: "DELETE",
-      });
-      if (res.ok) {
-        deletePage(pageId);
-        if (editingPage?.id === pageId) setIsModalOpen(false);
-      }
+      await api.delete(`/api/websites/${websiteId}/pages/${pageId}`);
+
+      // Update local state
+      deletePage(pageId);
+      if (editingPage?.id === pageId) setIsModalOpen(false);
     } catch (error) {
       alert(t("websites_page.pages.delete_error"));
     }
@@ -190,6 +198,38 @@ export default function Pages() {
         </table>
       </div>
 
+      {/* Pagination Controls */}
+      {!isLoading && pages.length > 0 && totalPages > 1 && (
+        <div className="mt-4 flex items-center justify-between">
+          <div className="text-sm text-gray-600">
+            Showing {pages.length} of {total} pages
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            >
+              <Icon icon="mingcute:left-line" width={16} className="inline" />{" "}
+              Previous
+            </button>
+            <span className="text-sm text-gray-600">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              onClick={() =>
+                setCurrentPage(Math.min(totalPages, currentPage + 1))
+              }
+              disabled={currentPage === totalPages}
+              className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            >
+              Next{" "}
+              <Icon icon="mingcute:right-line" width={16} className="inline" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Settings/Create Modal */}
       {isModalOpen && (
         <PageSettingsModal
@@ -266,16 +306,9 @@ const PageSettingsModal = ({
         ? `/api/websites/${websiteId}/pages`
         : `/api/websites/${websiteId}/pages/${page!.id}`;
 
-      const method = isNew ? "POST" : "PATCH";
+      const method = isNew ? "post" : "patch";
 
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, websiteId }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      const data = (await api[method](url, { ...formData, websiteId })) as Page;
 
       // Ideally backend returns the full object, if not we merge
       const resultPage = isNew

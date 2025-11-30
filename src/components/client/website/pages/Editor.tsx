@@ -13,6 +13,7 @@ import { useEditorData } from "@stores/useEditorData";
 import { useWebsitesStore } from "@/stores/useWebsitesStore";
 import { usePagesStore, type Page } from "@/stores/usePagesStore";
 import { puckOverrides } from "./overrides/editor-overrides";
+import { api } from "@/lib/api";
 
 export default function PuckEditor() {
   const config = useConfig();
@@ -136,16 +137,10 @@ export default function PuckEditor() {
 
       setIsSaving(true);
       try {
-        const res = await fetch(
+        await api.post(
           `/api/websites/${websiteId}/pages/${pageId}/editor-save`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ data }),
-          },
+          { data },
         );
-
-        if (!res.ok) throw new Error("Failed to save");
 
         const cacheKey = `${websiteId}-${pageId}`;
         setPageData(cacheKey, data);

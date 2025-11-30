@@ -21,11 +21,20 @@ interface PagesState {
   isLoading: boolean;
   fetchingWebsiteId: string | null; // Track which website is currently being fetched
   currentWebsiteId: string | null; // Track which website the cache belongs to
-  fetchPages: (websiteId: string, force?: boolean) => Promise<void>;
+  currentPage: number;
+  totalPages: number;
+  total: number;
+  fetchPages: (
+    websiteId: string,
+    page?: number,
+    force?: boolean,
+  ) => Promise<void>;
   setPages: (pages: Page[]) => void;
   addPage: (page: Page) => void;
   updatePage: (page: Page) => void;
   deletePage: (pageId: string) => void;
+  setCurrentPage: (page: number) => void;
+  reset: () => void;
 }
 
 export const usePagesStore = create<PagesState>()(
@@ -35,13 +44,23 @@ export const usePagesStore = create<PagesState>()(
       isLoading: false,
       fetchingWebsiteId: null,
       currentWebsiteId: null,
+      currentPage: 1,
+      totalPages: 1,
+      total: 0,
       setPages: (pages) => set({ pages }),
-      fetchPages: async (websiteId: string, force: boolean = false) => {
+      setCurrentPage: (page) => set({ currentPage: page }),
+      fetchPages: async (
+        websiteId: string,
+        page: number = 1,
+        force: boolean = false,
+      ) => {
         const { fetchingWebsiteId, currentWebsiteId, pages } = get();
 
-        // Smart caching: skip if already have data for this website
+        // Smart caching: skip if already have data for this website and page
         const hasDataForWebsite =
-          currentWebsiteId === websiteId && pages.length > 0;
+          currentWebsiteId === websiteId &&
+          pages.length > 0 &&
+          page === get().currentPage;
         if (
           !shouldFetch(fetchingWebsiteId, websiteId, hasDataForWebsite, force)
         ) {
@@ -49,10 +68,25 @@ export const usePagesStore = create<PagesState>()(
         }
 
         set({ isLoading: true, fetchingWebsiteId: websiteId });
-        await fetchData<Page[]>(
-          `/api/websites/${websiteId}/pages`,
-          (data) => set({ pages: data, currentWebsiteId: websiteId }),
-          (err) => console.error("Failed to fetch pages", err),
+        await fetchData<{
+          pages: Page[];
+          total: number;
+          page: number;
+          totalPages: number;
+        }>(
+          `/api/websites/${websiteId}/pages?page=${page}&limit=20`,
+          (data) =>
+            set({
+              pages: data.pages || [],
+              currentWebsiteId: websiteId,
+              currentPage: data.page || 1,
+              totalPages: data.totalPages || 1,
+              total: data.total || 0,
+            }),
+          (err) => {
+            console.error("Failed to fetch pages", err);
+            window.dispatchEvent(new CustomEvent("app:reset"));
+          },
         );
         set({ isLoading: false, fetchingWebsiteId: null });
       },
@@ -65,6 +99,17 @@ export const usePagesStore = create<PagesState>()(
         set((state) => ({
           pages: state.pages.filter((p) => p.id !== pageId),
         })),
+      reset: () => {
+        set({
+          pages: [],
+          isLoading: false,
+          fetchingWebsiteId: null,
+          currentWebsiteId: null,
+          currentPage: 1,
+          totalPages: 1,
+          total: 0,
+        });
+      },
     }),
     {
       name: "pages",

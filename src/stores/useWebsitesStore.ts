@@ -23,6 +23,7 @@ interface WebsitesState {
   fetchingWebsites: boolean; // Track if fetch is in progress
   fetchWebsites: (force?: boolean) => Promise<void>;
   setWebsites: (websites: Website[]) => void;
+  reset: () => void;
 }
 
 export const useWebsitesStore = create<WebsitesState>()(
@@ -52,9 +53,22 @@ export const useWebsitesStore = create<WebsitesState>()(
         await fetchData<Website[]>(
           "/api/websites",
           (data) => set({ websites: data }),
-          (err) => console.error("Failed to load websites", err),
+          (err) => {
+            console.error("Failed to load websites", err);
+            // If access is forbidden or not found (e.g. user deleted), clear the list
+            if (err.message.includes("403") || err.message.includes("404")) {
+              set({ websites: [] });
+            }
+          },
         );
         set({ isLoading: false, fetchingWebsites: false });
+      },
+      reset: () => {
+        set({
+          websites: [],
+          isLoading: false,
+          fetchingWebsites: false,
+        });
       },
     }),
     {

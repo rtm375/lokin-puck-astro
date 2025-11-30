@@ -8,6 +8,7 @@ interface UserState {
   fetchingProfile: boolean; // Track if fetch is in progress
   fetchProfile: (force?: boolean) => Promise<void>;
   setProfile: (profile: any) => void;
+  reset: () => void;
 }
 
 export const useProfileStore = create<UserState>()(
@@ -39,6 +40,13 @@ export const useProfileStore = create<UserState>()(
           (err) => console.error("Failed to load profile", err),
         );
         set({ isLoading: false, fetchingProfile: false });
+      },
+      reset: () => {
+        set({
+          profile: null,
+          isLoading: false,
+          fetchingProfile: false,
+        });
       },
     }),
     {

@@ -4,6 +4,7 @@ import Header from "@components/Header.astro";
 import Sidebar from "@components/Sidebar.astro";
 import { ClientRouter } from "astro:transitions";
 import "uno.css";
+import AuthListener from "@components/client/AuthListener";
 const { preferences } = Astro.locals;
 
 const { title, type } = Astro.props;
@@ -76,5 +77,6 @@ const { title, type } = Astro.props;
         </div>
       </main>
     </div>
+    <AuthListener client:only="react" />
   </body>
 </html>

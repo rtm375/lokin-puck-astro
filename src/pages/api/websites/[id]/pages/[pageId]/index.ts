@@ -1,17 +1,20 @@
-import type { APIRoute } from "astro";
+import { apiHandler, requirePage, requireAuth } from "@/lib/server/api-handler";
 
 export const prerender = false;
 
-export const GET: APIRoute = async ({ request, params }) => {
-  return new Response(JSON.stringify({ message: "nothings here friends" }), {
-    status: 200,
-  });
-};
+export const GET = apiHandler(async (ctx) => {
+  return { message: "nothings here friends" };
+});
 
 // PATCH: Update Page Settings (Title, SEO, Path, Status)
-export const PATCH: APIRoute = async ({ request, params, locals }) => {
-  const { supabase } = locals;
-  const { pageId } = params;
+export const PATCH = apiHandler(async (ctx) => {
+  const { supabase } = ctx.locals;
+  const { pageId } = ctx.params;
+  const request = ctx.request;
+
+  requireAuth(ctx.locals);
+  await requirePage(supabase, pageId);
+
   const body = await request.json();
 
   // Sync title changes to Puck Data if it exists in the body
@@ -32,27 +35,22 @@ export const PATCH: APIRoute = async ({ request, params, locals }) => {
     })
     .eq("id", pageId);
 
-  if (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-    });
-  }
+  if (error) throw error;
 
-  return new Response(JSON.stringify({ success: true }), { status: 200 });
-};
+  return { success: true };
+});
 
 // DELETE: Delete Page
-export const DELETE: APIRoute = async ({ request, params, locals }) => {
-  const { supabase } = locals;
-  const { pageId } = params;
+export const DELETE = apiHandler(async (ctx) => {
+  const { supabase } = ctx.locals;
+  const { pageId } = ctx.params;
+
+  requireAuth(ctx.locals);
+  await requirePage(supabase, pageId);
 
   const { error } = await supabase.from("pages").delete().eq("id", pageId);
 
-  if (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-    });
-  }
+  if (error) throw error;
 
-  return new Response(JSON.stringify({ success: true }), { status: 200 });
-};
+  return { success: true };
+});

@@ -3,15 +3,18 @@ import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { format } from "date-fns";
+import { api } from "@/lib/api";
 import { useWebsitesStore } from "@/stores/useWebsitesStore";
 import { useFileUpload } from "@/hooks/useFileUpload";
 
 interface FileItem {
+  id: number;
   key: string;
   url: string;
   size: number;
-  lastModified: string;
+  created_at: string;
   name: string;
+  type: string;
 }
 
 export default function Files() {
@@ -24,25 +27,32 @@ export default function Files() {
   const [files, setFiles] = useState<FileItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [storageUsed, setStorageUsed] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [selectedFiles, setSelectedFiles] = useState<Set<number>>(new Set());
   const { upload, isUploading, error: uploadError, progress } = useFileUpload();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const MAX_STORAGE = 50 * 1024 * 1024; // 50MB for Free tier (Hardcoded for now, ideally from profile)
+  const ITEMS_PER_PAGE = 20;
 
-  const fetchFiles = async () => {
+  const fetchFiles = async (page: number = 1) => {
     if (!websiteId) return;
     setIsLoading(true);
     try {
-      const res = await fetch(`/api/websites/${websiteId}/files`);
-      if (res.ok) {
-        const data = await res.json();
-        setFiles(data);
-        const totalSize = data.reduce(
-          (acc: number, f: FileItem) => acc + f.size,
-          0,
-        );
-        setStorageUsed(totalSize);
-      }
+      const data = await api.get<any>(
+        `/api/websites/${websiteId}/files?page=${page}&limit=${ITEMS_PER_PAGE}`,
+      );
+
+      setFiles(data.files || []);
+      setTotal(data.total || 0);
+      setCurrentPage(data.page || 1);
+      setTotalPages(data.totalPages || 1);
+      setSelectedFiles(new Set()); // Reset selection on page change
+
+      // Use total storage from API (calculated from all files, not just current page)
+      setStorageUsed(data.totalStorage || 0);
     } catch (error) {
       console.error("Failed to fetch files", error);
     } finally {
@@ -51,52 +61,107 @@ export default function Files() {
   };
 
   useEffect(() => {
-    fetchFiles();
-  }, [websiteId]);
+    fetchFiles(currentPage);
+  }, [websiteId, currentPage]);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0 && websiteId) {
       const selectedFiles = Array.from(e.target.files);
       const results = await upload(selectedFiles, websiteId);
       if (results.length > 0) {
-        fetchFiles(); // Refresh list
+        fetchFiles(currentPage); // Refresh current page
       }
       // Reset input
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
-  const handleDelete = async (key: string) => {
-    if (!confirm(t("common.confirm_delete"))) return; // Use generic or specific translation
+  const handleDelete = async (id: number) => {
+    if (!confirm(t("common.confirm_delete"))) return;
     if (!websiteId) return;
 
-    // Extract filename from key if needed, but API expects the key part after websiteId?
-    // Our API route is `[websiteId]/files/[key]`.
-    // The key in `files` state is `websiteId/uuid-filename`.
-    // We need to pass just `uuid-filename` to the API if the API route is `[key]`.
-    // Let's check the API implementation again.
-    // API: `const fullKey = \`\${websiteId}/\${key}\`;`
-    // So we should pass the part AFTER `${websiteId}/`.
-
-    const filenameKey = key.split("/").pop(); // Simple extraction
-
     try {
-      const res = await fetch(
-        `/api/websites/${websiteId}/files/${filenameKey}`,
-        {
-          method: "DELETE",
-        },
-      );
-      if (res.ok) {
-        setFiles((prev) => prev.filter((f) => f.key !== key));
-        // Update storage locally to avoid full refetch if possible, or just refetch
-        const file = files.find((f) => f.key === key);
-        if (file) setStorageUsed((prev) => Math.max(0, prev - file.size));
-      } else {
-        alert("Failed to delete file");
+      const fileToDelete = files.find((f) => f.id === id);
+      if (!fileToDelete) {
+        alert("File not found.");
+        return;
       }
+
+      await api.delete(`/api/websites/${websiteId}/files/${fileToDelete.id}`);
+
+      // Update local state
+      setFiles((prev) => prev.filter((f) => f.id !== fileToDelete.id));
+      setStorageUsed((prev) => Math.max(0, prev - fileToDelete.size));
+      setTotal((prev) => Math.max(0, prev - 1));
     } catch (error) {
       alert("Error deleting file");
+    }
+  };
+
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      const allIds = files.map((f) => f.id);
+      setSelectedFiles(new Set(allIds));
+    } else {
+      setSelectedFiles(new Set());
+    }
+  };
+
+  const handleSelectOne = (id: number) => {
+    const newSelected = new Set(selectedFiles);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedFiles(newSelected);
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedFiles.size === 0) return;
+    if (
+      !confirm(
+        t("websites_page.files.confirm_bulk_delete", {
+          count: selectedFiles.size,
+          defaultValue: `Are you sure you want to delete ${selectedFiles.size} files?`,
+        }),
+      )
+    )
+      return;
+
+    if (!websiteId) return;
+
+    try {
+      const res = await fetch(`/api/websites/${websiteId}/files`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ids: Array.from(selectedFiles) }),
+      });
+
+      if (res.ok) {
+        // Remove deleted files from local state
+        setFiles((prev) => prev.filter((f) => !selectedFiles.has(f.id)));
+
+        // Update storage locally
+        const deletedFiles = files.filter((f) => selectedFiles.has(f.id));
+        const deletedSize = deletedFiles.reduce((acc, f) => acc + f.size, 0);
+        setStorageUsed((prev) => Math.max(0, prev - deletedSize));
+
+        setSelectedFiles(new Set());
+
+        // If page becomes empty, refresh or go to previous page
+        if (files.length === selectedFiles.size && currentPage > 1) {
+          setCurrentPage((prev) => prev - 1);
+        } else if (files.length === selectedFiles.size) {
+          fetchFiles(1);
+        }
+      } else {
+        alert("Failed to delete files");
+      }
+    } catch (error) {
+      alert("Error deleting files");
     }
   };
 
@@ -130,6 +195,15 @@ export default function Files() {
           </p>
         </div>
         <div className="flex gap-2">
+          {selectedFiles.size > 0 && (
+            <button
+              onClick={handleBulkDelete}
+              className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 text-sm font-medium rounded-md hover:bg-red-100 transition"
+            >
+              <Icon icon="mingcute:delete-2-line" width={18} />
+              Delete ({selectedFiles.size})
+            </button>
+          )}
           <input
             type="file"
             multiple
@@ -181,6 +255,18 @@ export default function Files() {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
+              {selectedFiles.size > 0 && (
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-10">
+                  <input
+                    type="checkbox"
+                    className="rounded border-gray-300 text-primary focus:ring-primary"
+                    checked={
+                      files.length > 0 && selectedFiles.size === files.length
+                    }
+                    onChange={handleSelectAll}
+                  />
+                </th>
+              )}
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
                 Preview
               </th>
@@ -202,7 +288,7 @@ export default function Files() {
             {isLoading ? (
               <tr>
                 <td
-                  colSpan={5}
+                  colSpan={6}
                   className="px-6 py-10 text-center text-gray-500"
                 >
                   Loading files...
@@ -211,7 +297,7 @@ export default function Files() {
             ) : files.length === 0 ? (
               <tr>
                 <td
-                  colSpan={5}
+                  colSpan={6}
                   className="px-6 py-10 text-center text-gray-500"
                 >
                   No files uploaded yet.
@@ -219,10 +305,19 @@ export default function Files() {
               </tr>
             ) : (
               files.map((file) => (
-                <tr
-                  key={file.key}
-                  className="hover:bg-gray-50 group transition"
-                >
+                <tr key={file.id} className="hover:bg-gray-50 group transition">
+                  {/* Checkbox */}
+                  {selectedFiles.size > 0 && (
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <input
+                        type="checkbox"
+                        className="rounded border-gray-300 text-primary focus:ring-primary"
+                        checked={selectedFiles.has(file.id)}
+                        onChange={() => handleSelectOne(file.id)}
+                      />
+                    </td>
+                  )}
+
                   {/* Preview */}
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div
@@ -263,8 +358,8 @@ export default function Files() {
 
                   {/* Uploaded At */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {file.lastModified
-                      ? format(new Date(file.lastModified), "MMM d, yyyy HH:mm")
+                    {file.created_at
+                      ? format(new Date(file.created_at), "MMM d, yyyy HH:mm")
                       : "-"}
                   </td>
 
@@ -279,7 +374,7 @@ export default function Files() {
                         <Icon icon="solar:copy-linear" width={18} />
                       </button>
                       <button
-                        onClick={() => handleDelete(file.key)}
+                        onClick={() => handleDelete(file.id)}
                         className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-md transition"
                         title="Delete"
                       >
@@ -293,6 +388,38 @@ export default function Files() {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination Controls */}
+      {!isLoading && files.length > 0 && totalPages > 1 && (
+        <div className="mt-4 flex items-center justify-between">
+          <div className="text-sm text-gray-600">
+            Showing {files.length} of {total} files
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            >
+              <Icon icon="mingcute:left-line" width={16} className="inline" />{" "}
+              Previous
+            </button>
+            <span className="text-sm text-gray-600">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+              }
+              disabled={currentPage === totalPages}
+              className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            >
+              Next{" "}
+              <Icon icon="mingcute:right-line" width={16} className="inline" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

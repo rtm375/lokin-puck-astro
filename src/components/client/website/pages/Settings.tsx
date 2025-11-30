@@ -2,8 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import { Icon } from "@iconify/react";
+import { api } from "@/lib/api";
 import { useWebsitesStore } from "@/stores/useWebsitesStore";
-import { useDomainsStore } from "@/stores/useDomainsStore";
+import { useDomainsStore, type Domain } from "@/stores/useDomainsStore";
 import { usePagesStore } from "@/stores/usePagesStore";
 
 export default function Settings() {
@@ -46,16 +47,13 @@ export default function Settings() {
     e.preventDefault();
     setIsAdding(true);
     try {
-      const res = await fetch(`/api/websites/${websiteId}/domains`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ domain: newDomain }),
-      });
+      const addedDomain = await api.post<Domain>(
+        `/api/websites/${websiteId}/domains`,
+        {
+          domain: newDomain,
+        },
+      );
 
-      if (!res.ok)
-        throw new Error(t("websites_page.settings.domains.error_add"));
-
-      const addedDomain = await res.json();
       useDomainsStore.getState().addDomain(addedDomain);
       setNewDomain("");
     } catch (err) {
@@ -109,9 +107,7 @@ export default function Settings() {
     )
       return;
     try {
-      await fetch(`/api/websites/${websiteId}/domains?domain=${domain}`, {
-        method: "DELETE",
-      });
+      await api.delete(`/api/websites/${websiteId}/domains/${domain}`);
       removeDomain(domain);
     } catch (err) {
       alert(t("websites_page.settings.domains.error_delete"));

@@ -1,14 +1,15 @@
-import type { APIRoute } from "astro";
+import {
+  apiHandler,
+  requireWebsite,
+  requireAuth,
+  APIError,
+} from "@/lib/server/api-handler";
 
-export const GET: APIRoute = async ({ params, locals }) => {
-  const { supabase } = locals;
-  const { id } = params;
+export const GET = apiHandler(async (ctx) => {
+  const { supabase } = ctx.locals;
+  const { id } = ctx.params;
 
-  if (!id) {
-    return new Response(JSON.stringify({ error: "Website ID is required" }), {
-      status: 400,
-    });
-  }
+  await requireWebsite(supabase, id);
 
   const { data, error } = await supabase
     .from("components")
@@ -16,35 +17,24 @@ export const GET: APIRoute = async ({ params, locals }) => {
     .eq("website_id", id)
     .order("created_at", { ascending: false });
 
-  if (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-    });
-  }
+  if (error) throw error;
 
-  return new Response(JSON.stringify(data), { status: 200 });
-};
+  return data;
+});
 
-export const POST: APIRoute = async ({ request, params, locals }) => {
-  const { supabase } = locals;
-  const { id } = params;
+export const POST = apiHandler(async (ctx) => {
+  const { supabase } = ctx.locals;
+  const { id } = ctx.params;
+  const request = ctx.request;
 
-  if (!id) {
-    return new Response(JSON.stringify({ error: "Website ID is required" }), {
-      status: 400,
-    });
-  }
+  requireAuth(ctx.locals);
+  await requireWebsite(supabase, id);
 
   const body = await request.json();
   const { name, data } = body;
 
   if (!name || !data) {
-    return new Response(
-      JSON.stringify({ error: "Name and Data are required" }),
-      {
-        status: 400,
-      },
-    );
+    throw new APIError("Name and Data are required", 400);
   }
 
   const { data: newComponent, error } = await supabase
@@ -53,11 +43,7 @@ export const POST: APIRoute = async ({ request, params, locals }) => {
     .select()
     .single();
 
-  if (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-    });
-  }
+  if (error) throw error;
 
-  return new Response(JSON.stringify(newComponent), { status: 201 });
-};
+  return newComponent;
+});
