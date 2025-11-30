@@ -1,9 +1,9 @@
 import React from "react";
 
 import { useTranslation } from "react-i18next";
-const Media = () => {
+const Files = () => {
   const { t } = useTranslation();
-  return <div>{t("websites_page.placeholders.media")}</div>;
+  return <div>{t("websites_page.placeholders.files")}</div>;
 };
 
-export default Media;
+export default Files;

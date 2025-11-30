@@ -13,7 +13,7 @@
       "all": "Semua situs",
       "editing": "Situs sekarang:",
       "pages": "Halaman",
-      "media": "Galeri",
+      "files": "File",
       "products": "Produk",
       "forms": "Formulir",
       "appearance": "Tampilan",
@@ -124,7 +124,7 @@
       "unsaved_draft": "Draf Belum Disimpan"
     },
     "placeholders": {
-      "media": "Konten Media",
+      "files": "Konten File",
       "products": "Konten Produk",
       "forms": "Konten Formulir",
       "appearance": "Konten Tampilan",

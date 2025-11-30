@@ -11,7 +11,7 @@ import NavWebsites from "./Navigation";
 import Pages from "./pages/Pages";
 import PuckEditor from "./pages/Editor";
 import PuckPreview from "./pages/Preview";
-import Media from "./pages/Media";
+import Files from "./pages/Files";
 import Products from "./pages/Products";
 import Forms from "./pages/Forms";
 import Appearance from "./pages/Appearance";
@@ -71,7 +71,7 @@ export const Websites = ({ user }: { user: any }) => {
           children: [
             { index: true, element: <Navigate to="pages" replace /> },
             { path: "pages", element: <Pages /> },
-            { path: "media", element: <Media /> },
+            { path: "files", element: <Files /> },
             { path: "products", element: <Products /> },
             { path: "forms", element: <Forms /> },
             { path: "appearance", element: <Appearance /> },

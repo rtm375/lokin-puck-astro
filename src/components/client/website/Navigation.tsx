@@ -141,7 +141,7 @@ const NavWebsites = ({ user }: NavWebsitesProps) => {
           </li>
           <li>
             <NavLink
-              to={`/admin/websites/${subdomain}/media`}
+              to={`/admin/websites/${subdomain}/files`}
               className={getLinkClass}
             >
               <Icon
@@ -151,7 +151,7 @@ const NavWebsites = ({ user }: NavWebsitesProps) => {
               />
               <span className="text-sm font-medium">
                 {" "}
-                {t("navigations.websites.media")}{" "}
+                {t("navigations.websites.files")}{" "}
               </span>
             </NavLink>
           </li>

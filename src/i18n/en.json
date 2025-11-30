@@ -13,7 +13,7 @@
       "all": "All websites",
       "editing": "Current website:",
       "pages": "Pages",
-      "media": "Media",
+      "files": "Files",
       "products": "Products",
       "forms": "Forms",
       "appearance": "Appearance",
@@ -133,7 +133,7 @@
       "unsaved_draft": "Unsaved Draft"
     },
     "placeholders": {
-      "media": "Media Content",
+      "files": "Files Content",
       "products": "Products Content",
       "forms": "Forms Content",
       "appearance": "Appearance Content",
