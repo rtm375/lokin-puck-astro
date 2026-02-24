@@ -1,5 +1,4 @@
 import i18next from "i18next";
-import { useState, useEffect } from "react";
 import en from "./en.json";
 import id from "./id.json";
 

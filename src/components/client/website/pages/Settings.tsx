@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import { Icon } from "@iconify/react";
-import { api } from "@/lib/api";
+import { api } from "@/lib/client";
 import { useWebsitesStore } from "@/stores/useWebsitesStore";
 import { useDomainsStore, type Domain } from "@/stores/useDomainsStore";
 import { usePagesStore } from "@/stores/usePagesStore";
@@ -73,13 +73,11 @@ export default function Settings() {
     }
 
     try {
-      const res = await fetch(`/api/websites/${websiteId}/domains/verify`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ domain }),
-      });
+      const data = await api.post<{ verified: boolean }>(
+        `/api/websites/${websiteId}/domains/verify`,
+        { domain },
+      );
 
-      const data = await res.json();
       if (data.verified) {
         // Update store
         const targetDomain = domains.find((d) => d.domain === domain);
@@ -118,13 +116,9 @@ export default function Settings() {
   const handleSaveFrontPage = async () => {
     setIsSavingFrontPage(true);
     try {
-      const res = await fetch(`/api/websites/${websiteId}/front-page`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pageId: frontPageId || null }),
+      await api.post(`/api/websites/${websiteId}/front-page`, {
+        pageId: frontPageId || null,
       });
-
-      if (!res.ok) throw new Error("Failed to update front page");
 
       // Update local pages store
       const updatedPages = pages.map((p) => ({

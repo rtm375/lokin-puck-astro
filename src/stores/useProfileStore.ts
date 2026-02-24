@@ -1,13 +1,15 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { shouldFetch, fetchData } from "./utils/fetchHelpers";
+import { shouldFetch, fetchData } from "@/utils/fetchHelpers";
+import type { Profile } from "@/types";
 
 interface UserState {
-  profile: any | null;
+  profile: Profile | null;
   isLoading: boolean;
   fetchingProfile: boolean; // Track if fetch is in progress
+  error: string | null;
   fetchProfile: (force?: boolean) => Promise<void>;
-  setProfile: (profile: any) => void;
+  setProfile: (profile: Profile) => void;
   reset: () => void;
 }
 
@@ -17,6 +19,7 @@ export const useProfileStore = create<UserState>()(
       profile: null,
       isLoading: false,
       fetchingProfile: false,
+      error: null,
 
       setProfile: (profile) => set({ profile }),
 
@@ -46,6 +49,7 @@ export const useProfileStore = create<UserState>()(
           profile: null,
           isLoading: false,
           fetchingProfile: false,
+          error: null,
         });
       },
     }),

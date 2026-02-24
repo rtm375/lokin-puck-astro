@@ -1,22 +1,17 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { shouldFetch, fetchData } from "./utils/fetchHelpers";
-import type { Data } from "@measured/puck";
+import { shouldFetch, fetchData } from "@/utils/fetchHelpers";
+import type { Component } from "@/types";
 
-export interface Component {
-  id: string;
-  website_id: string;
-  name: string;
-  data: Data;
-  created_at: string;
-  updated_at: string;
-}
+// Re-export for backward compatibility
+export type { Component } from "@/types";
 
 interface ComponentsState {
   components: Component[];
   isLoading: boolean;
   fetchingWebsiteId: string | null;
   currentWebsiteId: string | null;
+  error: string | null;
   fetchComponents: (websiteId: string, force?: boolean) => Promise<void>;
   setComponents: (components: Component[]) => void;
   addComponent: (component: Component) => void;
@@ -32,6 +27,7 @@ export const useComponentsStore = create<ComponentsState>()(
       isLoading: false,
       fetchingWebsiteId: null,
       currentWebsiteId: null,
+      error: null,
       setComponents: (components) => set({ components }),
       fetchComponents: async (websiteId: string, force: boolean = false) => {
         const { fetchingWebsiteId, currentWebsiteId, components } = get();
@@ -70,6 +66,7 @@ export const useComponentsStore = create<ComponentsState>()(
           isLoading: false,
           fetchingWebsiteId: null,
           currentWebsiteId: null,
+          error: null,
         });
       },
     }),

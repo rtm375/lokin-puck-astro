@@ -1,20 +1,10 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { shouldFetch, fetchData } from "./utils/fetchHelpers";
-import type { Website } from "./useWebsitesStore";
+import { shouldFetch, fetchData } from "@/utils/fetchHelpers";
+import type { Page } from "@/types";
 
-export interface Page {
-  id: string;
-  title: string;
-  path: string;
-  status: "draft" | "published";
-  updated_at: string;
-  image_url?: string;
-  description?: string;
-  head_code?: string;
-  is_front_page?: boolean;
-  website_id: string;
-}
+// Re-export for backward compatibility
+export type { Page } from "@/types";
 
 interface PagesState {
   pages: Page[];
@@ -24,6 +14,7 @@ interface PagesState {
   currentPage: number;
   totalPages: number;
   total: number;
+  error: string | null;
   fetchPages: (
     websiteId: string,
     page?: number,
@@ -47,6 +38,7 @@ export const usePagesStore = create<PagesState>()(
       currentPage: 1,
       totalPages: 1,
       total: 0,
+      error: null,
       setPages: (pages) => set({ pages }),
       setCurrentPage: (page) => set({ currentPage: page }),
       fetchPages: async (
@@ -108,6 +100,7 @@ export const usePagesStore = create<PagesState>()(
           currentPage: 1,
           totalPages: 1,
           total: 0,
+          error: null,
         });
       },
     }),

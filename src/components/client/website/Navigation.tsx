@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Icon } from "@iconify/react";
 import { NavLink, useParams, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -266,7 +266,25 @@ const NavWebsites = ({ user }: NavWebsitesProps) => {
               </a>
 
               <form
-                action="/api/auth/logout"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  // clear local storage
+                  localStorage.clear();
+                  // clear cookies
+                  document.cookie.split(";").forEach((cookie) => {
+                    document.cookie = cookie
+                      .replace(/^ +/, "")
+                      .replace(
+                        /=.+$/,
+                        "=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/",
+                      );
+                  });
+                  fetch("/api/auth/logout", {
+                    method: "POST",
+                  }).then(() => {
+                    window.location.href = "/";
+                  });
+                }}
                 method="POST"
                 className="w-full border-t border-gray-200"
               >

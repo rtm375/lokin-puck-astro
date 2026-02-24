@@ -1,26 +1,18 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { shouldFetch, fetchData } from "./utils/fetchHelpers";
+import { shouldFetch, fetchData } from "@/utils/fetchHelpers";
+import { Status } from "@/types";
+import type { Website } from "@/types";
 
-export enum Status {
-  ONLINE = "ONLINE",
-  OFFLINE = "OFFLINE",
-  MAINTENANCE = "MAINTENANCE",
-}
-
-export interface Website {
-  id: string;
-  name: string;
-  subdomain: string;
-  description: string | null;
-  status: Status;
-  created_at: string;
-}
+// Re-export for backward compatibility
+export { Status } from "@/types";
+export type { Website } from "@/types";
 
 interface WebsitesState {
   websites: Website[];
   isLoading: boolean;
   fetchingWebsites: boolean; // Track if fetch is in progress
+  error: string | null;
   fetchWebsites: (force?: boolean) => Promise<void>;
   setWebsites: (websites: Website[]) => void;
   reset: () => void;
@@ -32,6 +24,7 @@ export const useWebsitesStore = create<WebsitesState>()(
       websites: [],
       isLoading: false,
       fetchingWebsites: false,
+      error: null,
       setWebsites: (websites) => set({ websites }),
       fetchWebsites: async (force: boolean = false) => {
         const { fetchingWebsites, websites } = get();
@@ -68,6 +61,7 @@ export const useWebsitesStore = create<WebsitesState>()(
           websites: [],
           isLoading: false,
           fetchingWebsites: false,
+          error: null,
         });
       },
     }),

@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
-import { LanguageProvider } from "@/i18n/LanguageProvider";
+import { LanguageProvider } from "@/providers/LanguageProvider";
 
 export default function Register() {
   const { t } = useTranslation();

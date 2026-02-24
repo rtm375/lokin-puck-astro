@@ -37,7 +37,7 @@ export function shouldFetch(
  * @param onSuccess - Callback when fetch succeeds
  * @param onError - Optional error handler
  */
-import { api } from "@/lib/api";
+import { api } from "@/lib/client";
 
 export async function fetchData<T>(
   url: string,

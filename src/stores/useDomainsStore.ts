@@ -1,18 +1,16 @@
 import { create } from "zustand";
-import { shouldFetch, fetchData } from "./utils/fetchHelpers";
+import { shouldFetch, fetchData } from "@/utils/fetchHelpers";
+import type { Domain } from "@/types";
 
-export interface Domain {
-  domain: string;
-  status: "pending" | "active" | "invalid";
-  type: "subdomain" | "custom";
-  is_primary: boolean;
-}
+// Re-export for backward compatibility
+export type { Domain } from "@/types";
 
 interface DomainsState {
   domains: Domain[];
   isLoading: boolean;
   fetchingWebsiteId: string | null; // Track which website is currently being fetched
   currentWebsiteId: string | null; // Track which website the cache belongs to
+  error: string | null;
   fetchDomains: (websiteId: string, force?: boolean) => Promise<void>;
   setDomains: (domains: Domain[]) => void;
   addDomain: (domain: Domain) => void;
@@ -26,6 +24,7 @@ export const useDomainsStore = create<DomainsState>()((set, get) => ({
   isLoading: false,
   fetchingWebsiteId: null,
   currentWebsiteId: null,
+  error: null,
   setDomains: (domains) => set({ domains }),
   fetchDomains: async (websiteId: string, force: boolean = false) => {
     const { fetchingWebsiteId, currentWebsiteId, domains } = get();
@@ -63,6 +62,7 @@ export const useDomainsStore = create<DomainsState>()((set, get) => ({
       isLoading: false,
       fetchingWebsiteId: null,
       currentWebsiteId: null,
+      error: null,
     });
   },
 }));

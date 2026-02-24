@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useParams, Link } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { format } from "date-fns";
-import { api } from "@/lib/api";
+import { api } from "@/lib/client";
 import { useWebsitesStore } from "@/stores/useWebsitesStore";
 import { usePagesStore, type Page } from "@/stores/usePagesStore";
 
@@ -268,7 +268,6 @@ const PageSettingsModal = ({
   isOpen,
   onClose,
   page,
-  websiteSubdomain,
   websiteId,
   onSuccess,
   onDelete,

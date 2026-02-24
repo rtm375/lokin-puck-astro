@@ -1,11 +1,11 @@
-import { s3Client, R2_BUCKET_NAME, R2_PUBLIC_DOMAIN } from "@/lib/s3";
+import { s3Client, R2_BUCKET_NAME, R2_PUBLIC_DOMAIN } from "@/lib/server/s3";
 import { PutObjectCommand, DeleteObjectsCommand } from "@aws-sdk/client-s3";
 import {
   apiHandler,
   requireWebsite,
   requireAuth,
   APIError,
-} from "@/lib/server/api-handler";
+} from "@/lib/server";
 
 export const prerender = false;
 

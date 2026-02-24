@@ -1,19 +1,19 @@
 import { Puck, type Data } from "@measured/puck";
 import "@measured/puck/puck.css";
-import { useConfig } from "@lib/puck.config";
+import { useConfig } from "@/lib";
 import type {
   Props,
   RootProps,
 } from "@components/client/website/pages/blocks/types";
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams, useNavigate } from "react-router-dom";
-import { Icon } from "@iconify/react";
+
 import { useEditorData } from "@stores/useEditorData";
 import { useWebsitesStore } from "@/stores/useWebsitesStore";
-import { usePagesStore, type Page } from "@/stores/usePagesStore";
+import { usePagesStore } from "@/stores/usePagesStore";
 import { puckOverrides } from "./overrides/editor-overrides";
-import { api } from "@/lib/api";
+import { api } from "@/lib/client";
 
 export default function PuckEditor() {
   const config = useConfig();
@@ -49,15 +49,19 @@ export default function PuckEditor() {
   const currentPage = pages.find((p) => p.path === pagePath);
   const pageId = currentPage?.id;
 
-  const { setPageData, getPageData, clearPageData, fetchEditorData } =
-    useEditorData();
+  const {
+    setPageData,
+    getPageData,
+    clearPageData,
+    fetchEditorData,
+    isLoading: editorLoading,
+  } = useEditorData();
 
   const storageKey = `${websiteSubdomain}-${pagePath}`;
 
   const [initialData, setInitialData] = useState<Data<Props, RootProps> | null>(
     null,
   );
-  const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
@@ -65,16 +69,14 @@ export default function PuckEditor() {
   useEffect(() => {
     // Check if website exists
     if (!websiteId) {
-      setIsLoading(false);
       return;
     }
 
     // Wait for pages to finish loading
     if (pagesLoading) return;
 
-    // If pages loaded but page not found, show error
+    // If pages loaded but page not found, return (error will show after loading)
     if (!pageId && pages.length > 0) {
-      setIsLoading(false);
       return;
     }
 
@@ -86,7 +88,6 @@ export default function PuckEditor() {
       const dbData = await fetchEditorData(websiteId, pageId);
 
       if (!dbData) {
-        setIsLoading(false);
         return;
       }
 
@@ -99,8 +100,6 @@ export default function PuckEditor() {
       } else {
         setInitialData(dbData);
       }
-
-      setIsLoading(false);
     };
 
     loadPage();
@@ -166,12 +165,29 @@ export default function PuckEditor() {
   }, [websiteSubdomain, pagePath]);
 
   // Memoize overrides to prevent recreating on every render
+  // Memoize overrides to prevent recreating on every render
   const memoizedOverrides = useMemo(
-    () => puckOverrides(handlePreview, t),
-    [handlePreview, t],
+    () =>
+      puckOverrides(
+        handlePreview,
+        handlePublish,
+        t,
+        hasUnsavedChanges,
+        isSaving,
+        () => navigate(`/admin/websites/${websiteSubdomain}/pages`),
+      ),
+    [
+      handlePreview,
+      handlePublish,
+      t,
+      hasUnsavedChanges,
+      isSaving,
+      navigate,
+      websiteSubdomain,
+    ],
   );
 
-  if (isLoading)
+  if (pagesLoading || editorLoading || (websiteId && pageId && !initialData))
     return (
       <div className="p-10 text-center">
         {t("websites_page.editor.loading")}
@@ -201,22 +217,6 @@ export default function PuckEditor() {
 
   return (
     <div className="h-screen w-full bg-white flex flex-col">
-      <div className="bg-white border-b border-gray-200 px-4 h-12 flex items-center justify-between shrink-0 z-10">
-        <button
-          onClick={() => navigate(`/admin/websites/${websiteSubdomain}/pages`)}
-          className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1 font-medium"
-        >
-          <Icon icon="lucide:arrow-left" width={16} />
-          {t("websites_page.editor.back_to_dashboard")}
-        </button>
-
-        {hasUnsavedChanges && (
-          <span className="text-xs text-amber-600 font-medium bg-amber-50 px-2 py-1 rounded">
-            {t("websites_page.editor.unsaved_changes")}
-          </span>
-        )}
-      </div>
-
       <div className="grow overflow-hidden">
         <Puck
           key={storageKey}

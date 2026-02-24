@@ -1,10 +1,10 @@
 import { defineMiddleware } from "astro:middleware";
-import { getSupabaseClient } from "./lib/supabase-client";
-import { initI18n } from "./i18n/client";
+import { LRUCache } from "@/lib/server";
+import { getSupabaseClient } from "@/lib/server/supabase-client";
+import { initI18n } from "@/lib/i18n";
 
 import type { User } from "@supabase/supabase-js";
-import { browserLang } from "./utils";
-import { LRUCache } from "./lib/cache";
+import { browserLang } from "@/utils";
 
 // Initialize LRU Cache for domain resolution
 // Max 1000 domains, TTL 60 seconds

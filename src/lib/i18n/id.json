@@ -114,7 +114,10 @@
       "preview": "Pratinjau",
       "publish_success": "Berhasil diterbitkan",
       "save_error": "Gagal menyimpan halaman",
-      "page_not_found": "Halaman tidak ditemukan"
+      "page_not_found": "Halaman tidak ditemukan",
+      "saving": "Menyimpan...",
+      "publish": "Posting",
+      "publishing": "Menyimpan"
     },
     "preview": {
       "loading": "Memuat pratinjau...",

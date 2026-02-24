@@ -17,7 +17,7 @@ import Forms from "./pages/Forms";
 import Appearance from "./pages/Appearance";
 import Users from "./pages/Users";
 import Settings from "./pages/Settings";
-import { LanguageProvider } from "@/i18n/LanguageProvider";
+import { LanguageProvider } from "@/providers/LanguageProvider";
 
 export const Websites = ({ user }: { user: any }) => {
   // The Main Dashboard Layout (Sidebar + Content)

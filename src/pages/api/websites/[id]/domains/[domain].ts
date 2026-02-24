@@ -3,7 +3,7 @@ import {
   requireWebsite,
   requireAuth,
   APIError,
-} from "@/lib/server/api-handler";
+} from "@/lib/server";
 
 export const prerender = false;
 

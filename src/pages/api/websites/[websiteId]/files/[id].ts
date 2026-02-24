@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { s3Client, R2_BUCKET_NAME } from "@/lib/s3";
+import { s3Client, R2_BUCKET_NAME } from "@/lib/server/s3";
 import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 
 export const prerender = false;

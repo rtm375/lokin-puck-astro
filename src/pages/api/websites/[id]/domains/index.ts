@@ -1,9 +1,4 @@
-import {
-  apiHandler,
-  requireWebsite,
-  requireAuth,
-  APIError,
-} from "@/lib/server/api-handler";
+import { apiHandler, requireWebsite, requireAuth } from "@/lib/server";
 
 export const prerender = false;
 

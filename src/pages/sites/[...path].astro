@@ -1,9 +1,9 @@
 ---
 import { Render } from "@measured/puck";
-import { getConfig } from "@/lib/puck.config";
-import { generateCss } from "@/lib/css-engine";
-import { scriptRegistry } from "@/lib/script-registry";
-import { pageCache } from "@/lib/page-cache";
+import { getConfig } from "@/lib";
+import { generateCss } from "@/lib/server";
+import { scriptRegistry } from "@/lib";
+import { pageCache } from "@/lib/server";
 
 const { supabase, websiteId } = Astro.locals;
 const { path } = Astro.params;

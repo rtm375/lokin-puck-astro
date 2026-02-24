@@ -3,19 +3,11 @@ import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { format } from "date-fns";
-import { api } from "@/lib/api";
+import { api } from "@/lib/client";
 import { useWebsitesStore } from "@/stores/useWebsitesStore";
-import { useFileUpload } from "@/hooks/useFileUpload";
-
-interface FileItem {
-  id: number;
-  key: string;
-  url: string;
-  size: number;
-  created_at: string;
-  name: string;
-  type: string;
-}
+import { useFileUpload } from "@/utils/hooks";
+import { formatBytes } from "@/utils/formatters";
+import type { FileItem } from "@/types";
 
 export default function Files() {
   const { t } = useTranslation();
@@ -132,33 +124,25 @@ export default function Files() {
     if (!websiteId) return;
 
     try {
-      const res = await fetch(`/api/websites/${websiteId}/files`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ ids: Array.from(selectedFiles) }),
+      await api.delete(`/api/websites/${websiteId}/files`, {
+        data: { ids: Array.from(selectedFiles) },
       });
 
-      if (res.ok) {
-        // Remove deleted files from local state
-        setFiles((prev) => prev.filter((f) => !selectedFiles.has(f.id)));
+      // Remove deleted files from local state
+      setFiles((prev) => prev.filter((f) => !selectedFiles.has(f.id)));
 
-        // Update storage locally
-        const deletedFiles = files.filter((f) => selectedFiles.has(f.id));
-        const deletedSize = deletedFiles.reduce((acc, f) => acc + f.size, 0);
-        setStorageUsed((prev) => Math.max(0, prev - deletedSize));
+      // Update storage locally
+      const deletedFiles = files.filter((f) => selectedFiles.has(f.id));
+      const deletedSize = deletedFiles.reduce((acc, f) => acc + f.size, 0);
+      setStorageUsed((prev) => Math.max(0, prev - deletedSize));
 
-        setSelectedFiles(new Set());
+      setSelectedFiles(new Set());
 
-        // If page becomes empty, refresh or go to previous page
-        if (files.length === selectedFiles.size && currentPage > 1) {
-          setCurrentPage((prev) => prev - 1);
-        } else if (files.length === selectedFiles.size) {
-          fetchFiles(1);
-        }
-      } else {
-        alert("Failed to delete files");
+      // If page becomes empty, refresh or go to previous page
+      if (files.length === selectedFiles.size && currentPage > 1) {
+        setCurrentPage((prev) => prev - 1);
+      } else if (files.length === selectedFiles.size) {
+        fetchFiles(1);
       }
     } catch (error) {
       alert("Error deleting files");
@@ -169,15 +153,6 @@ export default function Files() {
     navigator.clipboard.writeText(url);
     // Could add a toast notification here
     alert("URL copied to clipboard!");
-  };
-
-  const formatBytes = (bytes: number, decimals = 2) => {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const dm = decimals < 0 ? 0 : decimals;
-    const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
   };
 
   const usagePercent = Math.min(100, (storageUsed / MAX_STORAGE) * 100);
@@ -223,7 +198,7 @@ export default function Files() {
               <Icon icon="mingcute:upload-2-fill" width={18} />
             )}
             {isUploading
-              ? "Uploading..."
+              ? `Uploading... ${Math.round(progress)}%`
               : t("websites_page.files.upload", "Upload Files")}
           </button>
         </div>

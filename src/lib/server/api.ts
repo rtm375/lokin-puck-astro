@@ -1,6 +1,6 @@
 import type { APIRoute, APIContext } from "astro";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { handleSupabaseError } from "@/pages/api/utils";
+import { handleSupabaseError } from "@/lib/server/db";
 
 export class APIError extends Error {
   constructor(

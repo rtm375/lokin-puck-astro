@@ -1,16 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import type { User } from "@supabase/supabase-js";
 import { useProfileStore } from "@stores/useProfileStore"; // Import store
-import { LanguageProvider } from "@/i18n/LanguageProvider";
+import { LanguageProvider } from "@/providers/LanguageProvider";
 
-interface UserSettingsProps {
-  currentLang?: string;
-}
+interface UserSettingsProps {}
 
-export default function UserSettings({
-  currentLang = "en",
-}: UserSettingsProps) {
+export default function UserSettings({}: UserSettingsProps) {
   const { profile, setProfile, fetchProfile } = useProfileStore();
 
   useEffect(() => {

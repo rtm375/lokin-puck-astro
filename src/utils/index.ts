@@ -1,30 +1,23 @@
-import { use } from "react";
+/**
+ * Barrel export for all utility functions
+ * This file provides a single entry point for importing utilities
+ * Usage: import { slugify, browserLang, formatBytes } from '@/utils'
+ */
 
-export function isActive(currentPath: string, target: string) {
-  return currentPath === target || currentPath.startsWith(target + "/");
-}
+// Browser utilities
+export { browserLang } from "./browserLang";
 
-export function slugify(text: string) {
-  return text
-    .toString()
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/[^\w\-]+/g, '')
-    .replace(/\-\-+/g, '-')
-    .replace(/^-+/, '')
-    .replace(/-+$/, '');
-};
+// Fetch helpers
+export { shouldFetch, fetchData } from "./fetchHelpers";
 
-export function browserLang(acceptLanguageHeader: string | null): string {
-  let userLanguage: string = "id";
+// Formatters
+export { formatBytes, formatSlug, truncate } from "./formatters";
 
-  if (acceptLanguageHeader) { // Checks if the value is not null and not empty (TypeScript handles null)
-    const preferredLanguage = acceptLanguageHeader.split(",")[0]?.trim();
+// Custom hooks
+export { useSelection, useFileUpload } from "./hooks";
 
-    if (preferredLanguage) {
-      userLanguage = preferredLanguage.split("-")[0].toLocaleLowerCase();
-    }
-  }
-  return userLanguage;
-}
+// Navigation utilities
+export { isActive } from "./isActive";
+
+// String utilities
+export { slugify } from "./slugify";

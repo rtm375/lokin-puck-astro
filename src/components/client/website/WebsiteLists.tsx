@@ -3,9 +3,8 @@ import { useTranslation } from "react-i18next";
 import { slugify } from "@utils";
 import { useProfileStore } from "@stores/useProfileStore";
 import { useWebsitesStore } from "@stores/useWebsitesStore";
-import type { Status, Website } from "@stores/useWebsitesStore";
-import { LanguageProvider } from "@/i18n/LanguageProvider";
-import { api } from "@/lib/api";
+import { LanguageProvider } from "@/providers/LanguageProvider";
+import { api } from "@/lib/client";
 
 export default function WebsitesList() {
   const { profile, fetchProfile } = useProfileStore();
@@ -14,7 +13,6 @@ export default function WebsitesList() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const currentLang = profile?.preferences?.language || "en";
   const tier = profile?.tier || "free";
 
   useEffect(() => {
@@ -26,19 +24,9 @@ export default function WebsitesList() {
     }
   }, [profile, fetchProfile, websites.length, fetchWebsites]);
 
-  const { t } = useTranslation();
-  const loaded = true; // react-i18next handles loading state internally or via Suspense, but for now we can assume loaded or check i18n.isInitialized if needed, but standard hook usage is enough.
-  // Actually, let's keep it simple. If we need loaded state, we can use ready from useTranslation
-  // const { t, ready } = useTranslation();
-  // But the original code used loaded to show a loading spinner.
-  // Let's check if we can just remove the loaded check or replace it.
-  // The original code: const { t, loaded } = useTranslation(currentLang);
-  // and: if (!profile || !loaded) { return ... }
-  // We can probably just rely on profile being loaded for now, or check i18n.isInitialized.
-  // Let's use ready from useTranslation if available, or just remove it if i18n is init in client.ts synchronously enough (it's async though).
-  // Let's use:
-  // const { t, i18n } = useTranslation();
-  // const loaded = i18n.isInitialized;
+  const { t, i18n } = useTranslation();
+  const loaded = i18n.isInitialized;
+
   // Form State
   const [formData, setFormData] = useState({
     name: "",

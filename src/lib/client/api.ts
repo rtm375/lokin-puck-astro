@@ -1,8 +1,6 @@
-import { handleSupabaseError } from "@/pages/api/utils";
+export type RequestMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
-type RequestMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-
-interface RequestOptions extends RequestInit {
+export interface RequestOptions extends RequestInit {
   data?: any;
 }
 
@@ -72,6 +70,56 @@ class ApiClient {
 
   patch<T>(endpoint: string, data?: any, options?: RequestOptions) {
     return this.request<T>(endpoint, "PATCH", { ...options, data });
+  }
+
+  /**
+   * Upload file using FormData
+   * @param endpoint - API endpoint
+   * @param formData - FormData object containing file(s)
+   * @param options - Additional request options
+   * @returns Promise with upload result
+   */
+  async uploadFile<T>(
+    endpoint: string,
+    formData: FormData,
+    options: RequestOptions = {},
+  ): Promise<T> {
+    const { headers, ...customConfig } = options;
+
+    const config: RequestInit = {
+      method: "POST",
+      headers: {
+        // Don't set Content-Type for FormData - browser will set it with boundary
+        ...headers,
+      },
+      body: formData,
+      ...customConfig,
+    };
+
+    try {
+      const response = await fetch(endpoint, config);
+
+      if (!response.ok) {
+        // Global Error Handling Trigger
+        if (
+          response.status === 401 ||
+          response.status === 403 ||
+          response.status === 404
+        ) {
+          window.dispatchEvent(new CustomEvent("app:reset"));
+          throw new Error("Unauthorized or Data Not Found");
+        }
+
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.error || `Upload failed with status ${response.status}`,
+        );
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
   }
 
   delete<T>(endpoint: string, options?: RequestOptions) {

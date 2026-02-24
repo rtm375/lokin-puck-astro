@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
-import { syncToKV } from "@/lib/cloudflare";
-import { handleSupabaseError } from "../utils";
+import { syncToKV } from "@/lib/server/cloudflare";
+import { handleSupabaseError } from "@/lib/server/db";
 export const prerender = false;
 
 export const GET: APIRoute = async ({ locals }) => {

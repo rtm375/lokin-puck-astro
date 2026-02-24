@@ -5,12 +5,13 @@ import type {
   Props,
   RootProps,
 } from "@components/client/website/pages/blocks/types";
-import { shouldFetch, fetchData } from "./utils/fetchHelpers";
+import { shouldFetch, fetchData } from "@/utils/fetchHelpers";
 
 interface EditorState {
   pages: Record<string, Data<Props, RootProps>>;
   isLoading: boolean;
   fetchingPageKey: string | null; // Track which page is being fetched
+  error: string | null;
   fetchEditorData: (
     websiteId: string,
     pagePath: string,
@@ -28,6 +29,7 @@ export const useEditorData = create<EditorState>()(
       pages: {},
       isLoading: false,
       fetchingPageKey: null,
+      error: null,
 
       fetchEditorData: async (
         websiteId: string,
@@ -111,6 +113,7 @@ export const useEditorData = create<EditorState>()(
           pages: {},
           isLoading: false,
           fetchingPageKey: null,
+          error: null,
         });
       },
     }),

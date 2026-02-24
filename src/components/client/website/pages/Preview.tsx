@@ -1,21 +1,52 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams, Link } from "react-router-dom";
 import { Render, type Data } from "@measured/puck";
-import { useConfig } from "@lib/puck.config";
+import { useConfig } from "@/lib";
 import { Icon } from "@iconify/react";
 import { useEditorData } from "@stores/useEditorData";
+import { useWebsitesStore } from "@/stores/useWebsitesStore";
+import { usePagesStore } from "@/stores/usePagesStore";
 import "@measured/puck/puck.css";
 
 export default function PuckPreview() {
   const config = useConfig();
   const { t } = useTranslation();
-  const { subdomain, pagePath } = useParams<{
+  const { subdomain: websiteSubdomain, pagePath } = useParams<{
     subdomain: string;
     pagePath: string;
   }>();
+
+  const {
+    websites,
+    fetchWebsites,
+    isLoading: websitesLoading,
+  } = useWebsitesStore();
+  const { pages, fetchPages, isLoading: pagesLoading } = usePagesStore();
   const { getPageData } = useEditorData();
-  const storageKey = `${subdomain}-${pagePath}`;
+
+  // Fetch websites on mount if empty
+  useEffect(() => {
+    if (websites.length === 0) {
+      fetchWebsites();
+    }
+  }, [websites.length, fetchWebsites]);
+
+  const currentWebsite = websites.find((w) => w.subdomain === websiteSubdomain);
+  const websiteId = currentWebsite?.id;
+
+  // Fetch pages when websiteId is available
+  useEffect(() => {
+    if (websiteId) {
+      fetchPages(websiteId);
+    }
+  }, [websiteId, fetchPages]);
+
+  const currentPage = pages.find((p) => p.path === pagePath);
+  const pageId = currentPage?.id;
+
+  // Match storage key with Editor.tsx: `${websiteSubdomain}-${pagePath}`
+  const storageKey = `${websiteSubdomain}-${pagePath}`;
 
   const [data, setData] = useState<Data | null>(null);
   const [source, setSource] = useState<"local" | "db" | null>(null);
@@ -23,7 +54,10 @@ export default function PuckPreview() {
 
   useEffect(() => {
     const loadPage = async () => {
-      if (!subdomain || !pagePath) return;
+      // Wait for IDs to be resolved
+      if (!websiteId || !pageId) {
+        return;
+      }
 
       // 1. Try Local Storage first (Real-time preview)
       const localData = getPageData(storageKey);
@@ -37,7 +71,7 @@ export default function PuckPreview() {
       // 2. Fallback to Database
       try {
         const res = await fetch(
-          `/api/websites/${subdomain}/pages/${pagePath}/editor-data`,
+          `/api/websites/${websiteId}/pages/${pageId}/editor-data`,
         );
         if (!res.ok) throw new Error("Failed to load page");
         const page = await res.json();
@@ -63,7 +97,33 @@ export default function PuckPreview() {
 
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
-  }, [subdomain, pagePath, getPageData, storageKey]);
+  }, [websiteId, pageId, getPageData, storageKey]);
+
+  const isResolving = websitesLoading || pagesLoading;
+
+  if (isResolving) {
+    return (
+      <div className="p-10 text-center">
+        {t("websites_page.preview.loading")}
+      </div>
+    );
+  }
+
+  if (!websiteId) {
+    return (
+      <div className="p-10 text-center">
+        {t("websites_page.preview.website_not_found")}
+      </div>
+    );
+  }
+
+  if (!pageId) {
+    return (
+      <div className="p-10 text-center">
+        {t("websites_page.preview.page_not_found")}
+      </div>
+    );
+  }
 
   if (isLoading)
     return (
@@ -84,7 +144,7 @@ export default function PuckPreview() {
       <div className="fixed top-0 left-0 right-0 z-50 h-14 bg-gray-900 text-white flex items-center justify-between px-4 shadow-md">
         <div className="flex items-center gap-3">
           <Link
-            to={`/admin/websites/${subdomain}/pages/${pagePath}/editor`}
+            to={`/admin/websites/${websiteSubdomain}/pages/${pagePath}/editor`}
             className="flex items-center gap-2 text-sm font-medium hover:text-gray-300 transition-colors"
           >
             <Icon icon="lucide:arrow-left" width={18} />
