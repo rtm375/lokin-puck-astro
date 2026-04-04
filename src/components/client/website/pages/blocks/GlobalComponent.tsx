@@ -1,5 +1,5 @@
-import type { ComponentConfig } from "@measured/puck";
-import { Render } from "@measured/puck";
+import type { ComponentConfig } from "@puckeditor/core";
+import { Render } from "@puckeditor/core";
 import { useComponentsStore } from "@/stores/useComponentsStore";
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";

@@ -1,5 +1,5 @@
 ---
-import { Render } from "@measured/puck";
+import { Render } from "@puckeditor/core";
 import { getConfig } from "@/lib";
 import { generateCss } from "@/lib/server";
 import { scriptRegistry } from "@/lib";
@@ -84,10 +84,14 @@ const contentHtml = renderToStaticMarkup(
     config: config,
     data: puckData,
     overrides: puckOverrides(
-      () => {},
-      (key: string) => key
+      () => {}, // handlePreview
+      () => {}, // handlePublish
+      (key: string) => key, // t
+      false, // hasUnsavedChanges
+      false, // isSaving
+      () => {}, // onBack
     ),
-  })
+  }),
 );
 
 const generatedCss = await generateCss(contentHtml);

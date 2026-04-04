@@ -20,6 +20,7 @@ interface PagesState {
     page?: number,
     force?: boolean,
   ) => Promise<void>;
+  fetchPageByPath: (websiteSubdomain: string, pagePath: string) => Promise<Page | null>;
   setPages: (pages: Page[]) => void;
   addPage: (page: Page) => void;
   updatePage: (page: Page) => void;
@@ -81,6 +82,21 @@ export const usePagesStore = create<PagesState>()(
           },
         );
         set({ isLoading: false, fetchingWebsiteId: null });
+      },
+      fetchPageByPath: async (websiteSubdomain, pagePath) => {
+        // Check if we already have it in the list to avoid a network call
+        const existing = get().pages.find(p => p.path === pagePath);
+        if (existing) return existing;
+
+        try {
+          // Calling a specific endpoint that finds a page via slugs
+          const res = await fetch(`/api/websites/by-subdomain/${websiteSubdomain}/pages/by-path?path=${pagePath}`);
+          if (!res.ok) return null;
+          const data = await res.json();
+          return data; // Returns the single Page object
+        } catch (err) {
+          return null;
+        }
       },
       addPage: (page) => set((state) => ({ pages: [page, ...state.pages] })),
       updatePage: (page) =>

@@ -1,142 +1,77 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams, Link } from "react-router-dom";
-import { Render, type Data } from "@measured/puck";
+import { Render, type Data } from "@puckeditor/core";
 import { useConfig } from "@/lib";
 import { Icon } from "@iconify/react";
 import { useEditorData } from "@stores/useEditorData";
-import { useWebsitesStore } from "@/stores/useWebsitesStore";
 import { usePagesStore } from "@/stores/usePagesStore";
-import "@measured/puck/puck.css";
+import "@puckeditor/core/puck.css";
 
 export default function PuckPreview() {
   const config = useConfig();
   const { t } = useTranslation();
-  const { subdomain: websiteSubdomain, pagePath } = useParams<{
-    subdomain: string;
-    pagePath: string;
-  }>();
+  const { subdomain, pagePath } = useParams<{ subdomain: string; pagePath: string }>();
 
-  const {
-    websites,
-    fetchWebsites,
-    isLoading: websitesLoading,
-  } = useWebsitesStore();
-  const { pages, fetchPages, isLoading: pagesLoading } = usePagesStore();
-  const { getPageData } = useEditorData();
+  const { fetchPageByPath } = usePagesStore();
+  const storageKey = `${subdomain}-${pagePath}`;
 
-  // Fetch websites on mount if empty
-  useEffect(() => {
-    if (websites.length === 0) {
-      fetchWebsites();
-    }
-  }, [websites.length, fetchWebsites]);
-
-  const currentWebsite = websites.find((w) => w.subdomain === websiteSubdomain);
-  const websiteId = currentWebsite?.id;
-
-  // Fetch pages when websiteId is available
-  useEffect(() => {
-    if (websiteId) {
-      fetchPages(websiteId);
-    }
-  }, [websiteId, fetchPages]);
-
-  const currentPage = pages.find((p) => p.path === pagePath);
-  const pageId = currentPage?.id;
-
-  // Match storage key with Editor.tsx: `${websiteSubdomain}-${pagePath}`
-  const storageKey = `${websiteSubdomain}-${pagePath}`;
-
-  const [data, setData] = useState<Data | null>(null);
-  const [source, setSource] = useState<"local" | "db" | null>(null);
+  // 1. Get data reactively from the store
+  const localData = useEditorData((s) => s.pages[storageKey]);
+  const [dbData, setDbData] = useState<Data | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // 2. Synchronize across tabs using storage event
   useEffect(() => {
-    const loadPage = async () => {
-      // Wait for IDs to be resolved
-      if (!websiteId || !pageId) {
-        return;
-      }
-
-      // 1. Try Local Storage first (Real-time preview)
-      const localData = getPageData(storageKey);
-      if (localData) {
-        setData(localData);
-        setSource("local");
-        setIsLoading(false);
-        return;
-      }
-
-      // 2. Fallback to Database
-      try {
-        const res = await fetch(
-          `/api/websites/${websiteId}/pages/${pageId}/editor-data`,
-        );
-        if (!res.ok) throw new Error("Failed to load page");
-        const page = await res.json();
-        setData(page.data);
-        setSource("db");
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadPage();
-
-    // Optional: Listen for storage events to update preview in real-time if user has two windows open side-by-side
-    const handleStorageChange = () => {
-      const newData = getPageData(storageKey);
-      if (newData) {
-        setData(newData);
-        setSource("local");
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "editor-data") {
+        // Force Zustand to rehydrate from localStorage
+        useEditorData.persist.rehydrate();
       }
     };
 
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
-  }, [websiteId, pageId, getPageData, storageKey]);
+  }, []);
 
-  const isResolving = websitesLoading || pagesLoading;
+  // 3. Load DB data if not in local storage
+  useEffect(() => {
+    const loadFromDb = async () => {
+      if (localData) {
+        setIsLoading(false);
+        return;
+      }
 
-  if (isResolving) {
-    return (
-      <div className="p-10 text-center">
-        {t("websites_page.preview.loading")}
-      </div>
-    );
-  }
+      setIsLoading(true);
+      try {
+        const page = await fetchPageByPath(subdomain!, pagePath!);
+        if (page?.id) {
+          const res = await fetch(
+            `/api/websites/${page.website_id}/pages/${page.id}/editor-data`
+          );
+          const editorJson = await res.json();
+          setDbData(editorJson.data);
+        }
+      } catch (error) {
+        console.error("Failed to load preview data", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  if (!websiteId) {
-    return (
-      <div className="p-10 text-center">
-        {t("websites_page.preview.website_not_found")}
-      </div>
-    );
-  }
+    loadFromDb();
+  }, [subdomain, pagePath, localData, fetchPageByPath]);
 
-  if (!pageId) {
-    return (
-      <div className="p-10 text-center">
-        {t("websites_page.preview.page_not_found")}
-      </div>
-    );
-  }
+  // Priority: Local Draft > DB Data
+  const data = localData || dbData;
+  const source = localData ? "local" : "db";
 
-  if (isLoading)
-    return (
-      <div className="p-10 text-center">
-        {t("websites_page.preview.loading")}
-      </div>
-    );
-  if (!data)
-    return (
-      <div className="p-10 text-center">
-        {t("websites_page.preview.not_found")}
-      </div>
-    );
+  if (isLoading) return <div className="p-10 text-center">
+    {t("websites_page.preview.loading")}
+  </div>;
+  if (!data) return <div className="p-10 text-center">
+    {t("websites_page.preview.not_found")}
+  </div>;
 
   return (
     <div className="min-h-screen bg-white">
@@ -144,7 +79,7 @@ export default function PuckPreview() {
       <div className="fixed top-0 left-0 right-0 z-50 h-14 bg-gray-900 text-white flex items-center justify-between px-4 shadow-md">
         <div className="flex items-center gap-3">
           <Link
-            to={`/admin/websites/${websiteSubdomain}/pages/${pagePath}/editor`}
+            to={`/admin/websites/${subdomain}/pages/${pagePath}/editor`}
             className="flex items-center gap-2 text-sm font-medium hover:text-gray-300 transition-colors"
           >
             <Icon icon="lucide:arrow-left" width={18} />

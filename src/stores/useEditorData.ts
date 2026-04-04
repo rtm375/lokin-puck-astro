@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import type { Data } from "@measured/puck";
+import type { Data } from "@puckeditor/core";
 import type {
   Props,
   RootProps,

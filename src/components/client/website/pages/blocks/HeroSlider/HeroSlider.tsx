@@ -1,4 +1,4 @@
-import type { ComponentConfig } from "@measured/puck";
+import type { ComponentConfig } from "@puckeditor/core";
 import type { Props } from "@blockTypes";
 
 export const HeroSlider: ComponentConfig<Props["HeroSlider"]> = {

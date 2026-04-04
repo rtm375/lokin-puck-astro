@@ -214,27 +214,51 @@
   "editor": {
     "blocks": {
       "flex": {
+        "min_height": {
+          "title": "Min Height",
+          "1/3": "1/3",
+          "2/3": "2/3",
+          "full": "Full",
+          "default": "Default"
+        },
+        "width": {
+          "title": "Width",
+          "full": "Full",
+          "default": "Default"
+        },
         "title": "Flex",
         "direction": {
           "title": "Direction",
           "row": "Row",
-          "column": "Column"
+          "column": "Column",
+          "row_reverse": "Row Reverse",
+          "column_reverse": "Column Reverse"
         },
         "justify_content": {
           "title": "Justify Content",
+          "normal": "Normal",
           "start": "Start",
           "center": "Center",
           "end": "End",
-          "stretch": "Stretch"
+          "stretch": "Stretch",
+          "between": "Space Between",
+          "around": "Space Around",
+          "evenly": "Space Evenly"
         },
         "align": {
-          "title": "Align"
+          "title": "Align Items",
+          "start": "Start",
+          "center": "Center",
+          "end": "End",
+          "baseline": "Baseline",
+          "stretch": "Stretch"
         },
-        "gap": "Gap",
+        "gaps": "Gaps",
         "wrap": {
           "title": "Wrap",
           "wrap": "Wrap",
-          "nowrap": "No Wrap"
+          "nowrap": "No Wrap",
+          "wrap_reverse": "Wrap Reverse"
         }
       },
       "items": {

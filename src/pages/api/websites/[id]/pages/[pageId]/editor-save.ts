@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { type Data } from "@measured/puck";
+import { type Data } from "@puckeditor/core";
 
 export const prerender = false;
 

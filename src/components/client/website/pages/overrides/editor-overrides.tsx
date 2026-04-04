@@ -1,7 +1,94 @@
 import React from "react";
 import { Icon } from "@iconify/react";
-import { createUsePuck } from "@measured/puck";
-const usePuck = createUsePuck();
+import { createUsePuck } from "@puckeditor/core";
+export const usePuck = createUsePuck();
+
+const IframeWrapper = ({ children, document }: any) => {
+  React.useEffect(() => {
+    if (!document) return;
+
+    const head = document.head;
+    if (!head) return;
+
+    if (!head.querySelector("#preview-frame-uno")) {
+      const configScript = document.createElement("script");
+      configScript.id = "preview-frame-uno-config";
+      configScript.innerHTML = `
+        window.__unocss = {
+          theme: {
+            colors: {
+              primary: "#f3602a",
+            },
+            font: {
+              lineHeight: "1",
+            }
+          }
+        };
+      `;
+      head.appendChild(configScript);
+
+      const script = document.createElement("script");
+      script.id = "preview-frame-uno";
+      script.src = "https://cdn.jsdelivr.net/npm/@unocss/runtime";
+      head.appendChild(script);
+    }
+
+    const cleanupStyles = () => {
+      head
+        .querySelectorAll('style[data-vite-dev-id*="__uno.css"]')
+        .forEach((el: Element) => el.remove());
+
+      head.querySelectorAll("style").forEach((el: Element) => {
+        if (el.innerHTML.includes("astro-island,astro-slot")) {
+          el.remove();
+        }
+      });
+    };
+
+    cleanupStyles();
+
+    const observer = new MutationObserver(cleanupStyles);
+    observer.observe(head, { childList: true });
+
+    return () => observer.disconnect();
+  }, [document]);
+
+  return children;
+};
+
+// Custom wrapper to track selection and switch left sidebar tabs automatically
+const PluginAutoSwitcher = ({ children }: { children: React.ReactNode }) => {
+  const selectedItem = usePuck((s) => s.appState.ui.itemSelector);
+  const dispatch = usePuck((s) => s.dispatch);
+
+  // Stringify the selection to ensure stable equality checks across renders
+  const selectedItemKey = selectedItem
+    ? `${selectedItem.zone}:${selectedItem.index}`
+    : null;
+
+  const prevSelectedRef = React.useRef(selectedItemKey);
+
+  React.useEffect(() => {
+    if (selectedItemKey !== prevSelectedRef.current) {
+      if (selectedItemKey) {
+        // Auto-switch to Fields (settings) when an item is selected
+        dispatch({
+          type: "setUi",
+          ui: { leftSideBarVisible: true, plugin: { current: "fields" } },
+        });
+      } else {
+        // Auto-switch back to Blocks when selection is cleared
+        dispatch({
+          type: "setUi",
+          ui: { leftSideBarVisible: true, plugin: { current: "blocks" } },
+        });
+      }
+      prevSelectedRef.current = selectedItemKey;
+    }
+  }, [selectedItemKey, dispatch]);
+
+  return <>{children}</>;
+};
 
 // Factory function that returns Puck overrides
 // This can be used in both client (with useMemo) and server (direct call)
@@ -13,48 +100,8 @@ export const puckOverrides = (
   isSaving: boolean,
   onBack: () => void,
 ) => ({
-  // iframe: ({ children, document }: any) => {
-  //   useEffect(() => {
-  //     if (!document) return;
-
-  //     const head = document.head;
-  //     if (!head) return;
-
-  //     if (!head.querySelector("base")) {
-  //       const base = document.createElement("base");
-  //       base.href = window.location.origin;
-  //       head.prepend(base);
-  //     }
-
-  //     if (!head.querySelector("#preview-frame-uno")) {
-  //       const script = document.createElement("script");
-  //       script.id = "preview-frame-uno";
-  //       script.src = "https://cdn.jsdelivr.net/npm/@unocss/runtime";
-  //       head.appendChild(script);
-  //     }
-
-  //     const cleanupStyles = () => {
-  //       head
-  //         .querySelectorAll('style[data-vite-dev-id*="__uno.css"]')
-  //         .forEach((el: any) => el.remove());
-
-  //       head.querySelectorAll("style").forEach((el: any) => {
-  //         if (el.innerHTML.includes("astro-island,astro-slot")) {
-  //           el.remove();
-  //         }
-  //       });
-  //     };
-
-  //     cleanupStyles();
-
-  //     const observer = new MutationObserver(cleanupStyles);
-  //     observer.observe(head, { childList: true });
-
-  //     return () => observer.disconnect();
-  //   }, [document]);
-
-  //   return <>{children}</>;
-  // },
+  puck: PluginAutoSwitcher,
+  iframe: IframeWrapper,
   header: ({ actions }: any) => {
     return (
       <div className="bg-white border-b border-gray-200 px-4 h-12 flex items-center justify-between shrink-0 z-10 w-screen">

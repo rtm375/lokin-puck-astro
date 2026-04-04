@@ -6,3 +6,78 @@
   --color-primary: #f3602a;
   --text-sm--line-height: 1;
 } */
+
+:root {
+  /* PRIMARY BRAND SCALE (Mapped to Azure) */
+  /* Based on #f3602a */
+  --puck-color-azure-01: #2d0f05;
+  --puck-color-azure-02: #4a1808;
+  --puck-color-azure-03: #6e240c;
+  --puck-color-azure-04: #983210;
+  --puck-color-azure-05: #c74116;
+  --puck-color-azure-06: #f3602a;
+  /* Your Brand Primary */
+  --puck-color-azure-07: #f58055;
+  --puck-color-azure-08: #f8a07f;
+  --puck-color-azure-09: #fac0aa;
+  --puck-color-azure-10: #fde0d4;
+  --puck-color-azure-11: #fef0e9;
+  --puck-color-azure-12: #fffaf8;
+
+  /* NEUTRAL INTERFACE SCALE (Mapped to Grey) */
+  /* Using a clean Slate tone for a premium SaaS look */
+  --puck-color-grey-01: #1a1a1a;
+  /* Near Black */
+  --puck-color-grey-02: #262626;
+  --puck-color-grey-03: #333333;
+  /* Your Base Anchor */
+  --puck-color-grey-04: #4d4d4d;
+  --puck-color-grey-05: #666666;
+  --puck-color-grey-06: #808080;
+  /* Mid-tone */
+  --puck-color-grey-07: #999999;
+  --puck-color-grey-08: #b3b3b3;
+  --puck-color-grey-09: #cccccc;
+  --puck-color-grey-10: #e5e5e5;
+  /* Light border */
+  --puck-color-grey-11: #f2f2f2;
+  /* Soft background */
+  --puck-color-grey-12: #fafafa;
+  /* Ghost background */
+
+  /* SUCCESS SCALE (Mapped to Green) */
+  --puck-color-green-01: #052e16;
+  --puck-color-green-06: #16a34a;
+  --puck-color-green-10: #dcfce7;
+
+  /* ERROR/DESTRUCTIVE SCALE (Mapped to Red) */
+  --puck-color-red-01: #450a0a;
+  --puck-color-red-06: #dc2626;
+  --puck-color-red-10: #fee2e2;
+
+  /* SECONDARY ACCENT (Mapped to Rose) */
+  /* Using a soft Indigo to complement the Orange primary */
+  --puck-color-rose-01: #1e1b4b;
+  --puck-color-rose-06: #4f46e5;
+  --puck-color-rose-10: #e0e7ff;
+
+  /* WARNING SCALE (Mapped to Yellow) */
+  --puck-color-yellow-01: #422006;
+  --puck-color-yellow-06: #ca8a04;
+  --puck-color-yellow-10: #fef9c3;
+
+  --puck-color-black: #020617;
+  --puck-color-white: #ffffff;
+}
+
+[class^="_PuckFields-field"] {
+  margin-top: 0 !important;
+}
+
+[class^="_PuckFields-field"] {
+  padding: 15px !important;
+}
+
+[un-cloak] {
+  display: none;
+}

@@ -1,140 +1,169 @@
-import type { ComponentConfig } from "@measured/puck";
+import type { ComponentConfig } from "@puckeditor/core";
 import type { Props } from "@blockTypes";
+import {
+  ResponsiveOptionButtonGroup,
+  ResponsiveGapControl,
+  getResponsiveCSS,
+  tailwindToCSS,
+} from "../shared/ResponsiveControls";
 
 export const createFlexConfig = (
   t: (key: string) => string,
 ): ComponentConfig<Props["Flex"]> => ({
   label: t("editor.blocks.flex.title"),
   fields: {
-    minHeight: {
-      label: t("editor.blocks.flex.min_height.title"),
-      type: "select",
-      options: [
-        { label: "1/3 screen", value: "min-h-1/3" },
-        { label: "2/3 screen", value: "min-h-2/3" },
-        { label: "Full screen", value: "min-h-screen" },
-        { label: "Default", value: "min-h-20" },
-      ],
-    },
-    width: {
-      label: t("editor.blocks.flex.width.title"),
-      type: "select",
-      options: [
-        { label: "1/3 screen", value: "w-1/3" },
-        { label: "2/3 screen", value: "w-2/3" },
-        { label: "Full screen", value: "w-full" },
-      ],
-    },
     direction: {
       label: t("editor.blocks.flex.direction.title"),
-      type: "radio",
-      options: [
-        { label: t("editor.blocks.flex.direction.row"), value: "flex-row" },
-        { label: t("editor.blocks.flex.direction.column"), value: "flex-col" },
-      ],
+      type: "custom",
+      render: ({ field, value, onChange }) => (
+        <ResponsiveOptionButtonGroup
+          label={field.label || ""}
+          value={value}
+          onChange={onChange}
+          defaultValue="flex-row"
+          options={[
+            {
+              label: t("editor.blocks.flex.direction.row"),
+              value: "flex-row",
+              icon: "material-symbols-light:arrow-right-alt-rounded",
+            },
+            {
+              label: t("editor.blocks.flex.direction.column"),
+              value: "flex-col",
+              icon: "material-symbols-light:arrow-downward-rounded",
+            },
+            {
+              label: t("editor.blocks.flex.direction.row_reverse"),
+              value: "flex-row-reverse",
+              icon: "material-symbols-light:arrow-left-alt-rounded",
+            },
+            {
+              label: t("editor.blocks.flex.direction.column_reverse"),
+              value: "flex-col-reverse",
+              icon: "material-symbols-light:arrow-upward-rounded",
+            },
+          ]}
+        />
+      ),
     },
     justifyContent: {
       label: t("editor.blocks.flex.justify_content.title"),
-      type: "radio",
-      options: [
-        {
-          label: t("editor.blocks.flex.justify_content.start"),
-          value: "justify-start",
-        },
-        {
-          label: t("editor.blocks.flex.justify_content.center"),
-          value: "justify-center",
-        },
-        {
-          label: t("editor.blocks.flex.justify_content.end"),
-          value: "justify-end",
-        },
-        {
-          label: t("editor.blocks.flex.justify_content.stretch"),
-          value: "justify-stretch",
-        },
-      ],
+      type: "custom",
+      render: ({ field, value, onChange }) => (
+        <ResponsiveOptionButtonGroup
+          label={field.label || ""}
+          value={value}
+          onChange={onChange}
+          controlType="justify"
+          directionData={(field as any).directionData}
+          options={[
+            {
+              label: t("editor.blocks.flex.justify_content.start"),
+              value: "justify-start",
+              icon: "material-symbols-light:align-justify-flex-start",
+            },
+            {
+              label: t("editor.blocks.flex.justify_content.center"),
+              value: "justify-center",
+              icon: "material-symbols-light:align-justify-center",
+            },
+            {
+              label: t("editor.blocks.flex.justify_content.end"),
+              value: "justify-end",
+              icon: "material-symbols-light:align-justify-flex-end",
+            },
+            {
+              label: t("editor.blocks.flex.justify_content.between"),
+              value: "justify-between",
+              icon: "material-symbols-light:align-justify-space-between",
+            },
+            {
+              label: t("editor.blocks.flex.justify_content.around"),
+              value: "justify-around",
+              icon: "material-symbols-light:align-justify-space-around",
+            },
+            {
+              label: t("editor.blocks.flex.justify_content.evenly"),
+              value: "justify-evenly",
+              icon: "material-symbols-light:align-justify-space-even",
+            },
+          ]}
+        />
+      ),
     },
-    gap: {
-      label: t("editor.blocks.flex.gap"),
-      type: "select",
-      options: [
-        { label: "None", value: "gap-0" },
-        { label: "Small", value: "gap-2" },
-        { label: "Medium", value: "gap-6" },
-        { label: "Large", value: "gap-10" },
-        { label: "Extra Large", value: "gap-14" },
-        { label: "Custom", value: "custom" },
-      ],
+    alignItems: {
+      label: t("editor.blocks.flex.align.title"),
+      type: "custom",
+      render: ({ field, value, onChange }) => (
+        <ResponsiveOptionButtonGroup
+          label={field.label || ""}
+          value={value}
+          onChange={onChange}
+          controlType="align"
+          directionData={(field as any).directionData}
+          options={[
+            {
+              label: t("editor.blocks.flex.align.start"),
+              value: "items-start",
+              icon: "material-symbols-light:align-vertical-top",
+            },
+            {
+              label: t("editor.blocks.flex.align.center"),
+              value: "items-center",
+              icon: "material-symbols-light:align-vertical-center",
+            },
+            {
+              label: t("editor.blocks.flex.align.end"),
+              value: "items-end",
+              icon: "material-symbols-light:align-vertical-bottom",
+            },
+            {
+              label: t("editor.blocks.flex.align.stretch"),
+              value: "items-stretch",
+              icon: "material-symbols-light:align-stretch",
+            },
+          ]}
+        />
+      ),
     },
-    gapCustom: {
-      label: t("editor.blocks.flex.gap_custom"),
-      type: "number",
-      min: 0,
-      max: 100,
+    gaps: {
+      label: t("editor.blocks.flex.gaps"),
+      type: "custom",
+      render: ({ field, value, onChange }) => (
+        <ResponsiveGapControl
+          label={field.label || ""}
+          value={value}
+          onChange={onChange}
+        />
+      ),
     },
     wrap: {
       label: t("editor.blocks.flex.wrap.title"),
-      type: "radio",
-      options: [
-        { label: t("editor.blocks.flex.wrap.wrap"), value: "wrap" },
-        { label: t("editor.blocks.flex.wrap.nowrap"), value: "nowrap" },
-      ],
-    },
-    spacing: {
-      type: "object",
-      objectFields: {
-        top: {
-          type: "select",
-          options: [
+      type: "custom",
+      render: ({ field, value, onChange }) => (
+        <ResponsiveOptionButtonGroup
+          label={field.label || ""}
+          value={value}
+          onChange={onChange}
+          options={[
             {
-              label: "Extra small",
-              value: "pt-2",
+              label: t("editor.blocks.flex.wrap.wrap"),
+              value: "flex-wrap",
+              icon: "lucide:wrap-text",
             },
             {
-              label: "Small",
-              value: "pt-4",
+              label: t("editor.blocks.flex.wrap.nowrap"),
+              value: "flex-nowrap",
+              icon: "lucide:arrow-right",
             },
             {
-              label: "Medium",
-              value: "pt-6",
+              label: t("editor.blocks.flex.wrap.wrap_reverse"),
+              value: "flex-wrap-reverse",
+              icon: "lucide:undo-2",
             },
-            {
-              label: "Large",
-              value: "pt-8",
-            },
-            {
-              label: "Extra Large",
-              value: "pt-10",
-            },
-          ],
-        },
-        bottom: {
-          type: "select",
-          options: [
-            {
-              label: "Extra small",
-              value: "pb-2",
-            },
-            {
-              label: "Small",
-              value: "pb-4",
-            },
-            {
-              label: "Medium",
-              value: "pb-6",
-            },
-            {
-              label: "Large",
-              value: "pb-8",
-            },
-            {
-              label: "Extra Large",
-              value: "pb-10",
-            },
-          ],
-        },
-      },
+          ]}
+        />
+      ),
     },
     items: {
       label: t("editor.blocks.items.title"),
@@ -142,54 +171,136 @@ export const createFlexConfig = (
     },
   },
   resolveFields: async (data, { fields }) => {
-    if (data.props.gap !== "custom") {
-      return {
-        ...fields,
-        gapCustom: undefined,
-      };
-    }
-    return fields;
+    let newFields = { ...fields };
+
+    const direction = data.props.direction || {};
+    const directionKey = JSON.stringify(direction);
+
+    newFields.justifyContent = {
+      ...newFields.justifyContent,
+      type: "custom",
+      key: `justify-${directionKey}`,
+      directionData: direction,
+    } as any;
+
+    newFields.alignItems = {
+      ...newFields.alignItems,
+      type: "custom",
+      key: `align-${directionKey}`,
+      directionData: direction,
+    } as any;
+
+    return newFields;
   },
   resolveData: async ({ props }) => {
-    if (props.gap !== "custom") {
-      return {
-        props: {
-          gapCustom: 0,
-        },
+    let newProps = { ...props };
+    // Migrate from the old string-based "gap" and "gapCustom"
+    if (typeof newProps.gaps === "string" || !newProps.gaps || typeof newProps.gaps !== "object") {
+      const oldGapVal: string = typeof newProps.gaps === "string" ? newProps.gaps : "gap-0";
+      newProps.gaps = {
+        row: { mobile: oldGapVal === "custom" ? "custom" : oldGapVal },
+        column: { mobile: oldGapVal === "custom" ? "custom" : oldGapVal },
+        rowCustom: oldGapVal === "custom" ? { mobile: (newProps as any).gapCustom || 0 } : {},
+        columnCustom: oldGapVal === "custom" ? { mobile: (newProps as any).gapCustom || 0 } : {},
+        lock: true
       };
+      if ("gapCustom" in newProps) {
+        delete (newProps as any).gapCustom;
+      }
     }
-    return { props };
+    return { props: newProps };
   },
   defaultProps: {
-    minHeight: "h-20",
-    width: "w-full",
-    justifyContent: "justify-start",
-    direction: "flex-row",
-    gap: "gap-24",
-    gapCustom: 0,
-    wrap: "wrap",
-    items: [],
-    spacing: {
-      top: "pt-2",
-      bottom: "pb-2",
+    justifyContent: {
+      mobile: "justify-start",
     },
+    alignItems: {
+      mobile: "items-stretch",
+    },
+    direction: {
+      mobile: "flex-col",
+      tablet: "flex-col",
+      laptop: "flex-row",
+      desktop: "flex-row",
+    },
+    gaps: {
+      row: { mobile: "gap-24" },
+      column: { mobile: "gap-24" },
+      lock: true
+    },
+    wrap: {
+      mobile: "flex-wrap",
+    },
+    items: []
   },
   render: ({
-    minHeight,
-    width,
     justifyContent,
+    alignItems,
     direction,
-    gap,
-    gapCustom,
+    gaps,
     wrap,
     items: Items,
-    spacing,
   }) => {
+    const { style: styleVars, className: stableClasses } = getResponsiveCSS([
+      {
+        property: "flex-direction",
+        prefix: "f-dir",
+        responsiveValue: direction,
+        formatter: (v) => tailwindToCSS("direction", v),
+      },
+      {
+        property: "justify-content",
+        prefix: "f-jus",
+        responsiveValue: justifyContent,
+        formatter: (v) => tailwindToCSS("justify", v),
+      },
+      {
+        property: "align-items",
+        prefix: "f-ali",
+        responsiveValue: alignItems,
+        formatter: (v) => tailwindToCSS("align", v),
+      },
+      {
+        property: "flex-wrap",
+        prefix: "f-wrp",
+        responsiveValue: wrap,
+        formatter: (v) => tailwindToCSS("wrap", v),
+      },
+      {
+        property: "row-gap",
+        prefix: "f-rgap",
+        resolver: (bp) => {
+          const val = gaps?.row?.[bp];
+          if (!val) return null;
+          if (val === "custom")
+            return `${gaps?.rowCustom?.[bp] ?? 0}${gaps?.unit?.[bp] ?? "px"}`;
+          const match = val.match(/gap-(\d+)/);
+          return match ? `${parseInt(match[1]) * 0.25}rem` : "0px";
+        },
+      },
+      {
+        property: "column-gap",
+        prefix: "f-cgap",
+        resolver: (bp) => {
+          const val = gaps?.column?.[bp];
+          if (!val) return null;
+          if (val === "custom")
+            return `${gaps?.columnCustom?.[bp] ?? 0}${gaps?.unit?.[bp] ?? "px"}`;
+          const match = val.match(/gap-(\d+)/);
+          return match ? `${parseInt(match[1]) * 0.25}rem` : "0px";
+        },
+      },
+    ]);
+
     return (
-      <Items
-        className={`flex ${justifyContent} ${direction} ${gap === "custom" ? `gap-${gapCustom}` : gap} ${wrap} ${spacing.top} ${spacing.bottom} ${minHeight} ${width}`}
-        disallow={["Hero", "Stats"]}
-      />
+      <div className={`flex flex-col`}>
+        <Items
+          style={styleVars}
+          className={`flex w-full ${stableClasses}`}
+          disallow={["Hero", "Stats"]}
+        />
+      </div>
     );
   },
 });
+

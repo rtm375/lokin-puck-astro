@@ -209,23 +209,35 @@
         "direction": {
           "title": "Arah",
           "row": "Baris",
-          "column": "Kolom"
+          "column": "Kolom",
+          "row_reverse": "Baris Terbalik",
+          "column_reverse": "Kolom Terbalik"
         },
         "justify_content": {
           "title": "Perataan Konten",
+          "normal": "Normal",
           "start": "Awal",
           "center": "Tengah",
           "end": "Akhir",
-          "stretch": "Rentang"
+          "stretch": "Rentang",
+          "between": "Bagi Rata (Antara)",
+          "around": "Bagi Rata (Sekitar)",
+          "evenly": "Bagi Rata (Sama)"
         },
         "align": {
-          "title": "Perataan"
+          "title": "Perataan Item",
+          "start": "Awal",
+          "center": "Tengah",
+          "end": "Akhir",
+          "baseline": "Garis Dasar",
+          "stretch": "Rentang"
         },
         "gap": "Jarak",
         "wrap": {
           "title": "Pecah Baris",
           "wrap": "Pecah",
-          "nowrap": "Tidak Pecah"
+          "nowrap": "Tidak Pecah",
+          "wrap_reverse": "Pecah Terbalik"
         }
       },
       "items": {
