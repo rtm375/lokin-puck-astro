@@ -12,9 +12,7 @@ import {
 } from "@components/client/website/pages/blocks";
 import { GlobalComponent } from "@components/client/website/pages/blocks/GlobalComponent";
 import { useComponentsStore } from "@/stores/useComponentsStore";
-import { useEffect, useMemo } from "react";
-import * as ReactRouterDOM from "react-router-dom";
-const { useParams } = ReactRouterDOM;
+import { useMemo } from "react";
 
 // Hook-based config for use in React components (editor UI)
 // Pure config function for SSR and internal use
@@ -25,6 +23,20 @@ export const getConfig = (
   return {
     root: {
       fields: {},
+      render: ({ children }) => {
+        return <div style={{ minHeight: "100vh" }}>{children}</div>;
+      },
+    },
+    categories: {
+      typography: {
+        components: ["Text", "GlobalComponent"],
+      },
+      layout: {
+        components: ["Flex"],
+      },
+      hero: {
+        components: ["Hero", "HeroSlider"],
+      },
     },
     components: {
       Text,

@@ -259,7 +259,9 @@
           "wrap": "Wrap",
           "nowrap": "No Wrap",
           "wrap_reverse": "Wrap Reverse"
-        }
+        },
+        "margin": "Margin",
+        "padding": "Padding"
       },
       "items": {
         "title": "Items"

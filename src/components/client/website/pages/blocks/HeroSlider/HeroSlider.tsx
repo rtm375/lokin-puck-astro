@@ -1,7 +1,9 @@
 import type { ComponentConfig } from "@puckeditor/core";
 import type { Props } from "@blockTypes";
 
-export const HeroSlider: ComponentConfig<Props["HeroSlider"]> = {
+export const HeroSlider: ComponentConfig<Props["HeroSlider"]> & { icon?: string } = {
+  label: "Hero Slider",
+  icon: "lucide:layers",
   fields: {
     slides: {
       type: "array",

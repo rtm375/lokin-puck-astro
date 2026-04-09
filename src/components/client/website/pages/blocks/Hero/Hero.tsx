@@ -5,7 +5,9 @@ import {
   getResponsiveClasses,
 } from "../shared/ResponsiveControls";
 
-export const Hero: ComponentConfig<Props["Hero"]> = {
+export const Hero: ComponentConfig<Props["Hero"]> & { icon?: string } = {
+  label: "Hero",
+  icon: "lucide:image",
   fields: {
     title: { type: "text" },
     bgImage: { type: "text" },

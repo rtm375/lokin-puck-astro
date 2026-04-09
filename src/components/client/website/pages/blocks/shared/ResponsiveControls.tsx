@@ -7,10 +7,88 @@ import {
   type BreakpointKey,
 } from "../../config/viewports";
 import type { ResponsiveValue } from "@blockTypes";
-
 import { useState } from "react";
 
 const usePuck = createUsePuck();
+
+export const ViewportSelector = () => {
+  const viewports = usePuck((s) => s.appState.ui.viewports);
+  const dispatch = usePuck((s) => s.dispatch);
+  const [open, setOpen] = useState(false);
+
+  const activeViewport = PUCK_VIEWPORTS.find(
+    (bp) => bp.width === viewports.current.width
+  );
+
+  const handleViewportChange = (bp: any) => {
+    dispatch({
+      type: "setUi",
+      ui: {
+        viewports: {
+          ...viewports,
+          current: {
+            width: bp.width,
+            height: "auto",
+          },
+        },
+      },
+    });
+    setOpen(false);
+  };
+
+  return (
+    <div className="relative flex">
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          setOpen((s) => !s);
+        }}
+        className="flex p-1 rounded hover:bg-neutral-200 transition-colors"
+      >
+        {activeViewport && activeViewport.icon}
+      </button>
+
+      {open && (
+        <>
+          <div
+            className="fixed inset-0 z-40"
+            onClick={() => setOpen(false)}
+          />
+          <div className="absolute rounded left-1/2 -translate-x-[50%] p-1 -top-1 gap-1 flex flex-col justify-center items-center bg-white shadow-lg z-50">
+            {PUCK_VIEWPORTS.map((bp) => (
+              <button
+                key={bp.label}
+                onClick={() => handleViewportChange(bp)}
+                className={`group relative p-1 flex items-center justify-center transition-colors hover:text-primary ${bp.width === viewports.current.width && "text-primary"
+                  }`}
+              >
+                {bp.icon}
+                <div className="absolute left-full ml-2 px-2 py-1 bg-neutral-900 text-white text-[10px] font-medium rounded-md opacity-0 group-hover:opacity-100 translate-x-1 group-hover:translate-x-0 transition-all whitespace-nowrap pointer-events-none z-[60] shadow-lg border border-white/5">
+                  {bp.label}
+                  <div className="absolute top-1/2 -left-1 -translate-y-1/2 border-y-[4px] border-y-transparent border-r-[4px] border-r-neutral-900" />
+                </div>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
+const CASCADING_ORDER: BreakpointKey[] = ["desktop", "laptop", "tablet", "mobile"];
+
+export const getCascadedValue = (valObj: any, activeKey: BreakpointKey) => {
+  if (!valObj) return undefined;
+  const targetIndex = CASCADING_ORDER.indexOf(activeKey);
+  for (let i = targetIndex; i >= 0; i--) {
+    const key = CASCADING_ORDER[i];
+    if (valObj[key] !== undefined && valObj[key] !== "") {
+      return valObj[key];
+    }
+  }
+  return undefined;
+};
 
 export const OptionButtonGroup = ({
   value,
@@ -65,14 +143,11 @@ export const ResponsiveOptionButtonGroup = ({
   directionData?: ResponsiveValue<string>;
 }) => {
   const viewports = usePuck((s) => s.appState.ui.viewports);
-  const dispatch = usePuck((s) => s.dispatch);
-
-  const [open, setOpen] = useState(false);
 
   const activeKey = viewportToKey(viewports.current.width);
-  const activeValue = value?.[activeKey] ?? defaultValue;
+  const activeValue = getCascadedValue(value, activeKey) ?? defaultValue;
 
-  const currentDirection = directionData?.[activeKey] || "flex-row";
+  const currentDirection = getCascadedValue(directionData, activeKey) || "flex-row";
 
   let mappedOptions = options;
   if (controlType) {
@@ -96,26 +171,6 @@ export const ResponsiveOptionButtonGroup = ({
     });
   }
 
-  const activeViewport = PUCK_VIEWPORTS.find(
-    (bp) => bp.width === viewports.current.width
-  );
-
-  const handleViewportChange = (bp: any) => {
-    dispatch({
-      type: "setUi",
-      ui: {
-        viewports: {
-          ...viewports,
-          current: {
-            width: bp.width,
-            height: "auto",
-          },
-        },
-      },
-    });
-    setOpen(false);
-  };
-
   return (
     <div className="flex flex-col w-full relative ">
       <div className="flex items-center gap-3 justify-between mb-1">
@@ -124,36 +179,7 @@ export const ResponsiveOptionButtonGroup = ({
             {label}
           </span>
 
-          {/* Icon trigger */}
-          <div className="relative flex">
-            <button
-              onClick={() => setOpen((s) => !s)}
-              className="flex p-1 rounded hover:bg-neutral-200"
-            >
-              {activeViewport && (
-                activeViewport.icon
-              )}
-            </button>
-
-            {/* Dropdown */}
-            {open && (
-              <div className="absolute right-0 top-0 flex flex-col gap-3 bg-white shadow-lg z-50">
-                {PUCK_VIEWPORTS.map((bp) => (
-                  <button
-                    key={bp.label}
-                    title={bp.label}
-                    onClick={() => handleViewportChange(bp)}
-                    className={`flex items-center gap-2 w-full p-1 text-xs hover:bg-neutral-100 ${bp.width === viewports.current.width
-                      ? "text-primary"
-                      : ""
-                      }`}
-                  >
-                    {bp.icon}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          <ViewportSelector />
         </div>
         {(label === "Direction" || label === "Wrap") && (
           <div className="flex-1">
@@ -181,6 +207,123 @@ export const ResponsiveOptionButtonGroup = ({
   );
 };
 
+export const ResponsiveSliderControl = ({
+  label,
+  value,
+  onChange,
+  units = ["px", "%", "em", "rem", "vw", "vh"],
+  min = 0,
+  max = 2000,
+  step = 1,
+  description,
+}: {
+  label: string;
+  value: any;
+  onChange: (val: any) => void;
+  units?: string[];
+  min?: number;
+  max?: number;
+  step?: number;
+  description?: React.ReactNode;
+}) => {
+  const viewports = usePuck((s) => s.appState.ui.viewports);
+  const activeKey = viewportToKey(viewports.current.width);
+
+  const currentVal = value || { value: {}, unit: {} };
+  const activeValue = getCascadedValue(currentVal.value, activeKey) ?? "";
+  const cascadedUnit = getCascadedValue(currentVal.unit, activeKey);
+  const activeUnit = cascadedUnit || units[0];
+
+  const [unitOpen, setUnitOpen] = useState(false);
+
+  const handleValueChange = (val: number | "") => {
+    onChange({
+      ...currentVal,
+      value: { ...(currentVal.value || {}), [activeKey]: val },
+    });
+  };
+
+  const handleUnitChange = (unit: string) => {
+    onChange({
+      ...currentVal,
+      unit: { ...(currentVal.unit || {}), [activeKey]: unit },
+    });
+    setUnitOpen(false);
+  };
+
+  return (
+    <div className="flex flex-col w-full gap-1 relative">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-[13px] font-medium text-neutral-700">
+            {label}
+          </span>
+          <ViewportSelector />
+        </div>
+        <div className="relative flex">
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              setUnitOpen((s) => !s);
+            }}
+            className="flex items-center py-1 px-2 text-[11px] rounded hover:bg-neutral-200"
+          >
+            {activeUnit}
+            <Icon icon="lucide:chevron-down" className="ml-1" width={12} />
+          </button>
+          {unitOpen && (
+            <>
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setUnitOpen(false)}
+              />
+              <div className="absolute right-0 top-full mt-1 flex flex-col bg-white shadow-lg z-50 min-w-[50px] border border-neutral-100 rounded overflow-hidden">
+                {units.map((u) => (
+                  <button
+                    key={u}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleUnitChange(u);
+                    }}
+                    className={`flex items-center justify-center w-full py-1.5 px-2 text-[11px] text-neutral-700 hover:bg-neutral-100 ${activeUnit === u ? "text-primary bg-primary/5 font-medium" : ""
+                      }`}
+                  >
+                    {u}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+      <div className="flex items-center gap-3">
+        <input
+          type="range"
+          min={min}
+          max={max}
+          step={step}
+          value={activeValue === "" ? min : activeValue}
+          onChange={(e) => handleValueChange(Number(e.target.value))}
+          className="flex-1 w-full h-1.5 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-neutral-700"
+        />
+        <input
+          type="number"
+          value={activeValue}
+          onChange={(e) =>
+            handleValueChange(e.target.value === "" ? "" : Number(e.target.value))
+          }
+          className="w-16 h-8 text-xs px-2 outline-none rounded border border-neutral-200 focus:border-neutral-400 bg-white"
+        />
+      </div>
+      {description && (
+        <span className="text-[10px] text-neutral-500 italic mt-[-2px]">
+          {description}
+        </span>
+      )}
+    </div>
+  );
+};
+
 const DropdownControl = ({
   label,
   value,
@@ -200,7 +343,6 @@ const DropdownControl = ({
         {label}
       </span>
 
-      {/* NORMAL DROPDOWN */}
       {!isCustom && (
         <>
           <button
@@ -232,7 +374,6 @@ const DropdownControl = ({
         </>
       )}
 
-      {/* CUSTOM INPUT MODE */}
       {isCustom && (
         <div className="relative w-full">
           <input
@@ -246,7 +387,6 @@ const DropdownControl = ({
             }}
           />
 
-          {/* Reset button */}
           <button
             onClick={() => onChange("")}
             className="absolute right-1 top-1/2 -translate-y-1/2 text-xs text-neutral-400 hover:text-red-500"
@@ -269,19 +409,12 @@ export const ResponsiveGapControl = ({
   onChange: (val: any) => void;
 }) => {
   const viewports = usePuck((s) => s.appState.ui.viewports);
-  const dispatch = usePuck((s) => s.dispatch);
-
-  const [open, setOpen] = useState(false);
 
   const activeKey = viewportToKey(viewports.current.width);
   const currentVal = value || { row: {}, column: {}, lock: true };
-  const activeRow = currentVal.row?.[activeKey] ?? "";
-  const activeColumn = currentVal.column?.[activeKey] ?? "";
+  const activeRow = getCascadedValue(currentVal.row, activeKey) ?? "";
+  const activeColumn = getCascadedValue(currentVal.column, activeKey) ?? "";
   const isLocked = currentVal.lock ?? true;
-
-  const activeViewport = PUCK_VIEWPORTS.find(
-    (bp) => bp.width === viewports.current.width
-  );
 
   const [unitOpen, setUnitOpen] = useState(false);
 
@@ -292,8 +425,9 @@ export const ResponsiveGapControl = ({
     { label: "REM", value: "rem" },
   ];
 
+  const cascadedUnit = getCascadedValue(currentVal.unit, activeKey);
   const activeUnit = units.find(
-    (u) => u.value === currentVal.unit?.[activeKey]
+    (u) => u.value === cascadedUnit
   );
 
   const handleUnitChange = (unit: string) => {
@@ -305,22 +439,6 @@ export const ResponsiveGapControl = ({
       },
     });
     setUnitOpen(false);
-  };
-
-  const handleViewportChange = (bp: any) => {
-    dispatch({
-      type: "setUi",
-      ui: {
-        viewports: {
-          ...viewports,
-          current: {
-            width: bp.width,
-            height: "auto",
-          },
-        },
-      },
-    });
-    setOpen(false);
   };
 
   const gapOptions = [
@@ -372,31 +490,7 @@ export const ResponsiveGapControl = ({
           <span className="text-[13px] font-medium text-neutral-700">
             {label}
           </span>
-          <div className="relative flex">
-            <button
-              onClick={() => setOpen((s) => !s)}
-              className="flex p-1 rounded hover:bg-neutral-200"
-            >
-              {activeViewport && activeViewport.icon}
-            </button>
-            {open && (
-              <div className="absolute right-0 top-0 flex flex-col gap-2 bg-white shadow-lg z-50">
-                {PUCK_VIEWPORTS.map((bp) => (
-                  <button
-                    key={bp.label}
-                    title={bp.label}
-                    onClick={() => handleViewportChange(bp)}
-                    className={`flex items-center gap-2 w-full p-1 text-xs text-neutral-700 bg-neutral-200 hover:bg-neutral-300 ${bp.width === viewports.current.width
-                      ? "text-primary bg-primary/10"
-                      : ""
-                      }`}
-                  >
-                    {bp.icon}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          <ViewportSelector />
         </div>
         <div className="relative flex">
           <button
@@ -425,14 +519,12 @@ export const ResponsiveGapControl = ({
         </div>
       </div>
 
-      {/* Content */}
       <div className="flex gap-1">
-        {/* Row */}
         <div className="flex-1">
           <DropdownControl
             label="Row"
             value={activeRow}
-            customValue={currentVal.rowCustom?.[activeKey]}
+            customValue={getCascadedValue(currentVal.rowCustom, activeKey)}
             options={gapOptions}
             onChange={handleRowChange}
             onCustomChange={(val: any) => {
@@ -453,12 +545,11 @@ export const ResponsiveGapControl = ({
             }}
           />
         </div>
-        {/* Column */}
         <div className="flex-1">
           <DropdownControl
             label="Column"
             value={activeColumn}
-            customValue={currentVal.columnCustom?.[activeKey]}
+            customValue={getCascadedValue(currentVal.columnCustom, activeKey)}
             options={gapOptions}
             onChange={handleColumnChange}
             onCustomChange={(val: any) => {
@@ -493,6 +584,179 @@ export const ResponsiveGapControl = ({
   );
 };
 
+export const ResponsiveSpacingControl = ({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: any;
+  onChange: (val: any) => void;
+}) => {
+  const viewports = usePuck((s) => s.appState.ui.viewports);
+
+  const activeKey = viewportToKey(viewports.current.width);
+  const currentVal = value || { top: {}, right: {}, bottom: {}, left: {}, lock: true };
+
+  const [unitOpen, setUnitOpen] = useState(false);
+
+  const activeTop = getCascadedValue(currentVal.top, activeKey) ?? "";
+  const activeRight = getCascadedValue(currentVal.right, activeKey) ?? "";
+  const activeBottom = getCascadedValue(currentVal.bottom, activeKey) ?? "";
+  const activeLeft = getCascadedValue(currentVal.left, activeKey) ?? "";
+  const isLocked = currentVal.lock ?? true;
+
+  const units = [
+    { label: "PX", value: "px" },
+    { label: "%", value: "%" },
+    { label: "EM", value: "em" },
+    { label: "REM", value: "rem" },
+  ];
+
+  const cascadedUnit = getCascadedValue(currentVal.unit, activeKey);
+  const activeUnit = units.find(
+    (u) => u.value === cascadedUnit
+  );
+
+  const handleUnitChange = (unit: string) => {
+    onChange({
+      ...currentVal,
+      unit: {
+        ...(currentVal.unit || {}),
+        [activeKey]: unit,
+      },
+    });
+    setUnitOpen(false);
+  };
+
+  const spacingOptions = [
+    { label: "None", value: "space-0" },
+    { label: "XS", value: "space-2" },
+    { label: "S", value: "space-6" },
+    { label: "M", value: "space-10" },
+    { label: "L", value: "space-14" },
+    { label: "XL", value: "space-24" },
+    { label: "XXL", value: "space-32" },
+    { label: "Custom", value: "custom" },
+  ];
+
+  const handleEdgeChange = (edge: "top" | "right" | "bottom" | "left", newVal: string) => {
+    let edgeUpdates: any = { [edge]: { ...(currentVal[edge] || {}), [activeKey]: newVal } };
+
+    if (isLocked) {
+      ["top", "right", "bottom", "left"].forEach((e) => {
+        edgeUpdates[e] = { ...(currentVal[e] || {}), [activeKey]: newVal };
+      });
+    }
+
+    onChange({ ...currentVal, ...edgeUpdates });
+  };
+
+  const handleCustomChange = (edge: "top" | "right" | "bottom" | "left", val: any) => {
+    let edgeUpdates: any = { [edge]: { ...(currentVal[edge] || {}), [activeKey]: "custom" } };
+    let customUpdates: any = { [`${edge}Custom`]: { ...(currentVal[`${edge}Custom`] || {}), [activeKey]: val } };
+
+    if (isLocked) {
+      ["top", "right", "bottom", "left"].forEach((e) => {
+        edgeUpdates[e] = { ...(currentVal[e] || {}), [activeKey]: "custom" };
+        customUpdates[`${e}Custom`] = { ...(currentVal[`${e}Custom`] || {}), [activeKey]: val };
+      });
+    }
+
+    onChange({ ...currentVal, ...edgeUpdates, ...customUpdates });
+  };
+
+  const toggleLock = () => {
+    onChange({
+      ...currentVal,
+      lock: !isLocked,
+    });
+  };
+
+  return (
+    <div className="flex flex-col w-full relative gap-1">
+      <div className="flex items-center gap-2 justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-[13px] font-medium text-neutral-700">
+            {label}
+          </span>
+          <ViewportSelector />
+        </div>
+
+        <div className="flex items-center gap-1">
+          <button
+            onClick={(e) => { e.preventDefault(); toggleLock(); }}
+            title="Lock all sides"
+            className={`p-1 flex items-center justify-center rounded transition-colors cursor-pointer ${isLocked ? 'text-primary bg-primary/10' : 'text-neutral-500 hover:bg-neutral-200'
+              }`}
+          >
+            <Icon icon={isLocked ? "lucide:link" : "lucide:unlink"} width={14} />
+          </button>
+
+          <div className="relative flex">
+            <button
+              onClick={() => setUnitOpen((s) => !s)}
+              className="flex py-1 px-2 text-[11px] rounded hover:bg-neutral-200"
+            >
+              {activeUnit?.label || "PX"}
+            </button>
+
+            {unitOpen && (
+              <div className="absolute right-0 top-full mt-1 flex flex-col bg-white shadow-lg z-50 min-w-[40px]">
+                {units.map((u) => (
+                  <button
+                    key={u.value}
+                    onClick={() => handleUnitChange(u.value)}
+                    className={`flex items-center justify-center gap-2 w-full p-1 text-[11px] text-neutral-700 hover:bg-neutral-200 ${activeUnit?.value === u.value ? "text-primary bg-primary/10" : ""
+                      }`}
+                  >
+                    {u.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 mt-1">
+        <DropdownControl
+          label="Top"
+          value={activeTop}
+          customValue={getCascadedValue(currentVal.topCustom, activeKey)}
+          options={spacingOptions}
+          onChange={(v: string) => handleEdgeChange("top", v)}
+          onCustomChange={(v: number) => handleCustomChange("top", v)}
+        />
+        <DropdownControl
+          label="Right"
+          value={activeRight}
+          customValue={getCascadedValue(currentVal.rightCustom, activeKey)}
+          options={spacingOptions}
+          onChange={(v: string) => handleEdgeChange("right", v)}
+          onCustomChange={(v: number) => handleCustomChange("right", v)}
+        />
+        <DropdownControl
+          label="Bottom"
+          value={activeBottom}
+          customValue={getCascadedValue(currentVal.bottomCustom, activeKey)}
+          options={spacingOptions}
+          onChange={(v: string) => handleEdgeChange("bottom", v)}
+          onCustomChange={(v: number) => handleCustomChange("bottom", v)}
+        />
+        <DropdownControl
+          label="Left"
+          value={activeLeft}
+          customValue={getCascadedValue(currentVal.leftCustom, activeKey)}
+          options={spacingOptions}
+          onChange={(v: string) => handleEdgeChange("left", v)}
+          onCustomChange={(v: number) => handleCustomChange("left", v)}
+        />
+      </div>
+    </div>
+  );
+};
+
 export const getResponsiveClasses = (
   prop: ResponsiveValue<string> | undefined,
   classPrefix: string = "",
@@ -508,66 +772,54 @@ export const getResponsiveClasses = (
     .join(" ");
 };
 
-/**
- * Utility to map standard Tailwind/UnoCSS layout values into raw CSS values.
- */
 export const tailwindToCSS = (type: "direction" | "justify" | "align" | "wrap", value: string): string => {
   if (!value) return "";
-  
+
   if (type === "direction") {
     if (value === "flex-row") return "row";
     if (value === "flex-col") return "column";
     if (value === "flex-row-reverse") return "row-reverse";
     if (value === "flex-col-reverse") return "column-reverse";
   }
-  
+
   if (type === "justify") {
     const val = value.replace("justify-", "");
     if (val === "start" || val === "end") return `flex-${val}`;
     if (val === "between" || val === "around" || val === "evenly") return `space-${val}`;
     return val;
   }
-  
+
   if (type === "align") {
     const val = value.replace("items-", "");
     if (val === "start" || val === "end") return `flex-${val}`;
     return val;
   }
-  
+
   if (type === "wrap") {
     return value.replace("flex-", "");
   }
-  
+
   return value;
 };
 
 export type ResponsiveCSSConfig = {
-  /** The actual CSS property, e.g. "flex-direction", "row-gap" */
   property: string;
-  /** Unique prefix for the internal CSS variables, e.g. "f-dir" */
   prefix: string;
-  /** The primitive mapping from Puck editor data */
   responsiveValue?: ResponsiveValue<any>;
-  /** Optional custom resolver for complex values (like gap arrays) */
   resolver?: (bp: BreakpointKey) => string | undefined | null;
-  /** Optional formatter to translate the editor value to a standard CSS property value */
   formatter?: (val: any) => string;
 };
 
-/**
- * Generates an inline style object of CSS Variables, and the corresponding UnoCSS arbitrary classes 
- * required to apply them responsively without FOUC (flash of unstyled content) in the editor.
- */
 export const getResponsiveCSS = (configs: ResponsiveCSSConfig[]) => {
   const style: React.CSSProperties = {} as any;
   const classes: string[] = [];
 
-  const bps: BreakpointKey[] = ["mobile", "tablet", "laptop", "desktop"];
+  const bps: BreakpointKey[] = ["desktop", "laptop", "tablet", "mobile"];
   const bpCodes: Record<BreakpointKey, string> = {
-    mobile: "base", // base avoids empty naming conflicts in CSS
-    tablet: "md",
+    desktop: "base",
     laptop: "lg",
-    desktop: "xl",
+    tablet: "md",
+    mobile: "sm",
   };
 
   configs.forEach(({ property, prefix, responsiveValue, resolver, formatter }) => {
@@ -582,10 +834,9 @@ export const getResponsiveCSS = (configs: ResponsiveCSSConfig[]) => {
       if (val !== undefined && val !== null && val !== "") {
         const finalValue = formatter ? formatter(val) : val;
         const varName = `--${prefix}-${bpCodes[bp]}`;
-        
+
         (style as any)[varName] = finalValue;
-        
-        // Output Unocss arbitrary property string: [flex-direction:var(--f-dir-base)] 
+
         const mqPrefix = BREAKPOINT_PREFIX[bp];
         classes.push(`${mqPrefix}[${property}:var(${varName})]`);
       }

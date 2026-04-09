@@ -238,7 +238,9 @@
           "wrap": "Pecah",
           "nowrap": "Tidak Pecah",
           "wrap_reverse": "Pecah Terbalik"
-        }
+        },
+        "margin": "",
+        "padding": ""
       },
       "items": {
         "title": "Isi"

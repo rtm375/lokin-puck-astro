@@ -1,4 +1,3 @@
-import React from "react";
 import {
   createBrowserRouter,
   RouterProvider,
@@ -84,10 +83,8 @@ export const Websites = ({ user }: { user: any }) => {
   ]);
 
   return (
-    <React.StrictMode>
-      <LanguageProvider>
-        <RouterProvider router={router} />
-      </LanguageProvider>
-    </React.StrictMode>
+    <LanguageProvider>
+      <RouterProvider router={router} />
+    </LanguageProvider>
   );
 };

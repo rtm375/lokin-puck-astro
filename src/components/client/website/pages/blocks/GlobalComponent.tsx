@@ -1,8 +1,4 @@
 import type { ComponentConfig } from "@puckeditor/core";
-import { Render } from "@puckeditor/core";
-import { useComponentsStore } from "@/stores/useComponentsStore";
-import { useEffect, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
 
 export interface GlobalComponentProps {
   componentId: string;
@@ -49,7 +45,6 @@ export const GlobalComponent: ComponentConfig<GlobalComponentProps> = {
       // We can rely on the store or fetch from API.
       // But resolveData in Puck is often used for "server components".
       // Let's try fetching from API.
-      const res = await fetch(`/api/components/${props.componentId}`); // We need this endpoint or similar
       // Actually, we can just return the props and let the component handle fetching if it's client side?
       // But the goal is SSR.
 

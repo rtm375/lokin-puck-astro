@@ -13,10 +13,12 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEditorData } from "@stores/useEditorData";
 import { useWebsitesStore } from "@/stores/useWebsitesStore";
 import { usePagesStore } from "@/stores/usePagesStore";
-import { puckOverrides, usePuck } from "./overrides/editor-overrides";
+import { puckOverrides, PluginAutoSwitcher, usePuck } from "./overrides/editor-overrides";
 import { PUCK_VIEWPORTS } from "./config/viewports";
 import { api } from "@/lib/client";
 import { Icon } from "@iconify/react";
+
+import { layerPlugin } from "./overrides/layer";
 
 // Custom Settings Panel that Elementor-ifies the Fields view
 const SettingsPanel = () => {
@@ -63,7 +65,7 @@ const editorPlugins = [
   {
     name: "fields",
     label: "Settings",
-    icon: <Icon icon="lucide:settings" width={18} className="hidden-settings-tab-icon" />,
+    icon: <Icon icon="lucide:settings" width={18} />,
     render: () => <SettingsPanel />,
     mobileOnly: false,
   },
@@ -227,26 +229,26 @@ export default function PuckEditor() {
     [pageId, websiteId, t, setPageData, clearPageData, storageKey],
   );
 
-  const handlePreview = useCallback(() => {
-    window.open(
-      `/admin/websites/${websiteSubdomain}/pages/${pagePath}/preview`,
-      "_blank",
-    );
-  }, [websiteSubdomain, pagePath]);
 
   // Memoize overrides to prevent recreating on every render
   const memoizedOverrides = useMemo(
-    () =>
-      puckOverrides(
-        handlePreview,
+    () => ({
+      ...puckOverrides(
         handlePublish,
         t,
         hasUnsavedChanges,
         isSaving,
         () => navigate(`/admin/websites/${websiteSubdomain}/pages`),
       ),
+      // Render PluginAutoSwitcher inside the Puck tree so usePuck is valid
+      puck: ({ children }: { children: React.ReactNode }) => (
+        <>
+          <PluginAutoSwitcher />
+          {children}
+        </>
+      ),
+    }),
     [
-      handlePreview,
       handlePublish,
       t,
       hasUnsavedChanges,
@@ -286,14 +288,10 @@ export default function PuckEditor() {
 
   return (
     <div className="h-screen w-full bg-white flex flex-col">
-      {/* Hide the Settings tab button globally since it dynamically takes over the left panel on selection */}
-      <style>{`
-        li:has(.hidden-settings-tab-icon) {
-          display: none !important;
-        }
-      `}</style>
       <div className="grow overflow-hidden">
         <Puck
+          _experimentalFullScreenCanvas={false}
+          _experimentalVirtualization={true}
           key={storageKey}
           config={config}
           data={initialData}
@@ -302,9 +300,13 @@ export default function PuckEditor() {
           headerPath={websiteSubdomain}
           overrides={memoizedOverrides}
           viewports={PUCK_VIEWPORTS}
-          plugins={editorPlugins}
+          plugins={[...editorPlugins, layerPlugin]}
+          ui={{
+            leftSideBarWidth: 240,
+            rightSideBarVisible: false
+          }}
         />
       </div>
-    </div>
+    </div >
   );
 }

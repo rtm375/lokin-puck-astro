@@ -1,44 +1,53 @@
 import React from "react";
 import { Icon } from "@iconify/react";
 import { createUsePuck } from "@puckeditor/core";
+import initUnocssRuntime from "@unocss/runtime";
+import presetWind4 from "unocss/preset-wind4";
+import { DrawerItem } from "./DrawerItem";
+import type { Props } from "../blocks/types";
+
 export const usePuck = createUsePuck();
 
-const IframeWrapper = ({ children, document }: any) => {
-  React.useEffect(() => {
-    if (!document) return;
+// Timestamp-based signal: LayerNode sets this to Date.now() on click.
+// PluginAutoSwitcher checks if a layer click happened within the last 300ms.
+// Unlike a boolean flag, a timestamp survives multiple effect runs.
+export const layerClickRef = { timestamp: 0 };
 
-    const head = document.head;
+const IframeWrapper = ({ children, document: doc }: any) => {
+  React.useEffect(() => {
+    if (!doc) return;
+
+    const head = doc.head;
     if (!head) return;
 
-    if (!head.querySelector("#preview-frame-uno")) {
-      const configScript = document.createElement("script");
-      configScript.id = "preview-frame-uno-config";
-      configScript.innerHTML = `
-        window.__unocss = {
-          theme: {
-            colors: {
-              primary: "#f3602a",
-            },
-            font: {
-              lineHeight: "1",
-            }
-          }
-        };
-      `;
-      head.appendChild(configScript);
+    if ((doc as any).__unocss_initialized) return;
+    (doc as any).__unocss_initialized = true;
+    head.querySelectorAll('style[data-unocss-runtime-layer]').forEach((el: any) => el.remove());
 
-      const script = document.createElement("script");
-      script.id = "preview-frame-uno";
-      script.src = "https://cdn.jsdelivr.net/npm/@unocss/runtime";
-      head.appendChild(script);
-    }
+    initUnocssRuntime({
+      defaults: {
+        presets: [presetWind4()],
+        theme: {
+          colors: {
+            primary: "#f3602a",
+          },
+        },
+      },
+      observer: {
+        target: () => doc.documentElement,
+      },
+      rootElement: () => doc.documentElement,
+      inject: (styleElement) => {
+        head.appendChild(styleElement);
+      },
+    });
 
     const cleanupStyles = () => {
       head
         .querySelectorAll('style[data-vite-dev-id*="__uno.css"]')
-        .forEach((el: Element) => el.remove());
+        .forEach((el: any) => el.remove());
 
-      head.querySelectorAll("style").forEach((el: Element) => {
+      head.querySelectorAll("style").forEach((el: any) => {
         if (el.innerHTML.includes("astro-island,astro-slot")) {
           el.remove();
         }
@@ -51,17 +60,16 @@ const IframeWrapper = ({ children, document }: any) => {
     observer.observe(head, { childList: true });
 
     return () => observer.disconnect();
-  }, [document]);
+  }, [doc]);
 
-  return children;
+  return <>{children}</>;
 };
 
-// Custom wrapper to track selection and switch left sidebar tabs automatically
-const PluginAutoSwitcher = ({ children }: { children: React.ReactNode }) => {
+export const PluginAutoSwitcher = () => {
+  const currentPlugin = usePuck((s) => s.appState.ui.plugin?.current);
   const selectedItem = usePuck((s) => s.appState.ui.itemSelector);
   const dispatch = usePuck((s) => s.dispatch);
 
-  // Stringify the selection to ensure stable equality checks across renders
   const selectedItemKey = selectedItem
     ? `${selectedItem.zone}:${selectedItem.index}`
     : null;
@@ -70,38 +78,51 @@ const PluginAutoSwitcher = ({ children }: { children: React.ReactNode }) => {
 
   React.useEffect(() => {
     if (selectedItemKey !== prevSelectedRef.current) {
+      prevSelectedRef.current = selectedItemKey;
+
+      // If a layer click happened recently (within 300ms), this selection
+      // change originated from the layer panel — don't override the plugin.
+      // A timestamp survives multiple effect re-runs unlike a boolean flag.
+      if (Date.now() - layerClickRef.timestamp < 300) {
+        return;
+      }
+
+      // Selection changed from a canvas click — switch to the appropriate panel.
       if (selectedItemKey) {
-        // Auto-switch to Fields (settings) when an item is selected
         dispatch({
           type: "setUi",
           ui: { leftSideBarVisible: true, plugin: { current: "fields" } },
         });
       } else {
-        // Auto-switch back to Blocks when selection is cleared
         dispatch({
           type: "setUi",
           ui: { leftSideBarVisible: true, plugin: { current: "blocks" } },
         });
       }
-      prevSelectedRef.current = selectedItemKey;
     }
-  }, [selectedItemKey, dispatch]);
+  }, [selectedItemKey, currentPlugin, dispatch]);
 
-  return <>{children}</>;
+  return <></>;
 };
 
 // Factory function that returns Puck overrides
 // This can be used in both client (with useMemo) and server (direct call)
 export const puckOverrides = (
-  handlePreview: () => void,
   handlePublish: (data: any) => void,
   t: (key: string) => string,
   hasUnsavedChanges: boolean,
   isSaving: boolean,
   onBack: () => void,
 ) => ({
-  puck: PluginAutoSwitcher,
   iframe: IframeWrapper,
+  fields: ({ children }: any) => (
+    <>{children}</>
+  ),
+  fieldLabel: ({ children }: any) => (
+    <>{children}</>
+  ),
+  outline: () => <></>,
+  drawerItem: ({ name }: { name: string }) => <DrawerItem name={name as keyof Props} />,
   header: ({ actions }: any) => {
     return (
       <div className="bg-white border-b border-gray-200 px-4 h-12 flex items-center justify-between shrink-0 z-10 w-screen">
@@ -136,16 +157,32 @@ export const puckOverrides = (
   },
   headerActions: (): React.ReactElement => {
     const appState = usePuck((s) => s.appState);
+    const dispatch = usePuck((s) => s.dispatch);
+    const isInteractive = appState.ui.previewMode === "interactive";
+
     return (
       <div className="flex items-center gap-2">
         <button
-          onClick={handlePreview}
-          className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors cursor-pointer"
-          title="Preview (Includes unsaved changes)"
+          onClick={() => {
+            dispatch({
+              type: "setUi",
+              ui: {
+                leftSideBarVisible: !isInteractive ? false : true,
+                previewMode: isInteractive ? "edit" : "interactive"
+              },
+            });
+          }}
+          className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer border ${isInteractive
+            ? "bg-primary text-white border-primary"
+            : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+            }`}
+          title={
+            isInteractive ? "Back to Edit" : "Preview (Includes unsaved changes)"
+          }
         >
-          <Icon icon="iconoir:eye" width={18} />
+          <Icon icon={isInteractive ? "iconoir:eye-off" : "iconoir:eye"} width={18} />
           <span className="hidden sm:inline">
-            {t("websites_page.editor.preview")}
+            {isInteractive ? "Exit Preview" : t("websites_page.editor.preview")}
           </span>
         </button>
         <button
