@@ -3,7 +3,7 @@ import dns from "node:dns/promises";
 
 export const prerender = false;
 
-export const POST: APIRoute = async ({ request, params, locals }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
   const { supabase } = locals;
   const body = await request.json();
   const { domain } = body;

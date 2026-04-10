@@ -37,7 +37,12 @@ if (cachedPage) {
 
   if (pagePath) {
     // Fetch by path
-    let { data } = await supabase.from("pages").select("data, title, head_code, is_front_page").eq("website_id", websiteId).eq("path", pagePath).single();
+    let { data } = await supabase
+      .from("pages")
+      .select("data, title, head_code, is_front_page")
+      .eq("website_id", websiteId)
+      .eq("path", pagePath)
+      .single();
     page = data;
 
     // Redirect if it's the front page
@@ -46,12 +51,22 @@ if (cachedPage) {
     }
   } else {
     // Root request: try is_front_page = true
-    let { data } = await supabase.from("pages").select("data, title, head_code, is_front_page").eq("website_id", websiteId).eq("is_front_page", true).single();
+    let { data } = await supabase
+      .from("pages")
+      .select("data, title, head_code, is_front_page")
+      .eq("website_id", websiteId)
+      .eq("is_front_page", true)
+      .single();
     page = data;
 
     // Fallback to "index"
     if (!page) {
-      const res = await supabase.from("pages").select("data, title, head_code, is_front_page").eq("website_id", websiteId).eq("path", "index").single();
+      const res = await supabase
+        .from("pages")
+        .select("data, title, head_code, is_front_page")
+        .eq("website_id", websiteId)
+        .eq("path", "index")
+        .single();
       page = res.data;
     }
   }
@@ -76,21 +91,12 @@ const puckData = page.data;
 
 import { renderToStaticMarkup } from "react-dom/server";
 import React from "react";
-import { puckOverrides } from "@components/client/website/pages/overrides/editor-overrides";
 
 const config = getConfig((key: string) => key, []);
 const contentHtml = renderToStaticMarkup(
   React.createElement(Render as any, {
     config: config,
     data: puckData,
-    overrides: puckOverrides(
-      () => {}, // handlePreview
-      () => {}, // handlePublish
-      (key: string) => key, // t
-      false, // hasUnsavedChanges
-      false, // isSaving
-      () => {}, // onBack
-    ),
   }),
 );
 

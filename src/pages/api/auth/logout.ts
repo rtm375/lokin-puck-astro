@@ -3,7 +3,7 @@ import type { APIRoute } from 'astro';
 export const prerender = false;
 
 export const POST: APIRoute = async ({ locals, redirect }) => {
-  const { session, supabase } = locals;
+  const { supabase } = locals;
   const { error } = await supabase.auth.signOut();
 
   if (error) {

@@ -1,11 +1,9 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { shouldFetch, fetchData } from "@/utils/fetchHelpers";
-import { Status } from "@/types";
 import type { Website } from "@/types";
 
 // Re-export for backward compatibility
-export { Status } from "@/types";
 export type { Website } from "@/types";
 
 interface WebsitesState {

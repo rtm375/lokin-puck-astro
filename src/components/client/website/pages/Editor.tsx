@@ -1,4 +1,4 @@
-import { Puck, type Data } from "@puckeditor/core";
+import { Puck, type Data, type Overrides } from "@puckeditor/core";
 import "@puckeditor/core/puck.css";
 import "@/assets/css/global.css";
 import { useConfig } from "@/lib";
@@ -6,14 +6,14 @@ import type {
   Props,
   RootProps,
 } from "@components/client/website/pages/blocks/types";
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams, useNavigate } from "react-router-dom";
 
 import { useEditorData } from "@stores/useEditorData";
 import { useWebsitesStore } from "@/stores/useWebsitesStore";
 import { usePagesStore } from "@/stores/usePagesStore";
-import { puckOverrides, PluginAutoSwitcher, usePuck } from "./overrides/editor-overrides";
+import { puckOverrides, PluginAutoSwitcher, usePuck, EditorContext } from "./overrides/editor-overrides";
 import { PUCK_VIEWPORTS } from "./config/viewports";
 import { api } from "@/lib/client";
 import { Icon } from "@iconify/react";
@@ -70,6 +70,16 @@ const editorPlugins = [
     mobileOnly: false,
   },
 ];
+
+const staticOverrides: Partial<Overrides> = {
+  ...puckOverrides,
+  puck: ({ children }) => (
+    <>
+      <PluginAutoSwitcher />
+      {children}
+    </>
+  ),
+};
 
 export default function PuckEditor() {
   const config = useConfig();
@@ -230,33 +240,7 @@ export default function PuckEditor() {
   );
 
 
-  // Memoize overrides to prevent recreating on every render
-  const memoizedOverrides = useMemo(
-    () => ({
-      ...puckOverrides(
-        handlePublish,
-        t,
-        hasUnsavedChanges,
-        isSaving,
-        () => navigate(`/admin/websites/${websiteSubdomain}/pages`),
-      ),
-      // Render PluginAutoSwitcher inside the Puck tree so usePuck is valid
-      puck: ({ children }: { children: React.ReactNode }) => (
-        <>
-          <PluginAutoSwitcher />
-          {children}
-        </>
-      ),
-    }),
-    [
-      handlePublish,
-      t,
-      hasUnsavedChanges,
-      isSaving,
-      navigate,
-      websiteSubdomain,
-    ],
-  );
+
 
   if (pagesLoading || editorLoading || (websiteId && pageId && !initialData))
     return (
@@ -287,26 +271,35 @@ export default function PuckEditor() {
     );
 
   return (
-    <div className="h-screen w-full bg-white flex flex-col">
-      <div className="grow overflow-hidden">
-        <Puck
-          _experimentalFullScreenCanvas={false}
-          _experimentalVirtualization={true}
-          key={storageKey}
-          config={config}
-          data={initialData}
-          onPublish={handlePublish}
-          onChange={handleChange}
-          headerPath={websiteSubdomain}
-          overrides={memoizedOverrides}
-          viewports={PUCK_VIEWPORTS}
-          plugins={[...editorPlugins, layerPlugin]}
-          ui={{
-            leftSideBarWidth: 240,
-            rightSideBarVisible: false
-          }}
-        />
+    <EditorContext.Provider
+      value={{
+        isSaving,
+        hasUnsavedChanges,
+        handlePublish,
+        onBack: () => navigate(`/admin/websites/${websiteSubdomain}/pages`),
+      }}
+    >
+      <div className="h-screen w-full bg-white flex flex-col">
+        <div className="grow overflow-hidden">
+          <Puck
+            _experimentalFullScreenCanvas={false}
+            _experimentalVirtualization={true}
+            key={storageKey}
+            config={config}
+            data={initialData}
+            onPublish={handlePublish}
+            onChange={handleChange}
+            headerPath={websiteSubdomain}
+            overrides={staticOverrides}
+            viewports={PUCK_VIEWPORTS}
+            plugins={[...editorPlugins, layerPlugin]}
+            ui={{
+              leftSideBarWidth: 240,
+              rightSideBarVisible: false
+            }}
+          />
+        </div>
       </div>
-    </div >
+    </EditorContext.Provider>
   );
 }

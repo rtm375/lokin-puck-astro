@@ -3,7 +3,7 @@ import type { APIRoute } from "astro";
 export const prerender = false;
 
 // GET: Load Page Data
-export const GET: APIRoute = async ({ request, params, locals }) => {
+export const GET: APIRoute = async ({ params, locals }) => {
   const { supabase } = locals;
   const { id, pageId } = params;
 

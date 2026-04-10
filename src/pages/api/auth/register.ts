@@ -6,7 +6,6 @@ export const POST: APIRoute = async ({ request, url, locals }) => {
   const formData = await request.formData();
   const email = formData.get("email")?.toString();
   const password = formData.get("password")?.toString();
-  const name = formData.get("name")?.toString();
 
   if (!email || !password) {
     return new Response(

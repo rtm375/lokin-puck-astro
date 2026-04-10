@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { shouldFetch, fetchData } from "@/utils/fetchHelpers";
+import { fetchData } from "@/utils/fetchHelpers";
 import type { Profile } from "@/types";
 
 interface UserState {

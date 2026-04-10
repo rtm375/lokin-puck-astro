@@ -14,10 +14,6 @@ export const onRequest = defineMiddleware(
   async ({ request, cookies, locals, url, redirect }, next) => {
     const supabase = getSupabaseClient(request, cookies);
     let user: User | null = null;
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    const accessToken = session?.access_token;
     const { data, error } = await supabase.auth.getUser();
     if (!error) user = data.user;
 

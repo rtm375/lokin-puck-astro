@@ -2,7 +2,7 @@ import { apiHandler, requirePage, requireAuth } from "@/lib/server";
 
 export const prerender = false;
 
-export const GET = apiHandler(async (ctx) => {
+export const GET = apiHandler(async () => {
   return { message: "nothings here friends" };
 });
 

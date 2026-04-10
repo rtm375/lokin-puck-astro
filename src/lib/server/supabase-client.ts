@@ -1,4 +1,4 @@
-import { createServerClient, parseCookieHeader, type CookieOptions } from '@supabase/ssr';
+import { createServerClient, parseCookieHeader } from '@supabase/ssr';
 import type { AstroCookies } from 'astro';
 
 export function getSupabaseClient(request: Request, cookies: AstroCookies) {
@@ -8,7 +8,7 @@ export function getSupabaseClient(request: Request, cookies: AstroCookies) {
   if (!SUPABASE_URL || !SUPABASE_KEY) {
     throw new Error("Supabase public environment variables are not set.");
   }
-  
+
   const supabase = createServerClient(
     SUPABASE_URL,
     SUPABASE_KEY,
