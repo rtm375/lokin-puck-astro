@@ -19,6 +19,8 @@ import { useEditorData } from "@stores/useEditorData";
 import { useWebsitesStore } from "@/stores/useWebsitesStore";
 import { usePagesStore } from "@/stores/usePagesStore";
 import { puckOverrides, PluginAutoSwitcher, usePuck, EditorContext } from "./overrides/editor-overrides";
+import { useClassSystemInit } from "@/hooks/useClassSystemInit";
+import { useWebsiteSwitch } from "@/hooks/useWebsiteSwitch";
 import { PUCK_VIEWPORTS } from "./config/viewports";
 import { api } from "@/lib/client";
 import { Icon } from "@iconify/react";
@@ -123,6 +125,12 @@ export default function PuckEditor() {
 
   const currentWebsite = websites.find((w) => w.subdomain === websiteSubdomain);
   const websiteId = currentWebsite?.id;
+
+  // Handle website switching (clear stores when website changes)
+  useWebsiteSwitch(websiteId);
+
+  // Initialize class system (variables and classes) for this website
+  useClassSystemInit(websiteId);
 
   const { pages, fetchPages, isLoading: pagesLoading } = usePagesStore();
 
@@ -239,6 +247,13 @@ export default function PuckEditor() {
 
       setIsSaving(true);
       try {
+        // Save all dirty classes to database first
+        const classRegistryStore = useClassRegistryStore.getState();
+        if (classRegistryStore.dirtyClasses.size > 0) {
+          console.log(`Saving ${classRegistryStore.dirtyClasses.size} modified classes...`);
+          await classRegistryStore.saveAllClasses();
+        }
+
         // Generate CSS in the browser before saving.
         // UnoCSS runs fine here — the browser build doesn't use @oxc-parser
         // native bindings (uses regex extraction instead).

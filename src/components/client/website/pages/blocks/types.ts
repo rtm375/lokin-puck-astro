@@ -88,6 +88,10 @@ export type Props = {
     componentId: string;
     data?: Data;
   };
+  Container: {
+    classIds: string[];
+    items: Slot;
+  };
 };
 
 export type RootProps = {

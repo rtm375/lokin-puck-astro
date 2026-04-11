@@ -6,6 +6,7 @@ import type {
 import { useTranslation } from "react-i18next";
 import {
   createFlexConfig,
+  createContainerConfig,
   Hero,
   HeroSlider,
   Text,
@@ -32,7 +33,7 @@ export const getConfig = (
         components: ["Text", "GlobalComponent"],
       },
       layout: {
-        components: ["Flex"],
+        components: ["Container", "Flex"], // Container is the new default, Flex kept for backward compatibility
       },
       hero: {
         components: ["Hero", "HeroSlider"],
@@ -40,7 +41,8 @@ export const getConfig = (
     },
     components: {
       Text,
-      Flex: createFlexConfig(t),
+      Container: createContainerConfig(t),
+      Flex: createFlexConfig(t), // Deprecated: kept for backward compatibility
       Hero,
       HeroSlider,
       GlobalComponent: {

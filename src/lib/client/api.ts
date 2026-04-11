@@ -4,6 +4,11 @@ export interface RequestOptions extends RequestInit {
   data?: any;
 }
 
+interface ApiErrorResponse {
+  error?: string;
+  message?: string;
+}
+
 class ApiClient {
   private async request<T>(
     endpoint: string,
@@ -38,8 +43,7 @@ class ApiClient {
           window.dispatchEvent(new CustomEvent("app:reset"));
           throw new Error("Unauthorized or Data Not Found");
         }
-
-        const errorData = await response.json().catch(() => ({}));
+        const errorData = await response.json().catch(() => ({})) as ApiErrorResponse;
         throw new Error(
           errorData.error || `Request failed with status ${response.status}`,
         );
@@ -110,7 +114,7 @@ class ApiClient {
           throw new Error("Unauthorized or Data Not Found");
         }
 
-        const errorData = await response.json().catch(() => ({}));
+        const errorData = await response.json().catch(() => ({})) as ApiErrorResponse;
         throw new Error(
           errorData.error || `Upload failed with status ${response.status}`,
         );

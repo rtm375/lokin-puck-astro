@@ -68,7 +68,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   }
 
   const body = await request.json();
-  const { name, subdomain, description } = body;
+  const { name, subdomain, description } = body as any;
 
   if (!name || !subdomain) {
     return new Response(
