@@ -1,4 +1,4 @@
-import { Puck, type Data, type Overrides } from "@puckeditor/core";
+import { Puck, Render, type Data, type Overrides } from "@puckeditor/core";
 import "@puckeditor/core/puck.css";
 import "@/assets/css/global.css";
 import { useConfig } from "@/lib";
@@ -9,6 +9,11 @@ import type {
 import { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams, useNavigate } from "react-router-dom";
+import { renderToStaticMarkup } from "react-dom/server";
+import React from "react";
+import { createGenerator } from "@unocss/core";
+import { presetWind4 } from "@unocss/preset-wind4";
+import tailwindReset from "@unocss/reset/tailwind-v4.css?inline";
 
 import { useEditorData } from "@stores/useEditorData";
 import { useWebsitesStore } from "@/stores/useWebsitesStore";
@@ -17,6 +22,23 @@ import { puckOverrides, PluginAutoSwitcher, usePuck, EditorContext } from "./ove
 import { PUCK_VIEWPORTS } from "./config/viewports";
 import { api } from "@/lib/client";
 import { Icon } from "@iconify/react";
+
+// Browser-side CSS generator — runs fine here because @oxc-parser is not used
+// in the browser build of unocss (it falls back to a regex-based extractor).
+// Initialized once and reused across publishes.
+const cssGenerator = createGenerator({
+  presets: [presetWind4()],
+  preflights: [{ getCSS: () => tailwindReset }],
+});
+
+async function generateCssFromData(config: any, data: Data): Promise<string> {
+  const html = renderToStaticMarkup(
+    React.createElement(Render as any, { config, data }),
+  );
+  const gen = await cssGenerator;
+  const { css } = await gen.generate(html);
+  return css;
+}
 
 import { layerPlugin } from "./overrides/layer";
 
@@ -217,16 +239,21 @@ export default function PuckEditor() {
 
       setIsSaving(true);
       try {
+        // Generate CSS in the browser before saving.
+        // UnoCSS runs fine here — the browser build doesn't use @oxc-parser
+        // native bindings (uses regex extraction instead).
+        const css = await generateCssFromData(config, data);
+
         await api.post(
           `/api/websites/${websiteId}/pages/${pageId}/editor-save`,
-          { data },
+          { data, css },
         );
 
         const cacheKey = `${websiteId}-${pageId}`;
         setPageData(cacheKey, data);
 
         clearPageData(storageKey);
-        setPendingData(null); // Clear pending changes
+        setPendingData(null);
         setHasUnsavedChanges(false);
         console.log(t("websites_page.editor.publish_success"));
       } catch (error) {
@@ -236,7 +263,7 @@ export default function PuckEditor() {
         setIsSaving(false);
       }
     },
-    [pageId, websiteId, t, setPageData, clearPageData, storageKey],
+    [pageId, websiteId, t, setPageData, clearPageData, storageKey, config],
   );
 
 

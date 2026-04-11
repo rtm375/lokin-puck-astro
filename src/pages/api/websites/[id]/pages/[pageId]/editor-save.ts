@@ -7,22 +7,23 @@ export const POST: APIRoute = async ({ request, params, locals }) => {
   try {
     const { supabase } = locals;
     const { id, pageId } = params;
-    const body = await request.json();
+    const body = (await request.json()) as { data: Data; css?: string };
     const puckData: Data = body.data;
+    // CSS is generated client-side (browser) by the editor before publishing,
+    // then sent along with the data. The server just stores it.
+    // This avoids running UnoCSS (which needs @oxc-parser native bindings)
+    // inside the Cloudflare Workers runtime (workerd).
+    const generatedCss: string = body.css ?? "";
 
     if (!puckData) return new Response("Missing Data", { status: 400 });
 
-    // Website ID is already in params.id
     const websiteId = id;
 
-    // R2 Upload removed in favor of Astro SSR
-    // The page is now rendered on-the-fly by src/pages/[...path].astro
-
-    // Update page data using pageId
     const { error } = await supabase
       .from("pages")
       .update({
         data: body.data,
+        css: generatedCss,
         updated_at: new Date().toISOString(),
       })
       .eq("id", pageId)
@@ -34,8 +35,6 @@ export const POST: APIRoute = async ({ request, params, locals }) => {
       });
     }
 
-    // Construct URL based on domain logic (simplified for now)
-    // We need to fetch the website subdomain to construct the URL
     const { data: website } = await supabase
       .from("websites")
       .select("subdomain")
@@ -43,7 +42,6 @@ export const POST: APIRoute = async ({ request, params, locals }) => {
       .single();
     const subdomain = website?.subdomain || "";
 
-    // Get page path again if we didn't fetch it above (we removed the fetch block)
     const { data: page } = await supabase
       .from("pages")
       .select("path")
@@ -56,10 +54,7 @@ export const POST: APIRoute = async ({ request, params, locals }) => {
     const url = `https://${subdomain}.lokin.id/${cleanPath}`;
 
     return new Response(
-      JSON.stringify({
-        success: true,
-        url: url,
-      }),
+      JSON.stringify({ success: true, url }),
       { status: 200 },
     );
   } catch (error: any) {

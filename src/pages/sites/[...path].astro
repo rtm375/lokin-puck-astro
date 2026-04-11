@@ -1,9 +1,13 @@
 ---
 import { Render } from "@puckeditor/core";
 import { getConfig } from "@/lib";
-import { generateCss } from "@/lib/server";
 import { scriptRegistry } from "@/lib";
-import { pageCache } from "@/lib/server";
+// Import pageCache directly — NOT via @/lib/server barrel which could transitively
+// pull in css-engine.ts → unocss → @oxc-parser native bindings (incompatible with workerd)
+import { pageCache } from "@/lib/server/page-cache";
+
+import { renderToStaticMarkup } from "react-dom/server";
+import React from "react";
 
 const { supabase, websiteId } = Astro.locals;
 const { path } = Astro.params;
@@ -12,19 +16,10 @@ if (!websiteId) {
   return new Response("Not Found", { status: 404 });
 }
 
-// Set Cache-Control header for CDN and Browser caching
-// s-maxage=60: Cloudflare/CDN cache for 60 seconds
-// stale-while-revalidate=30: Serve stale content while updating
-// max-age=60: Browser cache for 60 seconds
-// Astro.response.headers.set("Cache-Control", "public, max-age=60, s-maxage=60, stale-while-revalidate=30");
-
 // Resolve page path
-// If path is undefined, it's the root, so look for "home" or "index"
-// If path is defined, use it.
-// Note: path param in Astro for [...path] is a string, e.g. "about/us"
 let pagePath = path;
 
-// Try fetching the page
+// Try fetching the page (now includes `css` column pre-generated at save time)
 let page: any = null;
 const cacheKey = `${websiteId}:${pagePath}`;
 const cachedPage = pageCache.get(cacheKey);
@@ -39,7 +34,7 @@ if (cachedPage) {
     // Fetch by path
     let { data } = await supabase
       .from("pages")
-      .select("data, title, head_code, is_front_page")
+      .select("data, title, head_code, is_front_page, css")
       .eq("website_id", websiteId)
       .eq("path", pagePath)
       .single();
@@ -53,7 +48,7 @@ if (cachedPage) {
     // Root request: try is_front_page = true
     let { data } = await supabase
       .from("pages")
-      .select("data, title, head_code, is_front_page")
+      .select("data, title, head_code, is_front_page, css")
       .eq("website_id", websiteId)
       .eq("is_front_page", true)
       .single();
@@ -63,7 +58,7 @@ if (cachedPage) {
     if (!page) {
       const res = await supabase
         .from("pages")
-        .select("data, title, head_code, is_front_page")
+        .select("data, title, head_code, is_front_page, css")
         .eq("website_id", websiteId)
         .eq("path", "index")
         .single();
@@ -82,16 +77,11 @@ if (!page) {
 
 const puckData = page.data;
 
-// Generate CSS (UnoCSS)
-// We need to render to string first to generate CSS, but <Render> is a React component.
-// Astro can render React components.
-// However, to get the CSS *before* sending the response, we might need to render it here.
-// But `generateCss` takes HTML string.
-// We can use `renderToStaticMarkup` like in editor-save.ts.
+// CSS was pre-generated at publish time (editor-save.ts) and stored in the DB.
+// No UnoCSS at request time — the CF Worker just reads this string.
+const generatedCss: string = page.css ?? "";
 
-import { renderToStaticMarkup } from "react-dom/server";
-import React from "react";
-
+// Render HTML for the page body (no UnoCSS needed here)
 const config = getConfig((key: string) => key, []);
 const contentHtml = renderToStaticMarkup(
   React.createElement(Render as any, {
@@ -100,9 +90,7 @@ const contentHtml = renderToStaticMarkup(
   }),
 );
 
-const generatedCss = await generateCss(contentHtml);
-
-// Resolve Scripts & External CSS
+// Resolve Scripts & External CSS from component registry
 const scripts = new Set<string>();
 const styles = new Set<string>();
 
@@ -129,7 +117,7 @@ if (puckData.content) scanData(puckData.content);
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{page.title || "My Page"}</title>
     {Array.from(styles).map((url) => <link rel="stylesheet" href={url} />)}
-    <style set:html={generatedCss}></style>
+    {generatedCss && <style set:html={generatedCss}></style>}
     {page.head_code && <Fragment set:html={page.head_code} />}
   </head>
   <body>

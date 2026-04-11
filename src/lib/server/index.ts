@@ -19,8 +19,9 @@ export { pageCache } from "./page-cache";
 // Cloudflare utilities (safe - no top-level instantiation)
 export { syncToKV } from "./cloudflare";
 
-// CSS Engine (UnoCSS)
-export { generateCss } from "./css-engine";
+// CSS Engine is intentionally NOT exported here.
+// UnoCSS uses @oxc-parser native bindings incompatible with the CF Workers
+// runtime (workerd). Import css-engine.ts directly only from build-time scripts.
 
 // Permissions & roles
 export { getWebsiteRole, requireWebsiteRole } from "./permissions";

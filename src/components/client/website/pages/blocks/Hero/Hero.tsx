@@ -56,8 +56,8 @@ export const Hero: ComponentConfig<Props["Hero"]> & { icon?: string } = {
 
     return (
       <div
-        className={`relative w-full bg-cover bg-no-repeat flex flex-col justify-center ${alignmentClasses} p-[${padding}px] text-[${textColor}]`}
-        style={{ backgroundImage: `url(${bgImage})` }}
+        className={`relative w-full bg-cover bg-no-repeat flex flex-col justify-center ${alignmentClasses}`}
+        style={{ backgroundImage: `url(${bgImage})`, padding: `${padding}px`, color: textColor }}
       >
         <div className="absolute inset-0 bg-black/50 z-0 pointer-events-none"></div>
         <h1 className="relative z-10 text-4xl font-bold drop-shadow-lg">

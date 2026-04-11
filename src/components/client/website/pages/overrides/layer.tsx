@@ -254,7 +254,7 @@ const LayerNode = ({
           borderBottomColor: dragState.targetId === item.props.id && dragState.position === "bottom" ? "#3b82f6" : "transparent",
           backgroundColor: dragState.targetId === item.props.id && dragState.position === "inside" ? "#eff6ff" : undefined
         }}
-        onClick={(e) => {
+        onMouseEnter={(e) => {
           e.stopPropagation();
 
           let zone = zoneKey;

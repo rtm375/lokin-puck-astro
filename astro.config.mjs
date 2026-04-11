@@ -3,6 +3,8 @@ import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
 import UnoCSS from 'unocss/astro'
 
+import cloudflare from '@astrojs/cloudflare';
+
 // https://astro.build/config
 export default defineConfig({
   output: 'server',
@@ -12,8 +14,12 @@ export default defineConfig({
   },
   integrations: [
     react(),
-    UnoCSS({
-      injectEntry: false // Manual import required for SaaS pages
-    })
-  ]
+    UnoCSS()
+  ],
+  adapter: cloudflare(),
+  vite: {
+    build: {
+      chunkSizeWarningLimit: 1000,
+    },
+  },
 });

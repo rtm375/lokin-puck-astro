@@ -117,7 +117,7 @@ export const PluginAutoSwitcher = () => {
 const Header = ({ actions }: { actions: React.ReactNode }) => {
   const { t } = useTranslation();
   const context = useContext(EditorContext);
-  
+
   if (!context) return <></>;
   const { onBack, hasUnsavedChanges, isSaving } = context;
 
@@ -159,7 +159,7 @@ const HeaderActions = (): React.ReactElement => {
   const dispatch = usePuck((s) => s.dispatch);
   const isInteractive = appState.ui.previewMode === "interactive";
   const context = useContext(EditorContext);
-  
+
   if (!context) return <></>;
   const { handlePublish, isSaving } = context;
 

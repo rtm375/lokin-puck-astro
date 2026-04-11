@@ -3,9 +3,10 @@ import { defineConfig, presetWind4 } from "unocss";
 export default defineConfig({
   content: {
     pipeline: {
-      include: [/\.(astro|html|[tj]sx|ts|vue)$/],
+      include: [/\.([jt]sx?|astro|html|vue)($|\?)/],
       exclude: ["**/src/pages/sites/**"],
     },
+    filesystem: ["src/components/client/**/*.{tsx,ts}"],
   },
   presets: [presetWind4()],
   theme: {
