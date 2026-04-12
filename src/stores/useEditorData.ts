@@ -4,7 +4,7 @@ import type { Data } from "@puckeditor/core";
 import type {
   Props,
   RootProps,
-} from "@components/client/website/pages/blocks/types";
+} from "@/components/client/website/pages/puck/blocks/types";
 import { shouldFetch, fetchData } from "@/utils/fetchHelpers";
 
 interface EditorState {

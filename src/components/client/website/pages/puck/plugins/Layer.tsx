@@ -1,5 +1,5 @@
 import { usePuck } from "@puckeditor/core";
-import { layerClickRef } from "./editor-overrides";
+import { layerClickRef } from "../overrides/editor-overrides";
 import { Icon } from "@iconify/react";
 import { useState, useEffect, type DragEvent } from "react";
 

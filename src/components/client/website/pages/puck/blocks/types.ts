@@ -30,6 +30,9 @@ export type ResponsiveSize = {
 };
 
 export type Props = {
+  Container: {
+    content: string;
+  };
   Text: {
     content: string;
   };

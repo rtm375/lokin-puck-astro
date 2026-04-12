@@ -1,5 +1,5 @@
 import type { ComponentConfig } from "@puckeditor/core";
-import type { Props } from "@blockTypes";
+import type { Props } from "@/components/client/website/pages/puck/blocks/types";
 import type { BreakpointKey } from "../../config/viewports";
 import {
   ResponsiveOptionButtonGroup,

@@ -2,15 +2,16 @@ import type { Config } from "@puckeditor/core";
 import type {
   Props,
   RootProps,
-} from "@components/client/website/pages/blocks/types";
+} from "@/components/client/website/pages/puck/blocks/types";
 import { useTranslation } from "react-i18next";
 import {
+  Container,
   createFlexConfig,
   Hero,
   HeroSlider,
   Text,
-} from "@components/client/website/pages/blocks";
-import { GlobalComponent } from "@components/client/website/pages/blocks/GlobalComponent";
+} from "@/components/client/website/pages/puck/blocks";
+import { GlobalComponent } from "@/components/client/website/pages/puck/blocks/GlobalComponent";
 import { useComponentsStore } from "@/stores/useComponentsStore";
 import { useMemo } from "react";
 
@@ -39,6 +40,7 @@ export const getConfig = (
       },
     },
     components: {
+      Container,
       Text,
       Flex: createFlexConfig(t),
       Hero,

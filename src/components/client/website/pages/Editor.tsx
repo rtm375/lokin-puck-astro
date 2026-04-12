@@ -5,7 +5,7 @@ import { useConfig } from "@/lib";
 import type {
   Props,
   RootProps,
-} from "@components/client/website/pages/blocks/types";
+} from "@/components/client/website/pages/puck/blocks/types";
 import { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams, useNavigate } from "react-router-dom";
@@ -18,8 +18,8 @@ import tailwindReset from "@unocss/reset/tailwind-v4.css?inline";
 import { useEditorData } from "@stores/useEditorData";
 import { useWebsitesStore } from "@/stores/useWebsitesStore";
 import { usePagesStore } from "@/stores/usePagesStore";
-import { puckOverrides, PluginAutoSwitcher, usePuck, EditorContext } from "./overrides/editor-overrides";
-import { PUCK_VIEWPORTS } from "./config/viewports";
+import { puckOverrides, PluginAutoSwitcher, usePuck, EditorContext } from "./puck/overrides/editor-overrides";
+import { PUCK_VIEWPORTS } from "./puck/config/viewports";
 import { api } from "@/lib/client";
 import { Icon } from "@iconify/react";
 
@@ -40,7 +40,7 @@ async function generateCssFromData(config: any, data: Data): Promise<string> {
   return css;
 }
 
-import { layerPlugin } from "./overrides/layer";
+import { layerPlugin } from "./puck/plugins/Layer";
 
 // Custom Settings Panel that Elementor-ifies the Fields view
 const SettingsPanel = () => {

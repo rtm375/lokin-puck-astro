@@ -6,7 +6,7 @@ import {
   BREAKPOINT_PREFIX,
   type BreakpointKey,
 } from "../../config/viewports";
-import type { ResponsiveValue } from "@blockTypes";
+import type { ResponsiveValue } from "@/components/client/website/pages/puck/blocks/types";
 import { useState } from "react";
 
 const usePuck = createUsePuck();

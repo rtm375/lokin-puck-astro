@@ -33,7 +33,7 @@
         "./src/utils/index"
       ],
       "@blockTypes": [
-        "./src/components/client/website/pages/blocks/types.ts"
+        "src/components/client/website/pages/puck/blocks/types.ts"
       ]
     },
     "jsx": "react-jsx",
