@@ -10,26 +10,39 @@ export const POST: APIRoute = async ({ request, cookies, url, locals }) => {
 
   // OAuth
   if (provider === "google") {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (session)
-      return new Response(JSON.stringify({ redirect: "/admin/dashboard" }), {
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (session)
+        return new Response(JSON.stringify({ redirect: "/admin/dashboard" }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: `${url.origin}/api/auth/callback` },
+      });
+
+      if (error)
+        return new Response(JSON.stringify({ error: error.message }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        });
+      return new Response(JSON.stringify({ redirect: data.url }), {
         status: 200,
+        headers: { "Content-Type": "application/json" },
       });
-
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider,
-      options: { redirectTo: `${url.origin}/api/auth/callback` },
-    });
-
-    if (error)
-      return new Response(JSON.stringify({ error: error.message }), {
-        status: 400,
-      });
-    return new Response(JSON.stringify({ redirect: data.url }), {
-      status: 200,
-    });
+    } catch (e: any) {
+      return new Response(
+        JSON.stringify({ error: e?.message || "Internal Server Error" }),
+        {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
   }
 
   // Email/password
@@ -45,7 +58,7 @@ export const POST: APIRoute = async ({ request, cookies, url, locals }) => {
     if (error) {
       return new Response(
         JSON.stringify({ error: error.message, error_code: error.code }),
-        { status: error.status },
+        { status: error.status, headers: { "Content-Type": "application/json" } },
       );
     }
 
@@ -74,6 +87,7 @@ export const POST: APIRoute = async ({ request, cookies, url, locals }) => {
 
     return new Response(JSON.stringify({ redirect: "/admin/dashboard" }), {
       status: 200,
+      headers: { "Content-Type": "application/json" },
       // headers: {
       //   'Set-Cookie': `lang=${lang}; Path=/; Max-Age=31536000; HttpOnly; SameSite=Lax`
       // }
@@ -84,6 +98,7 @@ export const POST: APIRoute = async ({ request, cookies, url, locals }) => {
     JSON.stringify({ error: locals.t("api.auth.invalid_request") }),
     {
       status: 400,
+      headers: { "Content-Type": "application/json" },
     },
   );
 };

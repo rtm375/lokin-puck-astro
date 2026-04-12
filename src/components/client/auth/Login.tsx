@@ -61,7 +61,15 @@ export default function Login() {
         body: formData,
       });
 
-      const json = await res.json();
+      const text = await res.text();
+      let json;
+      try {
+        json = JSON.parse(text);
+      } catch (parseErr) {
+        setFormError(t("auth.messages.unexpected_error"));
+        setLoading(false);
+        return;
+      }
 
       if (json.error) {
         setFormError(json.error);
@@ -90,7 +98,20 @@ export default function Login() {
         body: formData,
       });
 
-      const json = await res.json();
+      const text = await res.text();
+      let json;
+      try {
+        json = JSON.parse(text);
+      } catch (parseErr) {
+        console.error("Non-JSON response received:", text);
+        return;
+      }
+
+      if (json.error) {
+        console.error("Google login API error:", json.error);
+        return;
+      }
+
       if (json.redirect) {
         window.location.href = json.redirect;
       }

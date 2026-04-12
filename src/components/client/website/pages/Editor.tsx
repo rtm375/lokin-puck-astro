@@ -41,6 +41,7 @@ async function generateCssFromData(config: any, data: Data): Promise<string> {
 }
 
 import { layerPlugin } from "./puck/plugins/Layer";
+import { variablesPlugin } from "./puck/plugins/Variables";
 
 // Custom Settings Panel that Elementor-ifies the Fields view
 const SettingsPanel = () => {
@@ -87,7 +88,7 @@ const editorPlugins = [
   {
     name: "fields",
     label: "Settings",
-    icon: <Icon icon="lucide:settings" width={18} />,
+    icon: <Icon icon="lucide:settings" width={24} />,
     render: () => <SettingsPanel />,
     mobileOnly: false,
   },
@@ -319,7 +320,7 @@ export default function PuckEditor() {
             headerPath={websiteSubdomain}
             overrides={staticOverrides}
             viewports={PUCK_VIEWPORTS}
-            plugins={[...editorPlugins, layerPlugin]}
+            plugins={[...editorPlugins, layerPlugin, variablesPlugin]}
             ui={{
               leftSideBarWidth: 240,
               rightSideBarVisible: false

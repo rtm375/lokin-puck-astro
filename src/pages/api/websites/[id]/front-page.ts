@@ -6,7 +6,7 @@ export const POST: APIRoute = async ({ request, params, locals }) => {
   const { supabase } = locals;
   const { id: websiteId } = params;
   const body = await request.json();
-  const { pageId } = body; // null means no front page
+  const { pageId } = body as any; // null means no front page
 
   try {
     // First, unset all front pages for this website

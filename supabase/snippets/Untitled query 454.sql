@@ -1,2 +1,1 @@
-alter table public.pages
-  add column if not exists css text default '';
+alter table public.variables add column skin text not null default 'Default';

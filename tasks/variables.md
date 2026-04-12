@@ -138,6 +138,27 @@ Dropdown:
 
 ---
 
+## Add New Variable
+
+Dropdown
+[ Variable Types ⬇️]
+- Color & Gradient
+- Length & Percentage
+- Box Shadow
+- Text Shadow
+
+On variable type select:
+
+Popout the variable creation based on the variable type (make it modular so easy to add new types and scale)
+- Color & Gradient: Color | Gradient tab
+- Length & Percentage: input + unit tab (px, em, rem, %, etc)
+- Box Shadow: Box Shadow input
+- Text Shadow: Text Shadow input
+
+[Add variable]
+
+---
+
 ## Variable Item
 
 ```

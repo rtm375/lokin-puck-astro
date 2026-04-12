@@ -389,7 +389,7 @@ export const LayerPanel = () => {
 export const layerPlugin = {
   name: "layers",
   label: "Layers",
-  icon: <Icon icon="lucide:layers" width={18} />,
+  icon: <Icon icon="lucide:layers" width={24} />,
   render: () => <LayerPanel />,
   mobileOnly: false,
 };

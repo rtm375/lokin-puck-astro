@@ -68,6 +68,11 @@ export const useWebsitesStore = create<WebsitesState>()(
       storage: createJSONStorage(() => {
         return localStorage;
       }),
+      partialize: (state) => ({
+        ...state,
+        isLoading: false,
+        fetchingWebsites: false,
+      }),
     },
   ),
 );

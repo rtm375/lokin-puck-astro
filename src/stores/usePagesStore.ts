@@ -83,16 +83,21 @@ export const usePagesStore = create<PagesState>()(
         );
         set({ isLoading: false, fetchingWebsiteId: null });
       },
-      fetchPageByPath: async (websiteSubdomain, pagePath) => {
+      fetchPageByPath: async (
+        websiteSubdomain: string,
+        pagePath: string,
+      ): Promise<Page | null> => {
         // Check if we already have it in the list to avoid a network call
-        const existing = get().pages.find(p => p.path === pagePath);
+        const existing = get().pages.find((p) => p.path === pagePath);
         if (existing) return existing;
 
         try {
           // Calling a specific endpoint that finds a page via slugs
-          const res = await fetch(`/api/websites/by-subdomain/${websiteSubdomain}/pages/by-path?path=${pagePath}`);
+          const res = await fetch(
+            `/api/websites/by-subdomain/${websiteSubdomain}/pages/by-path?path=${pagePath}`,
+          );
           if (!res.ok) return null;
-          const data = await res.json();
+          const data = (await res.json()) as Page;
           return data; // Returns the single Page object
         } catch (err) {
           return null;
@@ -124,6 +129,11 @@ export const usePagesStore = create<PagesState>()(
       name: "pages",
       storage: createJSONStorage(() => {
         return localStorage;
+      }),
+      partialize: (state) => ({
+        ...state,
+        isLoading: false,
+        fetchingWebsiteId: null,
       }),
     },
   ),

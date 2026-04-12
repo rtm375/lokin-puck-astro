@@ -11,9 +11,12 @@
     "generate-types": "wrangler types"
   },
   "dependencies": {
+    "@astrojs/check": "^0.9.8",
     "@astrojs/cloudflare": "^13.1.8",
     "@astrojs/react": "^5.0.3",
     "@aws-sdk/client-s3": "^3.1028.0",
+    "@dnd-kit/helpers": "0.1.18",
+    "@dnd-kit/react": "0.1.18",
     "@puckeditor/core": "^0.21.2",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.103.0",
@@ -30,6 +33,7 @@
     "react-dom": "^19.2.5",
     "react-i18next": "^17.0.2",
     "react-router-dom": "^7.14.0",
+    "typescript": "^6.0.2",
     "wrangler": "^4.81.1",
     "zustand": "^5.0.12"
   },

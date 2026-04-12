@@ -66,6 +66,10 @@ body {
   }
 }
 
+[class^="_PuckLayout-nav_"] {
+  border: 0 !important
+}
+
 /* :root [data-dnd-dragging][data-puck-component] {
   overflow: hidden !important;
   --dnd-width: 99px !important;
