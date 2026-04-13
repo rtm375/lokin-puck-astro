@@ -5,8 +5,7 @@ import type {
 } from "@/components/client/website/pages/puck/blocks/types";
 import { useTranslation } from "react-i18next";
 import {
-  Container,
-  createFlexConfig,
+  createContainerConfig,
   Hero,
   HeroSlider,
   Text,
@@ -33,16 +32,15 @@ export const getConfig = (
         components: ["Text", "GlobalComponent"],
       },
       layout: {
-        components: ["Flex"],
+        components: ["Container"],
       },
       hero: {
         components: ["Hero", "HeroSlider"],
       },
     },
     components: {
-      Container,
+      Container: createContainerConfig(t),
       Text,
-      Flex: createFlexConfig(t),
       Hero,
       HeroSlider,
       GlobalComponent: {

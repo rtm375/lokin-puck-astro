@@ -171,3 +171,18 @@ export interface Variable {
   created_at: string;
   updated_at: string;
 }
+
+// ============================================================================
+// Classes
+// ============================================================================
+
+export interface Class {
+  id: string;
+  website_id: string;
+  name: string;
+  parent_id: string | null;
+  styles: Record<string, any>;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}

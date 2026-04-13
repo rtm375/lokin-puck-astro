@@ -31,7 +31,9 @@ export type ResponsiveSize = {
 
 export type Props = {
   Container: {
-    content: string;
+    classes: string[];
+    styles: Record<string, any>; // format: { [pseudo]: { [breakpoint]: { [prop]: value } } }
+    items: Slot;
   };
   Text: {
     content: string;
@@ -42,47 +44,6 @@ export type Props = {
     padding: number;
     textColor: string;
     alignment: ResponsiveValue<"left" | "center" | "right">;
-  };
-  Flex: {
-    frame: {
-      contentWidth: "boxed" | "full";
-      width: ResponsiveSize;
-      minHeight: ResponsiveSize;
-      direction: ResponsiveValue<
-        "" | "flex-row" | "flex-col" | "flex-row-reverse" | "flex-col-reverse"
-      >;
-      justifyContent: ResponsiveValue<
-        | ""
-        | "justify-normal"
-        | "justify-start"
-        | "justify-center"
-        | "justify-end"
-        | "justify-between"
-        | "justify-around"
-        | "justify-evenly"
-        | "justify-stretch"
-      >;
-      alignItems: ResponsiveValue<
-        | ""
-        | "items-start"
-        | "items-center"
-        | "items-end"
-        | "items-baseline"
-        | "items-stretch"
-      >;
-      gaps: {
-        row: ResponsiveValue<string>;
-        column: ResponsiveValue<string>;
-        rowCustom?: ResponsiveValue<number>;
-        columnCustom?: ResponsiveValue<number>;
-        unit?: ResponsiveValue<string>;
-        lock: boolean;
-      };
-      wrap: ResponsiveValue<"" | "flex-wrap" | "flex-nowrap" | "flex-wrap-reverse">;
-      margin: ResponsiveSpacing;
-      padding: ResponsiveSpacing;
-    };
-    items: Slot;
   };
   HeroSlider: {
     slides: { imageUrl: string; caption: string }[];
