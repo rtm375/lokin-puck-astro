@@ -1,52 +1,13 @@
-/* @import "tailwindcss";
+@import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
   --color-primary: #f3602a;
   --text-sm--line-height: 1;
-} */
+}
 
-/* :root {
-  --puck-color-azure-01: #2d0f05;
-  --puck-color-azure-02: #4a1808;
-  --puck-color-azure-03: #6e240c;
-  --puck-color-azure-04: #983210;
-  --puck-color-azure-05: #c74116;
-  --puck-color-azure-06: #f3602a;
-  --puck-color-azure-07: #f58055;
-  --puck-color-azure-08: #f8a07f;
-  --puck-color-azure-09: #fac0aa;
-  --puck-color-azure-10: #fde0d4;
-  --puck-color-azure-11: #fef0e9;
-  --puck-color-azure-12: #fffaf8;
-  --puck-color-grey-01: #1a1a1a;
-  --puck-color-grey-02: #262626;
-  --puck-color-grey-03: #333333;
-  --puck-color-grey-04: #4d4d4d;
-  --puck-color-grey-05: #666666;
-  --puck-color-grey-06: #808080;
-  --puck-color-grey-07: #999999;
-  --puck-color-grey-08: #b3b3b3;
-  --puck-color-grey-09: #cccccc;
-  --puck-color-grey-10: #e5e5e5;
-  --puck-color-grey-11: #f2f2f2;
-  --puck-color-grey-12: #fafafa;
-  --puck-color-green-01: #052e16;
-  --puck-color-green-06: #16a34a;
-  --puck-color-green-10: #dcfce7;
-  --puck-color-red-01: #450a0a;
-  --puck-color-red-06: #dc2626;
-  --puck-color-red-10: #fee2e2;
-  --puck-color-rose-01: #1e1b4b;
-  --puck-color-rose-06: #4f46e5;
-  --puck-color-rose-10: #e0e7ff;
-  --puck-color-yellow-01: #422006;
-  --puck-color-yellow-06: #ca8a04;
-  --puck-color-yellow-10: #fef9c3;
-  --puck-color-black: #020617;
-  --puck-color-white: #ffffff;
-} */
+@import "./puck-vars.css";
 
 body {
   margin: 0;
@@ -66,10 +27,6 @@ body {
   }
 }
 
-[class^="_PuckLayout-nav_"] {
-  border: 0 !important
-}
-
 /* :root [data-dnd-dragging][data-puck-component] {
   overflow: hidden !important;
   --dnd-width: 99px !important;
@@ -80,38 +37,34 @@ body {
   background-color: red !important;
 } */
 
+[class^="_DropZone_"] {
+  @apply h-auto
+}
 [class^="_DropZone--hasChildren_"] {
-  min-height: inherit;
+  @apply min-h-['inherit']
+}
+
+[class^="_ComponentList-title_"] {
+  @apply items-center
 }
 
 [class^="_PuckFields-field"] {
-  margin-top: 0 !important;
+  @apply mt-0 p-2
 }
 
-[class^="_PuckFields-field"] {
-  padding: 15px !important;
-}
-
-[class*="_ComponentList-content_"]>* {
-  display: grid !important;
-  ;
-  grid-template-columns: repeat(2, 1fr) !important;
-  ;
-  gap: 12px;
-  min-width: 0 !important;
+[class*="_Drawer_"]{
+  @apply grid grid-cols-2 gap-4 min-w-0
 }
 
 #frame-root>[class^="_DropZone_"]:empty {
-  background: white !important;
-  outline: 0 !important;
+  @apply bg-white outline-0 min-h-screen!
 }
 
 #frame-root>[class^="_DropZone_"]:empty:before {
-  background: white !important;
-  outline: 0 !important;
-  content: "Drag any widget here to start";
-  display: flex;
-  height: 100%;
-  align-items: center;
-  justify-content: center;
+  @apply bg-white outline-0 content-["Drag_any_widget_here_to_start"] flex h-full items-center justify-center absolute left-0 right-0 border-2 border-dashed border-primary;
+  --min-empty-height: 100vh !important
+}
+
+[class^="_Sidebar_"] {
+  @apply bg-white
 }

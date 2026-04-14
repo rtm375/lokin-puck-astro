@@ -57,6 +57,7 @@ export default function WebsitesList() {
   };
 
   if (!profile || !loaded) {
+    console.log(profile, loaded)
     return <div className="p-10 text-center">Loading...</div>;
   }
 

@@ -4,13 +4,13 @@ import type { Data } from "@puckeditor/core";
 import type {
   Props,
   RootProps,
-} from "@/components/client/website/pages/puck/blocks/types";
-import { shouldFetch, fetchData } from "@/utils/fetchHelpers";
+} from "@/components/client/website/pages/editor/puck/blocks/types";
+import { fetchData } from "@/utils/fetchHelpers";
 
 interface EditorState {
   pages: Record<string, Data<Props, RootProps>>;
   isLoading: boolean;
-  fetchingPageKey: string | null; // Track which page is being fetched
+  fetchingPageKey: string | null;
   error: string | null;
   fetchEditorData: (
     websiteId: string,
@@ -39,10 +39,14 @@ export const useEditorData = create<EditorState>()(
         const pageKey = `${websiteId}-${pageId}`;
         const { fetchingPageKey, pages } = get();
 
-        // Smart caching: skip if already have data for this page
-        const hasDataForPage = !!pages[pageKey];
-        if (!shouldFetch(fetchingPageKey, pageKey, hasDataForPage, force)) {
+        // Prevent duplicate concurrent fetches
+        if (fetchingPageKey === pageKey) {
           return pages[pageKey] || null;
+        }
+
+        // Return cached data unless forced
+        if (!force && pages[pageKey]) {
+          return pages[pageKey];
         }
 
         set({ isLoading: true, fetchingPageKey: pageKey });
@@ -60,7 +64,7 @@ export const useEditorData = create<EditorState>()(
               content: [],
               zones: {},
             };
-            // Store in cache
+            // Store in cache (this will persist to localStorage)
             set((state) => ({
               pages: { ...state.pages, [pageKey]: dbData },
             }));
@@ -108,6 +112,7 @@ export const useEditorData = create<EditorState>()(
           delete newPages[key];
           return { pages: newPages };
         }),
+
       reset: () => {
         set({
           pages: {},

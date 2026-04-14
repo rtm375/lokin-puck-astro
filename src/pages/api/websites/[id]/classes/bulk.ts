@@ -39,6 +39,7 @@ export const POST = apiHandler(async (ctx) => {
           id: c.id,
           website_id: id,
           name: c.name,
+          css_class_name: c.css_class_name || null,
           parent_id: c.parent_id,
           styles: c.styles,
           sort_order: c.sort_order,

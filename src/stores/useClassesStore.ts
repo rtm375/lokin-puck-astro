@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { api } from "@/lib/client/api";
 import { type Class } from "@/types";
+import { generateCSSClassName } from "@/components/client/website/pages/editor/core/css-engine";
 
 interface ClassesState {
   classes: Class[];
@@ -41,10 +42,23 @@ export const useClassesStore = create<ClassesState>()(
         set({ isLoading: true, error: null });
         try {
           const classes = await api.get<Class[]>(`/api/websites/${websiteId}/classes`);
+          // Ensure all classes have CSS class names
+          let needsUpdate = false;
+          const classesWithNames = classes.map(cls => {
+            if (!cls.css_class_name) {
+              needsUpdate = true;
+              return {
+                ...cls,
+                css_class_name: generateCSSClassName()
+              };
+            }
+            return cls;
+          });
+          
           set({
-            classes: classes.sort((a, b) => a.sort_order - b.sort_order),
+            classes: classesWithNames.sort((a, b) => a.sort_order - b.sort_order),
             isLoading: false,
-            hasUnsavedChanges: false
+            hasUnsavedChanges: needsUpdate // Mark as changed if we generated names
           });
         } catch (error: any) {
           set({ error: error.message, isLoading: false });
@@ -71,6 +85,7 @@ export const useClassesStore = create<ClassesState>()(
           id: tempId,
           website_id: websiteId,
           name: data.name || "New Class",
+          css_class_name: data.css_class_name || generateCSSClassName(),
           parent_id: data.parent_id || null,
           styles: data.styles || {},
           sort_order: data.sort_order || get().classes.length,

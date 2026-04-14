@@ -9,7 +9,6 @@ import { useTranslation } from "react-i18next";
 import NavWebsites from "./Navigation";
 import Pages from "./pages/Pages";
 import PuckEditor from "./pages/Editor";
-import PuckPreview from "./pages/Preview";
 import Files from "./pages/Files";
 import Products from "./pages/Products";
 import Forms from "./pages/Forms";
@@ -58,10 +57,6 @@ export const Websites = ({ user }: { user: any }) => {
         {
           path: "pages/:pagePath/editor",
           element: <PuckEditor />,
-        },
-        {
-          path: "pages/:pagePath/preview",
-          element: <PuckPreview />,
         },
 
         // 2. Dashboard Routes (With Sidebar)

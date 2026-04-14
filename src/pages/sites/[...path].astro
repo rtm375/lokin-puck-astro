@@ -1,9 +1,6 @@
 ---
 import { Render } from "@puckeditor/core";
-import { getConfig } from "@/lib";
-import { scriptRegistry } from "@/lib";
-// Import pageCache directly — NOT via @/lib/server barrel which could transitively
-// pull in css-engine.ts → unocss → @oxc-parser native bindings (incompatible with workerd)
+import { getConfig, scriptRegistry } from "@components/client/website/pages/editor/puck/config";
 import { pageCache } from "@/lib/server/page-cache";
 
 import { renderToStaticMarkup } from "react-dom/server";
@@ -34,7 +31,7 @@ if (cachedPage) {
     // Fetch by path
     let { data } = await supabase
       .from("pages")
-      .select("data, title, head_code, is_front_page, css")
+      .select("data, title, head_code, is_front_page")
       .eq("website_id", websiteId)
       .eq("path", pagePath)
       .single();
@@ -48,7 +45,7 @@ if (cachedPage) {
     // Root request: try is_front_page = true
     let { data } = await supabase
       .from("pages")
-      .select("data, title, head_code, is_front_page, css")
+      .select("data, title, head_code, is_front_page")
       .eq("website_id", websiteId)
       .eq("is_front_page", true)
       .single();
@@ -58,7 +55,7 @@ if (cachedPage) {
     if (!page) {
       const res = await supabase
         .from("pages")
-        .select("data, title, head_code, is_front_page, css")
+        .select("data, title, head_code, is_front_page")
         .eq("website_id", websiteId)
         .eq("path", "index")
         .single();
@@ -77,11 +74,7 @@ if (!page) {
 
 const puckData = page.data;
 
-// CSS was pre-generated at publish time (editor-save.ts) and stored in the DB.
-// No UnoCSS at request time — the CF Worker just reads this string.
-const generatedCss: string = page.css ?? "";
-
-// Render HTML for the page body (no UnoCSS needed here)
+// Render HTML for the page body
 const config = getConfig((key: string) => key, []);
 const contentHtml = renderToStaticMarkup(
   React.createElement(Render as any, {
@@ -98,7 +91,7 @@ const scanData = (items: any[]) => {
   items.forEach((item) => {
     const type = item.type;
     if (scriptRegistry[type]) {
-      scriptRegistry[type].forEach((url) => {
+      scriptRegistry[type].forEach((url: any) => {
         url.endsWith(".css") ? styles.add(url) : scripts.add(url);
       });
     }
@@ -117,8 +110,10 @@ if (puckData.content) scanData(puckData.content);
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{page.title || "My Page"}</title>
     {Array.from(styles).map((url) => <link rel="stylesheet" href={url} />)}
-    {generatedCss && <style set:html={generatedCss}></style>}
     {page.head_code && <Fragment set:html={page.head_code} />}
+    <style>
+      @import "tailwindcss/preflight.css" layer(base);
+    </style>
   </head>
   <body>
     <Fragment set:html={contentHtml} />

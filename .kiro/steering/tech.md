@@ -8,9 +8,8 @@
 
 ## Styling
 
-- **UnoCSS**: Atomic CSS with Wind4 preset (Tailwind v4 compatible)
+- **TailwindCSS**: Atomic CSS with Wind4 preset (Tailwind v4 compatible)
 - Primary color: `#f3602a`
-- Config: `uno.config.ts`
 - Scoped to `src/components/client/**/*.{tsx,ts}`
 
 ## State Management

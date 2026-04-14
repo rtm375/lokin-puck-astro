@@ -180,6 +180,7 @@ export interface Class {
   id: string;
   website_id: string;
   name: string;
+  css_class_name?: string; // Generated CSS class name (e.g., LCLS_WFxqwc)
   parent_id: string | null;
   styles: Record<string, any>;
   sort_order: number;

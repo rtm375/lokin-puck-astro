@@ -9,7 +9,6 @@
     "dist"
   ],
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
       "@/*": [
         "./src/*"
@@ -33,7 +32,7 @@
         "./src/utils/index"
       ],
       "@blockTypes": [
-        "src/components/client/website/pages/puck/blocks/types.ts"
+        "./src/components/client/website/pages/editor/puck/blocks/types.ts"
       ]
     },
     "jsx": "react-jsx",

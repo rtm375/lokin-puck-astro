@@ -1,7 +1,7 @@
 # Class System
 
 ## Objective
-Refactor current Flex block to Container block and add class system with variable system to it. Once this success, we will refactor all blocks to use this system. And remove current unocss run time pre generated css.
+Refactor current Flex block to Container block and add class system with variable system to it. Once this success, we will refactor all blocks to use this system. And remove current tailwindcss run time pre generated css.
 
 **Path**
 `src/components/client/website/pages/puck/plugins/Classes.tsx`

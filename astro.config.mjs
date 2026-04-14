@@ -1,7 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
-import UnoCSS from 'unocss/astro'
+import tailwindcss from "@tailwindcss/vite";
 
 import cloudflare from '@astrojs/cloudflare';
 
@@ -16,13 +16,13 @@ export default defineConfig({
     allowedHosts: true
   },
   integrations: [
-    react(),
-    UnoCSS()
+    react()
   ],
   adapter: cloudflare(),
   vite: {
     build: {
       chunkSizeWarningLimit: 1000,
     },
+    plugins: [tailwindcss()]
   },
 });

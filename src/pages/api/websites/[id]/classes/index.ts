@@ -32,6 +32,7 @@ export const POST = apiHandler(async (ctx) => {
     .insert({
       website_id: id,
       name: body.name,
+      css_class_name: body.css_class_name || null,
       parent_id: body.parent_id || null,
       styles: body.styles || {},
       sort_order: body.sort_order ?? 0,

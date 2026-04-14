@@ -21,7 +21,7 @@ trigger: always_on
 
 - Astro + React + TypeScript hybrid.
 - Use functional components + hooks.
-- Uno css
+- Tailwind css
 - Use a state manager Zustand
 - Use Zod for all schema validations.
 - All astro components inside /astro-app/src/components

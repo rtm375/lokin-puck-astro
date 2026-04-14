@@ -39,7 +39,7 @@ class ApiClient {
           throw new Error("Unauthorized or Data Not Found");
         }
 
-        const errorData = await response.json().catch(() => ({}));
+        const errorData = await response.json().catch(() => ({})) as any;
         throw new Error(
           errorData.error || `Request failed with status ${response.status}`,
         );
@@ -110,7 +110,7 @@ class ApiClient {
           throw new Error("Unauthorized or Data Not Found");
         }
 
-        const errorData = await response.json().catch(() => ({}));
+        const errorData = await response.json().catch(() => ({})) as any;
         throw new Error(
           errorData.error || `Upload failed with status ${response.status}`,
         );

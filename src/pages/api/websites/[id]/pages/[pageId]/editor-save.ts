@@ -9,10 +9,6 @@ export const POST: APIRoute = async ({ request, params, locals }) => {
     const { id, pageId } = params;
     const body = (await request.json()) as { data: Data; css?: string };
     const puckData: Data = body.data;
-    // CSS is generated client-side (browser) by the editor before publishing,
-    // then sent along with the data. The server just stores it.
-    // This avoids running UnoCSS (which needs @oxc-parser native bindings)
-    // inside the Cloudflare Workers runtime (workerd).
     const generatedCss: string = body.css ?? "";
 
     if (!puckData) return new Response("Missing Data", { status: 400 });
