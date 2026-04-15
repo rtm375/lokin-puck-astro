@@ -11,11 +11,11 @@ import { type BreakpointKey, getInheritanceChain, mergeStyles, generateCSS, getC
 import { useEditorContext } from "@/components/client/website/pages/editor/core/editorProvider";
 import { type Class } from "@/types";
 import {
-  ClassSizeControl,
   ClassOptionGroup,
+  ClassSizeControl,
   ClassSpacingControl,
   ClassGapControl,
-} from "../shared/ClassControls";
+} from "../shared/ResponsiveControls";
 
 const baseBlockStyles = {
   normal: {
@@ -208,6 +208,8 @@ export const createContainerConfig = (
                     value={current.justifyContent}
                     onChange={(val: string) => handleUpdate({ justifyContent: val })}
                     disabled={isAnyOverridden("justifyContent")}
+                    controlType="justify"
+                    direction={current.flexDirection || computed.final.flexDirection}
                     options={[
                       { label: "Start", value: "flex-start", icon: "material-symbols-light:align-justify-flex-start" },
                       { label: "Center", value: "center", icon: "material-symbols-light:align-justify-center" },
@@ -220,6 +222,8 @@ export const createContainerConfig = (
                     value={current.alignItems}
                     onChange={(val: string) => handleUpdate({ alignItems: val })}
                     disabled={isAnyOverridden("alignItems")}
+                    controlType="align"
+                    direction={current.flexDirection || computed.final.flexDirection}
                     options={[
                       { label: "Start", value: "flex-start", icon: "material-symbols-light:align-vertical-top" },
                       { label: "Center", value: "center", icon: "material-symbols-light:align-vertical-center" },

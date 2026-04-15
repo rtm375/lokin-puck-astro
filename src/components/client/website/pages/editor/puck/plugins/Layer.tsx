@@ -86,7 +86,7 @@ const findListAndIndex = (data: any, id: string) => {
 /**
  * Resolve the Puck zone string for an item given its parentId, slotKey, and zoneKey.
  */
-const resolveZone = (parentId: string | null, slotKey: string | null, zoneKey: string) => {
+const resolveZone = (parentId: string | null, slotKey: string | null, _zoneKey: string) => {
   if (parentId && slotKey) return `${parentId}:${slotKey}`;
   return "root:default-zone";
 };
@@ -99,7 +99,7 @@ type ContextMenuInfo = {
   zone: string;
 };
 
-const LayerContextMenu = ({ x, y, item, index, zone, onClose, appState, dispatch, config, setEditingId }: any) => {
+const LayerContextMenu = ({ x, y, item, index, zone, onClose, appState, dispatch, setEditingId }: any) => {
   const handleAction = (action: string) => {
     if (action === "duplicate") {
       dispatch({

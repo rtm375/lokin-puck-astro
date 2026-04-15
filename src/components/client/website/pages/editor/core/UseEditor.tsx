@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 import { useEditorLoader } from "@/components/client/website/pages/editor/data/useEditorLoader";
 import { useEditorPersistence } from "@/components/client/website/pages/editor/data/useEditorPersistence";
 import { publishPage } from "@/components/client/website/pages/editor/publish/publishPage";
-import { useConfig } from "@/lib";
+import { useConfig } from "@/components/client/website/pages/editor/puck/config";
 
 export function useEditor() {
   const config = useConfig();
