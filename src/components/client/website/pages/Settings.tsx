@@ -3,36 +3,33 @@ import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { api } from "@/lib/client";
-import { useWebsitesStore } from "@/stores/useWebsitesStore";
-import { useDomainsStore, type Domain } from "@/stores/useDomainsStore";
-import { usePagesStore } from "@/stores/usePagesStore";
+import { useWebsitesQuery } from "@/hooks/queries/useWebsitesQuery";
+import {
+  useDomainsQuery,
+  useAddDomainMutation,
+  useVerifyDomainMutation,
+  useDeleteDomainMutation,
+} from "@/hooks/queries/useDomainsQuery";
+import { usePagesQuery } from "@/hooks/queries/usePagesQuery";
 
 export default function Settings() {
   const { t } = useTranslation();
   const { subdomain } = useParams<{ subdomain: string }>();
-  const { websites } = useWebsitesStore();
+  const { data: websites = [] } = useWebsitesQuery();
   const currentWebsite = websites.find((w) => w.subdomain === subdomain);
   const websiteId = currentWebsite?.id;
 
-  const {
-    domains,
-    fetchDomains,
-    updateDomain,
-    deleteDomain: removeDomain,
-  } = useDomainsStore();
-  const { pages, fetchPages } = usePagesStore();
+  const { data: domains = [] } = useDomainsQuery(websiteId);
+  const { data: pagesData } = usePagesQuery(websiteId);
+  const pages = pagesData?.pages || [];
+
+  const addDomainMut = useAddDomainMutation(websiteId);
+  const verifyDomainMut = useVerifyDomainMutation(websiteId);
+  const deleteDomainMut = useDeleteDomainMutation(websiteId);
+
   const [newDomain, setNewDomain] = useState("");
-  const [isAdding, setIsAdding] = useState(false);
   const [frontPageId, setFrontPageId] = useState<string>("");
   const [isSavingFrontPage, setIsSavingFrontPage] = useState(false);
-
-  // Fetch Domains and Pages
-  useEffect(() => {
-    if (websiteId) {
-      fetchDomains(websiteId);
-      fetchPages(websiteId);
-    }
-  }, [websiteId, fetchDomains, fetchPages]);
 
   // Set initial front page from pages data
   useEffect(() => {
@@ -45,21 +42,11 @@ export default function Settings() {
   // Add Domain
   const handleAddDomain = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsAdding(true);
     try {
-      const addedDomain = await api.post<Domain>(
-        `/api/websites/${websiteId}/domains`,
-        {
-          domain: newDomain,
-        },
-      );
-
-      useDomainsStore.getState().addDomain(addedDomain);
+      await addDomainMut.mutateAsync(newDomain);
       setNewDomain("");
     } catch (err) {
       alert(t("websites_page.settings.domains.error_add"));
-    } finally {
-      setIsAdding(false);
     }
   };
 
@@ -73,17 +60,8 @@ export default function Settings() {
     }
 
     try {
-      const data = await api.post<{ verified: boolean }>(
-        `/api/websites/${websiteId}/domains/verify`,
-        { domain },
-      );
-
+      const data = await verifyDomainMut.mutateAsync(domain);
       if (data.verified) {
-        // Update store
-        const targetDomain = domains.find((d) => d.domain === domain);
-        if (targetDomain) {
-          updateDomain({ ...targetDomain, status: "active" });
-        }
         alert(t("websites_page.settings.domains.success_verify"));
       } else {
         alert(t("websites_page.settings.domains.fail_verify"));
@@ -105,8 +83,7 @@ export default function Settings() {
     )
       return;
     try {
-      await api.delete(`/api/websites/${websiteId}/domains/${domain}`);
-      removeDomain(domain);
+      await deleteDomainMut.mutateAsync(domain);
     } catch (err) {
       alert(t("websites_page.settings.domains.error_delete"));
     }
@@ -119,14 +96,6 @@ export default function Settings() {
       await api.post(`/api/websites/${websiteId}/front-page`, {
         pageId: frontPageId || null,
       });
-
-      // Update local pages store
-      const updatedPages = pages.map((p) => ({
-        ...p,
-        is_front_page: p.id === frontPageId,
-      }));
-      usePagesStore.getState().setPages(updatedPages);
-
       alert(t("websites_page.settings.reading.success"));
     } catch (err) {
       alert(t("websites_page.settings.reading.error"));
@@ -225,15 +194,6 @@ export default function Settings() {
 
                   {d.type === "custom" && (
                     <div className="flex items-center gap-2">
-                      {/* {d.status === "pending" && (
-                        <button
-                          id={`verify-btn-${d.domain}`}
-                          onClick={() => handleVerify(d.domain)}
-                          className="text-xs bg-white border border-gray-300 text-gray-700 px-2 py-1 rounded hover:bg-gray-50"
-                        >
-                          Verify
-                        </button>
-                      )} */}
                       <button
                         id={`verify-btn-${d.domain}`}
                         onClick={() => handleVerify(d.domain)}
@@ -265,10 +225,10 @@ export default function Settings() {
               />
               <button
                 type="submit"
-                disabled={isAdding}
+                disabled={addDomainMut.isPending}
                 className="px-4 py-2 bg-primary text-white font-medium rounded-md hover:bg-primary/90 disabled:opacity-50"
               >
-                {isAdding
+                {addDomainMut.isPending
                   ? t("websites_page.settings.domains.adding")
                   : t("websites_page.settings.domains.add")}
               </button>

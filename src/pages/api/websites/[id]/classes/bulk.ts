@@ -8,10 +8,33 @@ export const POST = apiHandler(async (ctx) => {
   const body = (await ctx.request.json()) as any;
   await requireWebsite(supabase, id);
 
-  const { classes } = body;
+  const { classes, _savedAt } = body;
 
   if (!Array.isArray(classes)) {
     throw new APIError("Invalid payload", 400);
+  }
+
+  // Conflict detection: check if server data was modified since client last fetched
+  if (_savedAt) {
+    const { data: latestRows } = await supabase
+      .from("classes")
+      .select("updated_at")
+      .eq("website_id", id)
+      .order("updated_at", { ascending: false })
+      .limit(1);
+
+    if (latestRows && latestRows.length > 0) {
+      const serverUpdatedAt = new Date(latestRows[0].updated_at).getTime();
+      const clientSavedAt = new Date(_savedAt).getTime();
+      if (serverUpdatedAt > clientSavedAt) {
+        return {
+          error: "CONFLICT",
+          message: "Data was modified on another device",
+          serverUpdatedAt: latestRows[0].updated_at,
+          _status: 409,
+        };
+      }
+    }
   }
 
   // 1. Delete classes that are not in the payload
@@ -30,6 +53,8 @@ export const POST = apiHandler(async (ctx) => {
       .eq("website_id", id);
   }
 
+  const now = new Date().toISOString();
+
   // 2. Upsert classes
   if (classes.length > 0) {
     const { error: classesError } = await supabase
@@ -43,11 +68,12 @@ export const POST = apiHandler(async (ctx) => {
           parent_id: c.parent_id,
           styles: c.styles,
           sort_order: c.sort_order,
+          updated_at: now,
         })),
         { onConflict: "id" }
       );
     if (classesError) throw classesError;
   }
 
-  return { success: true };
+  return { success: true, updatedAt: now };
 });

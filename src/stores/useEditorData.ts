@@ -5,126 +5,83 @@ import type {
   Props,
   RootProps,
 } from "@/components/client/website/pages/editor/puck/blocks/types";
-import { fetchData } from "@/utils/fetchHelpers";
 
+/**
+ * Editor data store — handles local draft state for the page being edited.
+ * Server fetching is handled by useEditorDataQuery.
+ * This store only holds the live draft (pending changes before save).
+ */
 interface EditorState {
-  pages: Record<string, Data<Props, RootProps>>;
-  isLoading: boolean;
-  fetchingPageKey: string | null;
-  error: string | null;
-  fetchEditorData: (
-    websiteId: string,
-    pagePath: string,
-    force?: boolean,
-  ) => Promise<Data<Props, RootProps> | null>;
-  setPageData: (key: string, data: Data<Props, RootProps>) => void;
-  getPageData: (key: string) => Data<Props, RootProps> | null;
-  clearPageData: (key: string) => void;
+  // Current draft being edited (one page at a time)
+  draftKey: string | null; // "websiteId-pageId"
+  draftData: Data<Props, RootProps> | null;
+  hasUnsavedChanges: boolean;
+  _savedAt: string | null;
+
+  // Actions
+  setDraft: (key: string, data: Data<Props, RootProps>, savedAt?: string) => void;
+  updateDraft: (data: Data<Props, RootProps>) => void;
+  markSaved: (updatedAt: string) => void;
+  discardDraft: () => void;
   reset: () => void;
 }
 
 export const useEditorData = create<EditorState>()(
   persist(
     (set, get) => ({
-      pages: {},
-      isLoading: false,
-      fetchingPageKey: null,
-      error: null,
+      draftKey: null,
+      draftData: null,
+      hasUnsavedChanges: false,
+      _savedAt: null,
 
-      fetchEditorData: async (
-        websiteId: string,
-        pageId: string,
-        force: boolean = false,
-      ) => {
-        const pageKey = `${websiteId}-${pageId}`;
-        const { fetchingPageKey, pages } = get();
-
-        // Prevent duplicate concurrent fetches
-        if (fetchingPageKey === pageKey) {
-          return pages[pageKey] || null;
-        }
-
-        // Return cached data unless forced
-        if (!force && pages[pageKey]) {
-          return pages[pageKey];
-        }
-
-        set({ isLoading: true, fetchingPageKey: pageKey });
-
-        let result: Data<Props, RootProps> | null = null;
-        await fetchData<any>(
-          `/api/websites/${websiteId}/pages/${pageId}/editor-data`,
-          (dbPage) => {
-            const dbData = dbPage.data || {
-              root: {
-                props: {
-                  title: dbPage.title || "New Page",
-                },
-              },
-              content: [],
-              zones: {},
-            };
-            // Store in cache (this will persist to localStorage)
-            set((state) => ({
-              pages: { ...state.pages, [pageKey]: dbData },
-            }));
-            result = dbData;
-          },
-          (err) => console.error("Failed to fetch editor data", err),
-        );
-
-        set({ isLoading: false, fetchingPageKey: null });
-        return result;
+      setDraft: (key, data, savedAt) => {
+        set({
+          draftKey: key,
+          draftData: data,
+          _savedAt: savedAt || new Date().toISOString(),
+          hasUnsavedChanges: false,
+        });
       },
 
-      setPageData: (key, data) =>
-        set((state) => {
-          const newPages = { ...state.pages, [key]: data };
-
-          // Enforce uniqueness: If this page is set as Front Page, unset others
-          if (data.root?.props?.isFrontPage) {
-            Object.keys(newPages).forEach((k) => {
-              if (k !== key && newPages[k]?.root?.props?.isFrontPage) {
-                newPages[k] = {
-                  ...newPages[k],
-                  root: {
-                    ...newPages[k].root!,
-                    props: {
-                      ...newPages[k].root!.props!,
-                      isFrontPage: false,
-                    },
-                  },
-                };
-              }
-            });
-          }
-
-          return { pages: newPages };
-        }),
-
-      getPageData: (key) => {
-        return get().pages[key] || null;
+      updateDraft: (data) => {
+        // Enforce front page uniqueness
+        if (data.root?.props?.isFrontPage) {
+          // This is now only relevant for the current draft
+        }
+        set({ draftData: data, hasUnsavedChanges: true });
       },
 
-      clearPageData: (key) =>
-        set((state) => {
-          const newPages = { ...state.pages };
-          delete newPages[key];
-          return { pages: newPages };
-        }),
+      markSaved: (updatedAt) => {
+        set({ hasUnsavedChanges: false, _savedAt: updatedAt });
+      },
+
+      discardDraft: () => {
+        set({
+          draftKey: null,
+          draftData: null,
+          hasUnsavedChanges: false,
+          _savedAt: null,
+        });
+      },
 
       reset: () => {
         set({
-          pages: {},
-          isLoading: false,
-          fetchingPageKey: null,
-          error: null,
+          draftKey: null,
+          draftData: null,
+          hasUnsavedChanges: false,
+          _savedAt: null,
         });
       },
     }),
     {
-      name: "editor-data",
+      name: "editor-draft",
       storage: createJSONStorage(() => localStorage),
-    },
-  ),
+      partialize: (state) => ({
+        draftKey: state.draftKey,
+        draftData: state.draftData,
+        hasUnsavedChanges: state.hasUnsavedChanges,
+        _savedAt: state._savedAt,
+      }),
+    }
+  )
 );

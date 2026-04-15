@@ -4,46 +4,40 @@ import { useParams, Link } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { format } from "date-fns";
 import { api } from "@/lib/client";
-import { useWebsitesStore } from "@/stores/useWebsitesStore";
-import { usePagesStore, type Page } from "@/stores/usePagesStore";
+import { useWebsitesQuery } from "@/hooks/queries/useWebsitesQuery";
+import {
+  usePagesQuery,
+  useCreatePageMutation,
+  useUpdatePageMutation,
+  useDeletePageMutation,
+} from "@/hooks/queries/usePagesQuery";
+import type { Page } from "@/types";
 
 export default function Pages() {
   const { t } = useTranslation();
   const { subdomain: websiteSubdomain } = useParams<{ subdomain: string }>();
-  const { websites } = useWebsitesStore();
+  const { data: websites = [] } = useWebsitesQuery();
   const currentWebsite = websites.find((w) => w.subdomain === websiteSubdomain);
   const websiteId = currentWebsite?.id;
 
-  const {
-    pages,
-    isLoading,
-    fetchPages,
-    addPage,
-    updatePage,
-    deletePage,
-    currentPage,
-    totalPages,
-    total,
-    setCurrentPage,
-  } = usePagesStore();
+  const [currentPage, setCurrentPage] = useState(1);
+  const { data: pagesData, isLoading } = usePagesQuery(websiteId, currentPage);
+  const pages = pagesData?.pages || [];
+  const totalPages = pagesData?.totalPages || 1;
+  const total = pagesData?.total || 0;
+
+  const createPage = useCreatePageMutation(websiteId);
+  const updatePageMut = useUpdatePageMutation(websiteId);
+  const deletePageMut = useDeletePageMutation(websiteId);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPage, setEditingPage] = useState<Page | null>(null);
-
-  useEffect(() => {
-    if (websiteId) {
-      fetchPages(websiteId, currentPage);
-    }
-  }, [websiteId, currentPage, fetchPages]);
 
   // --- Actions ---
   const handleDelete = async (pageId: string) => {
     if (!confirm(t("websites_page.pages.confirm_delete"))) return;
-
     try {
-      await api.delete(`/api/websites/${websiteId}/pages/${pageId}`);
-
-      // Update local state
-      deletePage(pageId);
+      await deletePageMut.mutateAsync(pageId);
       if (editingPage?.id === pageId) setIsModalOpen(false);
     } catch (error) {
       alert(t("websites_page.pages.delete_error"));
@@ -238,12 +232,7 @@ export default function Pages() {
           page={editingPage}
           websiteSubdomain={websiteSubdomain!}
           websiteId={websiteId}
-          onSuccess={(updatedPage, isNew) => {
-            if (isNew) {
-              addPage(updatedPage);
-            } else {
-              updatePage(updatedPage);
-            }
+          onSuccess={() => {
             setIsModalOpen(false);
           }}
           onDelete={handleDelete}
@@ -260,7 +249,7 @@ interface PageSettingsProps {
   page: Page | null;
   websiteSubdomain: string;
   websiteId?: string;
-  onSuccess: (page: Page, isNew: boolean) => void;
+  onSuccess: () => void;
   onDelete: (id: string) => void;
 }
 
@@ -274,7 +263,10 @@ const PageSettingsModal = ({
 }: PageSettingsProps) => {
   const { t } = useTranslation();
   const isNew = !page;
-  const [isLoading, setIsLoading] = useState(false);
+  const createPage = useCreatePageMutation(websiteId);
+  const updatePage = useUpdatePageMutation(websiteId);
+  const isLoading = createPage.isPending || updatePage.isPending;
+
   const [formData, setFormData] = useState({
     title: page?.title || "",
     path: page?.path || "",
@@ -299,25 +291,19 @@ const PageSettingsModal = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     try {
-      const url = isNew
-        ? `/api/websites/${websiteId}/pages`
-        : `/api/websites/${websiteId}/pages/${page!.id}`;
-
-      const method = isNew ? "post" : "patch";
-
-      const data = (await api[method](url, { ...formData, websiteId })) as Page;
-
-      // Ideally backend returns the full object, if not we merge
-      const resultPage = isNew
-        ? data
-        : { ...page, ...formData, updated_at: new Date().toISOString() };
-      onSuccess(resultPage, isNew);
+      if (isNew) {
+        await createPage.mutateAsync({ ...formData, websiteId } as any);
+      } else {
+        await updatePage.mutateAsync({
+          ...page,
+          ...formData,
+          updated_at: new Date().toISOString(),
+        } as Page);
+      }
+      onSuccess();
     } catch (error: any) {
       alert(error.message);
-    } finally {
-      setIsLoading(false);
     }
   };
 

@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { format } from "date-fns";
 import { api } from "@/lib/client";
-import { useWebsitesStore } from "@/stores/useWebsitesStore";
+import { useWebsitesQuery } from "@/hooks/queries/useWebsitesQuery";
 import { useFileUpload } from "@/utils/hooks";
 import { formatBytes } from "@/utils/formatters";
 import type { FileItem } from "@/types";
@@ -12,7 +12,7 @@ import type { FileItem } from "@/types";
 export default function Files() {
   const { t } = useTranslation();
   const { subdomain: websiteSubdomain } = useParams<{ subdomain: string }>();
-  const { websites } = useWebsitesStore();
+  const { data: websites = [] } = useWebsitesQuery();
   const currentWebsite = websites.find((w) => w.subdomain === websiteSubdomain);
   const websiteId = currentWebsite?.id;
 

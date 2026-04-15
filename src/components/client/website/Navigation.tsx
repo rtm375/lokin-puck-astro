@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import { NavLink, useParams, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useProfileStore } from "@/stores/useProfileStore";
-import { useWebsitesStore, type Website } from "@/stores/useWebsitesStore";
+import { useProfileQuery } from "@/hooks/queries/useProfileQuery";
+import { useWebsitesQuery } from "@/hooks/queries/useWebsitesQuery";
+import type { Website } from "@/types";
 
 interface NavWebsitesProps {
   user: any;
@@ -11,23 +12,10 @@ interface NavWebsitesProps {
 
 const NavWebsites = ({ user }: NavWebsitesProps) => {
   const { subdomain } = useParams<{ subdomain: string }>();
-  const { profile, fetchProfile } = useProfileStore();
-  // const currentLanguage = profile?.preferences?.language || "en";
+  const { data: profile } = useProfileQuery();
   const { t } = useTranslation();
-  const { websites, fetchWebsites } = useWebsitesStore();
+  const { data: websites = [] } = useWebsitesQuery();
   const [currentWebsite, setCurrentWebsite] = useState<Website | null>(null);
-
-  useEffect(() => {
-    if (!profile) {
-      fetchProfile();
-    }
-  }, [profile, fetchProfile]);
-
-  useEffect(() => {
-    if (websites.length === 0) {
-      fetchWebsites();
-    }
-  }, [websites.length, fetchWebsites]);
 
   useEffect(() => {
     if (websites.length > 0 && subdomain) {

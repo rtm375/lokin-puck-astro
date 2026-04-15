@@ -1,31 +1,38 @@
 import { useState, useEffect, useRef, useMemo, useCallback, memo } from "react";
 import { useVariablesStore } from "@/stores/useVariablesStore";
 import { Icon } from "@iconify/react";
-import { VARIABLE_TYPES, type Variable, VariableMode, type VariableType } from "@/types";
+import { VARIABLE_TYPES, type Variable, VariableMode, type VariableType, type VariableCollection } from "@/types";
 import { useParams } from "react-router-dom";
-import { useWebsitesStore } from "@/stores/useWebsitesStore";
+import { useWebsitesQuery } from "@/hooks/queries/useWebsitesQuery";
+import { useVariablesQuery, useSaveVariablesMutation } from "@/hooks/queries/useVariablesQuery";
 import { useVariableDnD } from "@/hooks/useVariableDnd";
+import { ConflictDialog } from "@/components/client/ConflictDialog";
 
 export const VariablesPlugin = () => {
-
   const { subdomain } = useParams<{ subdomain: string }>();
-  const { websites } = useWebsitesStore();
+  const { data: websites = [] } = useWebsitesQuery();
   const websiteId = websites.find((w) => w.subdomain === subdomain)?.id || "";
 
+  // Query server state
+  const { data, isLoading: isQueryLoading } = useVariablesQuery(websiteId);
+  const serverCollections = data?.collections || [];
+  const serverVariables = data?.variables || [];
+  const saveMutation = useSaveVariablesMutation(websiteId);
+
   const {
-    collections,
-    variables,
+    draftCollections,
+    draftVariables,
     activeCollection,
     activeMode,
     activeSkin,
-    isLoading,
     hasUnsavedChanges,
-    isSaving,
-    saveChanges,
+    _savedAt,
+    initDraft,
+    markSaved,
+    discardDraft,
     setActiveCollection,
     setActiveMode,
     setActiveSkin,
-    fetchVariablesData,
     addVariable,
     updateVariable,
     addCollection,
@@ -35,15 +42,29 @@ export const VariablesPlugin = () => {
   const [newColName, setNewColName] = useState("");
   const [isCreatingCol, setIsCreatingCol] = useState(false);
   const [isEditingCollection, setIsEditingCollection] = useState(false);
+  const [showConflictDialog, setShowConflictDialog] = useState(false);
 
   const [editingVariable, setEditingVariable] = useState<Variable | null>(null);
   const [creatingState, setCreatingState] = useState<{ type: string; groupId?: string } | null>(null);
 
+  // Initialize draft from server data
   useEffect(() => {
-    if (websiteId) {
-      fetchVariablesData(websiteId);
+    if (serverCollections.length > 0 || (websiteId && serverCollections.length === 0)) {
+      const latestColUpdate = serverCollections.length > 0 
+        ? Math.max(...serverCollections.map(c => new Date(c.updated_at).getTime()))
+        : 0;
+      const latestVarUpdate = serverVariables.length > 0 
+        ? Math.max(...serverVariables.map(v => new Date(v.updated_at).getTime()))
+        : 0;
+      const latestUpdate = Math.max(latestColUpdate, latestVarUpdate);
+      const savedAt = latestUpdate > 0 ? new Date(latestUpdate).toISOString() : "initial";
+      
+      initDraft(serverCollections, serverVariables, savedAt);
     }
-  }, [websiteId]);
+  }, [serverCollections, serverVariables, websiteId, initDraft]);
+
+  const collections = draftCollections || serverCollections;
+  const variables = draftVariables || serverVariables;
 
   const activeVariables = useMemo(() =>
     variables.filter((v) =>
@@ -65,15 +86,39 @@ export const VariablesPlugin = () => {
   );
 
   const handleReorder = useCallback((updatedVars: Variable[]) => {
-    reorderVariables(websiteId, updatedVars);
-  }, [reorderVariables, websiteId]);
+    reorderVariables(updatedVars);
+  }, [reorderVariables]);
 
   const { dragState, handleDragStart, handleDragOver, handleDrop, handleDragEnd } = useVariableDnD(
     activeVariables,
     handleReorder
   );
 
-  if (isLoading) {
+  const handleSave = async (force = false) => {
+    if (!websiteId || !draftCollections || !draftVariables) return;
+    try {
+      const result = await saveMutation.mutateAsync({
+        collections: draftCollections,
+        variables: draftVariables,
+        _savedAt: force ? null : _savedAt,
+      });
+      markSaved(result.updatedAt || new Date().toISOString());
+      setShowConflictDialog(false);
+    } catch (err: any) {
+      if (err.message === "CONFLICT" || err.status === 409) {
+        setShowConflictDialog(true);
+      } else {
+        alert(err.message || "Failed to save variables");
+      }
+    }
+  };
+
+  const handleReload = () => {
+    discardDraft();
+    setShowConflictDialog(false);
+  };
+
+  if (isQueryLoading && !draftCollections) {
     return <div className="p-4 text-sm text-gray-500">Loading variables...</div>;
   }
 
@@ -86,11 +131,11 @@ export const VariablesPlugin = () => {
           <h2 className="text-sm font-semibold">Style Variables</h2>
           {hasUnsavedChanges && (
             <button
-              onClick={() => saveChanges(websiteId)}
-              disabled={isSaving}
+              onClick={() => handleSave()}
+              disabled={saveMutation.isPending}
               className="flex items-center gap-1 px-2 h-8 bg-primary hover:bg-primary/90 text-white text-xs font-medium transition-colors disabled:opacity-50"
             >
-              {isSaving ? <Icon icon="mdi:loading" className="animate-spin" /> : <Icon icon="mdi:content-save" />}
+              {saveMutation.isPending ? <Icon icon="mdi:loading" className="animate-spin" /> : <Icon icon="mdi:content-save" />}
               Save
             </button>
           )}
@@ -124,7 +169,7 @@ export const VariablesPlugin = () => {
               value={activeCollection || ""}
               onChange={(e) => setActiveCollection(e.target.value)}
             >
-              {!collections && <option value="" disabled>Select Collection</option>}
+              {collections.length === 0 && <option value="" disabled>Select Collection</option>}
               {collections.map((col) => (
                 <option key={col.id} value={col.id}>{col.name}</option>
               ))}
@@ -232,7 +277,7 @@ export const VariablesPlugin = () => {
           variable={editingVariable}
           onClose={() => setEditingVariable(null)}
           onConfirm={(name, value) => {
-            updateVariable(websiteId, editingVariable.id, { name, value });
+            updateVariable(editingVariable.id, { name, value });
             setEditingVariable(null);
           }}
         />
@@ -253,6 +298,13 @@ export const VariablesPlugin = () => {
           }}
         />
       )}
+
+      <ConflictDialog
+        isOpen={showConflictDialog}
+        onClose={() => setShowConflictDialog(false)}
+        onReload={handleReload}
+        onOverwrite={() => handleSave(true)}
+      />
     </div>
   );
 };
@@ -297,7 +349,7 @@ const VariableCreator = ({
         <div className="flex-1">
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="w-full text-sm py-1.5 border-2 border-zinc-200 flex items-center justify-center gap-1 hover:s0 text-zinc-600"
+            className="w-full text-sm py-1.5 border-2 border-zinc-200 flex items-center justify-center gap-1 hover:bg-zinc-100 text-zinc-600"
           >
             <Icon icon="mdi:plus" /> Variable
           </button>
@@ -737,7 +789,7 @@ const VariableTypeMultiSelect = ({ value, onChange }: { value: VariableType[], o
 };
 
 const CollectionSettings = ({ websiteId, collection, onBack }: { websiteId: string, collection: any, onBack: () => void }) => {
-  const { updateCollection, deleteCollection, activeSkin, setActiveSkin, variables, updateVariable } = useVariablesStore();
+  const { updateCollection, deleteCollection, activeSkin, setActiveSkin, draftVariables, updateVariable } = useVariablesStore();
   const [newSkin, setNewSkin] = useState("");
   const [editingSkin, setEditingSkin] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
@@ -755,12 +807,12 @@ const CollectionSettings = ({ websiteId, collection, onBack }: { websiteId: stri
     }
 
     const newSkins = collection.skins.map((s: string) => s === oldSkin ? trimmed : s);
-    updateCollection(websiteId, collection.id, { skins: newSkins });
+    updateCollection(collection.id, { skins: newSkins });
 
     // Cascade rename to all variables in this collection
-    variables.forEach(v => {
+    (draftVariables || []).forEach(v => {
       if (v.variables_collection_id === collection.id && v.skin === oldSkin) {
-        updateVariable(websiteId, v.id, { skin: trimmed });
+        updateVariable(v.id, { skin: trimmed });
       }
     });
 
@@ -779,7 +831,7 @@ const CollectionSettings = ({ websiteId, collection, onBack }: { websiteId: stri
           <input
             className="w-full bg-zinc-100 px-2 h-8 text-sm border-2 border-zinc-200 outline-none"
             value={collection.name}
-            onChange={(e) => updateCollection(websiteId, collection.id, { name: e.target.value })}
+            onChange={(e) => updateCollection(collection.id, { name: e.target.value })}
           />
         </div>
 
@@ -815,7 +867,7 @@ const CollectionSettings = ({ websiteId, collection, onBack }: { websiteId: stri
                 )}
                 {skin !== "Default" && !editingSkin && (
                   <button
-                    onClick={() => updateCollection(websiteId, collection.id, { skins: collection.skins.filter((s: string) => s !== skin) })}
+                    onClick={() => updateCollection(collection.id, { skins: collection.skins.filter((s: string) => s !== skin) })}
                     className="text-zinc-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     <Icon icon="mdi:trash-can-outline" />
@@ -831,7 +883,7 @@ const CollectionSettings = ({ websiteId, collection, onBack }: { websiteId: stri
                 onChange={(e) => setNewSkin(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && newSkin.trim()) {
-                    updateCollection(websiteId, collection.id, { skins: [...collection.skins, newSkin.trim()] });
+                    updateCollection(collection.id, { skins: [...collection.skins, newSkin.trim()] });
                     setNewSkin("");
                   }
                 }}
@@ -839,7 +891,7 @@ const CollectionSettings = ({ websiteId, collection, onBack }: { websiteId: stri
               <button
                 onClick={() => {
                   if (newSkin.trim()) {
-                    updateCollection(websiteId, collection.id, { skins: [...collection.skins, newSkin.trim()] });
+                    updateCollection(collection.id, { skins: [...collection.skins, newSkin.trim()] });
                     setNewSkin("");
                   }
                 }}
@@ -856,7 +908,7 @@ const CollectionSettings = ({ websiteId, collection, onBack }: { websiteId: stri
           <div className="relative">
             <VariableTypeMultiSelect
               value={collection.variable_types}
-              onChange={(types) => updateCollection(websiteId, collection.id, { variable_types: types })}
+              onChange={(types) => updateCollection(collection.id, { variable_types: types })}
             />
           </div>
         </div>
@@ -865,7 +917,7 @@ const CollectionSettings = ({ websiteId, collection, onBack }: { websiteId: stri
         <button
           onClick={() => {
             if (confirm("Are you sure you want to delete this collection and all its variables?")) {
-              deleteCollection(websiteId, collection.id);
+              deleteCollection(collection.id);
               onBack();
             }
           }}
@@ -939,7 +991,7 @@ const VariableRow = memo(({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            deleteVariable(websiteId, variable.id);
+            deleteVariable(variable.id);
           }}
           className="p-1 hover:text-red-500 text-zinc-400 transition-colors"
         >
@@ -1021,14 +1073,14 @@ const VariableItem = memo(({
             <Icon icon="mdi:folder-outline" className="text-zinc-400" />
             <input
               value={variable.name}
-              onChange={(e) => updateVariable(websiteId, variable.id, { name: e.target.value })}
+              onChange={(e) => updateVariable(variable.id, { name: e.target.value })}
               className="max-w-30 text-sm bg-transparent outline-none font-medium text-zinc-700 flex-1"
               placeholder="GroupName"
             />
           </div>
           <div className="flex items-center">
             <button
-              onClick={() => deleteVariable(websiteId, variable.id)}
+              onClick={() => deleteVariable(variable.id)}
               className="hover:bg-zinc-200 text-zinc-400 hover:text-red-500 transition-colors"
               title="Delete Group"
             >

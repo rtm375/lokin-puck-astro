@@ -1,15 +1,15 @@
 import { useCallback, useState } from "react";
 import { useEditorLoader } from "@/components/client/website/pages/editor/data/useEditorLoader";
 import { useEditorPersistence } from "../data/useEditorPersistence";
-import { publishPage } from "../publish/publishPage";
 import { useConfig } from "@/components/client/website/pages/editor/puck/config";
 import { useParams } from "react-router-dom";
 import { useEditorData } from "@stores/useEditorData";
+import { useSaveEditorMutation } from "@/hooks/queries/useEditorDataQuery";
 
 export function useEditor() {
   const config = useConfig();
   const { subdomain } = useParams<{ subdomain: string }>();
-  const { setPageData } = useEditorData();
+  const { markSaved, discardDraft, _savedAt } = useEditorData();
 
   const {
     data,
@@ -27,28 +27,39 @@ export function useEditor() {
     setHasUnsavedChanges,
   } = useEditorPersistence(storageKey);
 
-  const [isSaving, setIsSaving] = useState(false);
+  const saveMutation = useSaveEditorMutation(websiteId, pageId);
+  const [showConflictDialog, setShowConflictDialog] = useState(false);
 
   const handleChange = useCallback((data: any) => {
     setPendingData(data);
     setHasUnsavedChanges(true);
   }, [setPendingData, setHasUnsavedChanges]);
 
-  const handlePublish = useCallback(async (data: any) => {
+  const handlePublish = useCallback(async (data: any, force = false) => {
     if (!pageId || !websiteId) return;
 
-    setIsSaving(true);
     try {
-      await publishPage({ config, data, websiteId, pageId });
+      const result = await saveMutation.mutateAsync({
+        data,
+        _savedAt: force ? null : _savedAt,
+      });
       
-      // Update the store with the published data
-      setPageData(storageKey, data);
-      
+      markSaved(result.updatedAt || new Date().toISOString());
       setHasUnsavedChanges(false);
-    } finally {
-      setIsSaving(false);
+      setShowConflictDialog(false);
+    } catch (err: any) {
+      if (err.message === "CONFLICT" || err.status === 409) {
+        setShowConflictDialog(true);
+      } else {
+        alert(err.message || "Failed to save");
+      }
     }
-  }, [config, websiteId, pageId, storageKey, setPageData, setHasUnsavedChanges]);
+  }, [websiteId, pageId, _savedAt, markSaved, setHasUnsavedChanges, saveMutation]);
+
+  const handleReload = useCallback(() => {
+    discardDraft();
+    window.location.reload();
+  }, [discardDraft]);
 
   const onBack = useCallback(() => {
     window.location.href = `/admin/websites/${subdomain}`;
@@ -58,10 +69,13 @@ export function useEditor() {
     data: data || pendingData,
     loading,
     error,
-    isSaving,
+    isSaving: saveMutation.isPending,
     hasUnsavedChanges,
+    showConflictDialog,
+    setShowConflictDialog,
     handleChange,
     handlePublish,
+    handleReload,
     setHasUnsavedChanges,
     onBack,
   };

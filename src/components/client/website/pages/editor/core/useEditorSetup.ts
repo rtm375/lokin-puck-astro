@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useWebsitesStore } from "@/stores/useWebsitesStore";
-import { usePagesStore } from "@/stores/usePagesStore";
-import { useEditorData } from "@stores/useEditorData";
+import { useWebsitesQuery } from "@/hooks/queries/useWebsitesQuery";
+import { usePagesQuery } from "@/hooks/queries/usePagesQuery";
+import { useEditorDataQuery } from "@/hooks/queries/useEditorDataQuery";
 import type { Data } from "@puckeditor/core";
 import type { Props, RootProps } from "../puck/blocks/types";
 
@@ -24,63 +24,28 @@ export function useEditorSetup(
     pagePath: string;
   }>();
 
-  const { websites, fetchWebsites } = useWebsitesStore();
-  const { pages, fetchPages, isLoading: pagesLoading } = usePagesStore();
-  const { fetchEditorData, isLoading: editorLoading } = useEditorData();
-
+  const { data: websites = [] } = useWebsitesQuery();
   const currentWebsite = websites.find((w) => w.subdomain === websiteSubdomain);
   const websiteId = currentWebsite?.id;
 
+  const { data: pagesData, isLoading: pagesLoading } = usePagesQuery(websiteId);
+  const pages = pagesData?.pages || [];
   const currentPage = pages.find((p) => p.path === pagePath);
   const pageId = currentPage?.id;
 
   const storageKey = `${websiteSubdomain}-${pagePath}`;
 
-  // Fetch websites on mount if empty
+  const { data: editorData, isLoading: editorLoading } = useEditorDataQuery(websiteId, pageId);
+
+  // Load editor data when query resolves
   useEffect(() => {
-    if (websites.length === 0) {
-      fetchWebsites();
-    }
-  }, [websites.length, fetchWebsites]);
+    if (!editorData || !websiteId || !pageId) return;
+    if (pagesLoading || editorLoading) return;
 
-  // Fetch pages when website changes
-  useEffect(() => {
-    if (websiteId) {
-      fetchPages(websiteId);
-    }
-  }, [websiteId, fetchPages]);
-
-  // Load editor data
-  useEffect(() => {
-    if (!websiteId) return;
-    if (pagesLoading) return;
-    if (!pageId && pages.length > 0) return;
-    if (!pageId) return;
-
-    const loadPage = async () => {
-      const dbData = await fetchEditorData(websiteId, pageId);
-      if (!dbData) return;
-
-      const localData = onGetLocalData(storageKey);
-      const dataToUse = localData || dbData;
-
-      onDataLoaded(dataToUse, storageKey);
-    };
-
-    loadPage();
-  }, [
-    websites.length,
-    websiteId,
-    websiteSubdomain,
-    pageId,
-    pagesLoading,
-    pages.length,
-    pagePath,
-    fetchEditorData,
-    onDataLoaded,
-    onGetLocalData,
-    storageKey,
-  ]);
+    const localData = onGetLocalData(storageKey);
+    const dataToUse = localData || editorData;
+    onDataLoaded(dataToUse, storageKey);
+  }, [editorData, websiteId, pageId, pagesLoading, editorLoading]);
 
   return {
     websiteId,

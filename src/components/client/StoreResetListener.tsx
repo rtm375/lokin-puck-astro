@@ -5,11 +5,13 @@ import { usePagesStore } from "@/stores/usePagesStore";
 import { useEditorData } from "@/stores/useEditorData";
 import { useDomainsStore } from "@/stores/useDomainsStore";
 import { useComponentsStore } from "@/stores/useComponentsStore";
+import { queryClient } from "@/lib/client/queryClient";
 
 export default function StoreResetListener() {
   useEffect(() => {
     const handleReset = () => {
       console.log("Resetting app state");
+      queryClient.clear();
       useProfileStore.getState().reset();
       useWebsitesStore.getState().reset();
       usePagesStore.getState().reset();

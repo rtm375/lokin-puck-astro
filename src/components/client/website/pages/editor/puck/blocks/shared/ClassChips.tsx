@@ -9,7 +9,12 @@ export const ClassChips = ({ value = [], onChange }: { value: string[], onChange
   const { websites } = useWebsitesStore();
   const websiteId = websites.find((w) => w.subdomain === subdomain)?.id || "";
 
-  const { classes, activeClassId, setActiveClassId, addClass } = useClassesStore();
+  const draftClasses = useClassesStore(state => state.draftClasses);
+  const classes = useMemo(() => draftClasses || [], [draftClasses]);
+  const activeClassId = useClassesStore(state => state.activeClassId);
+  const setActiveClassId = useClassesStore(state => state.setActiveClassId);
+  const addClass = useClassesStore(state => state.addClass);
+
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
 

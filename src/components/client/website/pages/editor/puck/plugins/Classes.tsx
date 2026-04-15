@@ -1,36 +1,51 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useClassesStore } from "@/stores/useClassesStore";
 import { Icon } from "@iconify/react";
 import { type Class } from "@/types";
 import { useParams } from "react-router-dom";
-import { useWebsitesStore } from "@/stores/useWebsitesStore";
+import { useWebsitesQuery } from "@/hooks/queries/useWebsitesQuery";
+import { useClassesQuery, useSaveClassesMutation } from "@/hooks/queries/useClassesQuery";
+import { ConflictDialog } from "@/components/client/ConflictDialog";
 
 export const ClassesPlugin = () => {
   const { subdomain } = useParams<{ subdomain: string }>();
-  const { websites } = useWebsitesStore();
+  const { data: websites = [] } = useWebsitesQuery();
   const websiteId = websites.find((w) => w.subdomain === subdomain)?.id || "";
 
+  // Query server state
+  const { data: serverClasses = [], isLoading: isQueryLoading } = useClassesQuery(websiteId);
+  const saveMutation = useSaveClassesMutation(websiteId);
+
   const {
-    classes,
-    isLoading,
+    draftClasses,
     hasUnsavedChanges,
-    isSaving,
-    saveChanges,
-    fetchClassesData,
+    _savedAt,
+    initDraft,
+    markSaved,
+    discardDraft,
     addClass,
     updateClass,
-    deleteClass
+    deleteClass,
+    reorderClasses,
   } = useClassesStore();
 
   const [search, setSearch] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
+  const [showConflictDialog, setShowConflictDialog] = useState(false);
 
+  // Initialize draft from server data
   useEffect(() => {
-    if (websiteId) {
-      fetchClassesData(websiteId);
+    if (serverClasses.length > 0 || (websiteId && serverClasses.length === 0)) {
+      // We pass the last updated_at of any class from the server as our version
+      const latestUpdatedAt = serverClasses.length > 0 
+        ? serverClasses.reduce((max, c) => (c.updated_at > max ? c.updated_at : max), serverClasses[0].updated_at)
+        : "initial";
+      initDraft(serverClasses, latestUpdatedAt);
     }
-  }, [websiteId]);
+  }, [serverClasses, websiteId, initDraft]);
+
+  const classes = draftClasses || serverClasses;
 
   const rootClasses = useMemo(() =>
     classes
@@ -48,19 +63,43 @@ export const ClassesPlugin = () => {
     addClass(websiteId, { name: "New Class" });
   };
 
-  const handleRename = (c: Class) => {
+  const handleRename = (c: Class | { id: null }) => {
     setEditingId(c.id);
-    setEditingName(c.name);
+    setEditingName((c as Class).name || "");
   };
 
   const saveRename = () => {
     if (editingId && editingName) {
-      updateClass(websiteId, editingId, { name: editingName });
+      updateClass(editingId, { name: editingName });
       setEditingId(null);
     }
   };
 
-  if (isLoading) {
+  const handleSave = async (force = false) => {
+    if (!websiteId || !draftClasses) return;
+    try {
+      const result = await saveMutation.mutateAsync({
+        classes: draftClasses,
+        _savedAt: force ? null : _savedAt,
+      });
+      markSaved(result.updatedAt || new Date().toISOString());
+      setShowConflictDialog(false);
+    } catch (err: any) {
+      if (err.message === "CONFLICT" || err.status === 409) {
+        setShowConflictDialog(true);
+      } else {
+        alert(err.message || "Failed to save classes");
+      }
+    }
+  };
+
+  const handleReload = () => {
+    discardDraft();
+    setShowConflictDialog(false);
+    // useClassesQuery will automatically refetch because draft is cleared
+  };
+
+  if (isQueryLoading && !draftClasses) {
     return <div className="p-4 text-sm text-gray-500">Loading classes...</div>;
   }
 
@@ -70,11 +109,11 @@ export const ClassesPlugin = () => {
         <h2 className="text-sm font-semibold text-zinc-800">Classes</h2>
         {hasUnsavedChanges && (
           <button
-            onClick={() => saveChanges(websiteId)}
-            disabled={isSaving}
+            onClick={() => handleSave()}
+            disabled={saveMutation.isPending}
             className="flex items-center gap-1 px-3 py-1.5 bg-primary hover:bg-primary/90 text-white text-xs font-medium rounded transition-colors disabled:opacity-50"
           >
-            {isSaving ? <Icon icon="mdi:loading" className="animate-spin" /> : <Icon icon="mdi:content-save" />}
+            {saveMutation.isPending ? <Icon icon="mdi:loading" className="animate-spin" /> : <Icon icon="mdi:content-save" />}
             Save
           </button>
         )}
@@ -126,6 +165,13 @@ export const ClassesPlugin = () => {
           </div>
         )}
       </div>
+
+      <ConflictDialog
+        isOpen={showConflictDialog}
+        onClose={() => setShowConflictDialog(false)}
+        onReload={handleReload}
+        onOverwrite={() => handleSave(true)}
+      />
     </div>
   );
 };
@@ -214,7 +260,7 @@ const ClassItem = ({
             onClick={(e) => {
               e.stopPropagation();
               if (confirm("Delete this class and all sub-classes?")) {
-                deleteClass(websiteId, item.id);
+                deleteClass(item.id);
               }
             }}
             className="p-1 text-zinc-400 hover:text-red-500 transition-colors"

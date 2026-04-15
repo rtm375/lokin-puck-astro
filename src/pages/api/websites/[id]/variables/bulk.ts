@@ -8,10 +8,45 @@ export const POST = apiHandler(async (ctx) => {
   const body = (await ctx.request.json()) as any;
   await requireWebsite(supabase, id);
 
-  const { collections, variables } = body;
+  const { collections, variables, _savedAt } = body;
 
   if (!Array.isArray(collections) || !Array.isArray(variables)) {
     throw new APIError("Invalid payload", 400);
+  }
+
+  // Conflict detection: check both tables for newer data
+  if (_savedAt) {
+    const clientSavedAt = new Date(_savedAt).getTime();
+
+    const [{ data: latestCol }, { data: latestVar }] = await Promise.all([
+      supabase
+        .from("variables_collections")
+        .select("updated_at")
+        .eq("website_id", id)
+        .order("updated_at", { ascending: false })
+        .limit(1),
+      supabase
+        .from("variables")
+        .select("updated_at")
+        .eq("website_id", id)
+        .order("updated_at", { ascending: false })
+        .limit(1),
+    ]);
+
+    const serverTimes = [
+      ...(latestCol || []).map((r: any) => new Date(r.updated_at).getTime()),
+      ...(latestVar || []).map((r: any) => new Date(r.updated_at).getTime()),
+    ];
+    const maxServerTime = Math.max(0, ...serverTimes);
+
+    if (maxServerTime > clientSavedAt) {
+      return {
+        error: "CONFLICT",
+        message: "Data was modified on another device",
+        serverUpdatedAt: new Date(maxServerTime).toISOString(),
+        _status: 409,
+      };
+    }
   }
 
   // 1. Delete collections that are not in the payload
@@ -30,6 +65,8 @@ export const POST = apiHandler(async (ctx) => {
       .eq("website_id", id);
   }
 
+  const now = new Date().toISOString();
+
   // 2. Upsert collections
   if (collections.length > 0) {
     const { error: collectionsError } = await supabase
@@ -42,6 +79,7 @@ export const POST = apiHandler(async (ctx) => {
           modes: c.modes,
           skins: c.skins,
           variable_types: c.variable_types,
+          updated_at: now,
         })),
         { onConflict: "id" }
       );
@@ -79,11 +117,12 @@ export const POST = apiHandler(async (ctx) => {
           is_group: v.is_group,
           group_id: v.group_id,
           sort_order: v.sort_order,
+          updated_at: now,
         })),
         { onConflict: "id" }
       );
     if (variablesError) throw variablesError;
   }
 
-  return { success: true };
+  return { success: true, updatedAt: now };
 });

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { Icon } from "@iconify/react";
 import { useVariablesStore } from "@/stores/useVariablesStore";
 import { getVariableTypesForProperty, isVariableRef, parseVariableRef, createVariableRef, inferVariableType } from "./controlTypes";
@@ -20,7 +20,8 @@ export const VariableBindingButton: React.FC<VariableBindingButtonProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   
-  const { variables } = useVariablesStore();
+  const draftVariables = useVariablesStore(state => state.draftVariables);
+  const variables = useMemo(() => draftVariables || [], [draftVariables]);
 
   if (!cssProperty) return null;
 
@@ -29,9 +30,9 @@ export const VariableBindingButton: React.FC<VariableBindingButtonProps> = ({
 
   const isBound = isVariableRef(String(value));
   const boundVariableId = isBound ? parseVariableRef(String(value)) : null;
-  const boundVariable = boundVariableId ? variables.find(v => v.id === boundVariableId) : null;
+  const boundVariable = boundVariableId ? (variables as any[]).find(v => v.id === boundVariableId) : null;
 
-  const availableVariables = variables.filter(v => {
+  const availableVariables = (variables as any[]).filter(v => {
     if (v.is_group) return false;
     const inferredType = inferVariableType(v.value);
     return compatibleTypes.includes(inferredType as VariableType);
@@ -102,7 +103,7 @@ export const VariableBindingButton: React.FC<VariableBindingButtonProps> = ({
           {availableVariables.length === 0 ? (
             <div className="px-3 py-2 text-xs text-neutral-400 italic">No variables available</div>
           ) : (
-            availableVariables.map((v) => {
+            (availableVariables as any[]).map((v) => {
               const inferredType = inferVariableType(v.value);
               return (
                 <button

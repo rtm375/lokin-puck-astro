@@ -7,8 +7,6 @@
 // Browser utilities
 export { browserLang } from "./browserLang";
 
-// Fetch helpers
-export { shouldFetch, fetchData } from "./fetchHelpers";
 
 // Formatters
 export { formatBytes, formatSlug, truncate } from "./formatters";

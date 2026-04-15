@@ -1,5 +1,5 @@
 import { Icon } from "@iconify/react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { VariableBindingButton } from "./VariableBindingButton";
 import { isVariableRef } from "./controlTypes";
 
@@ -158,12 +158,34 @@ export const ClassSizeControl = ({ label, value, onChange, disabled, units = ["p
   );
 };
 
-export const ClassOptionGroup = ({ label, value, onChange, disabled, options }: any) => {
+export const ClassOptionGroup = ({ label, value, onChange, disabled, options, controlType, direction }: any) => {
+  const mappedOptions = useMemo(() => {
+    if (!controlType || !direction) return options;
+    return options.map((opt: any) => {
+      let rotateClass = "";
+      if (direction === "row") {
+        rotateClass = "";
+      } else if (direction === "column") {
+        rotateClass = controlType === "justify" ? "rotate-90" : "-rotate-90";
+      } else if (direction === "row-reverse") {
+        if (
+          controlType === "justify" &&
+          (opt.value.includes("start") || opt.value.includes("end"))
+        ) {
+          rotateClass = "rotate-180";
+        }
+      } else if (direction === "column-reverse") {
+        rotateClass = "-rotate-90";
+      }
+      return { ...opt, rotateClass };
+    });
+  }, [options, controlType, direction]);
+
   return (
     <div className={`flex flex-col gap-1 w-full mt-1 ${disabled ? 'opacity-60 pointer-events-none' : ''}`}>
       <span className="text-[11px] font-medium text-neutral-700">{label}</span>
       <div className="flex rounded-md border bg-white border-neutral-300 overflow-hidden w-full *:not-last-of-type:border-r *:not-last-of-type:border-neutral-300">
-        {options.map((opt: any) => (
+        {mappedOptions.map((opt: any) => (
           <button
             key={opt.value}
             disabled={disabled}
@@ -176,7 +198,13 @@ export const ClassOptionGroup = ({ label, value, onChange, disabled, options }: 
               value === opt.value ? "bg-primary/10 text-primary" : "text-gray-500 bg-neutral-50 hover:text-primary hover:bg-primary/10"
             }`}
           >
-            {opt.icon ? <Icon icon={opt.icon} width={15} /> : <span className="text-[10px] font-semibold">{opt.label}</span>}
+            {opt.icon ? (
+              <div className={`flex items-center justify-center transition-transform duration-200 ${opt.rotateClass || ""}`}>
+                <Icon icon={opt.icon} width={15} />
+              </div>
+            ) : (
+              <span className="text-[10px] font-semibold">{opt.label}</span>
+            )}
           </button>
         ))}
       </div>

@@ -4,8 +4,6 @@ import { useClassesStore } from "@/stores/useClassesStore";
 import { ClassChips } from "../shared/ClassChips";
 import { BreakpointPseudoSelector, type PseudoState } from "../shared/BreakpointPseudoSelector";
 import { useState, useMemo } from "react";
-import { useParams } from "react-router-dom";
-import { useWebsitesStore } from "@/stores/useWebsitesStore";
 import { Icon } from "@iconify/react";
 import { type BreakpointKey, getInheritanceChain, mergeStyles, generateCSS, getCSSClassName } from "@/components/client/website/pages/editor/core/css-engine";
 import { useEditorContext } from "@/components/client/website/pages/editor/core/editorProvider";
@@ -58,11 +56,11 @@ export const createContainerConfig = (
       render: ({ value: blockStyles, onChange }) => {
         const selectedItem = usePuck((s) => s.selectedItem);
         const hasItems = Array.isArray(selectedItem?.props?.items) && selectedItem.props.items.length > 0;
-        const { subdomain } = useParams<{ subdomain: string }>();
-        const { websites } = useWebsitesStore();
-        const websiteId = websites.find((w) => w.subdomain === subdomain)?.id || "";
 
-        const { activeClassId, classes, updateClass } = useClassesStore();
+        const draftClasses = useClassesStore(state => state.draftClasses);
+        const classes = useMemo(() => draftClasses || [], [draftClasses]);
+        const activeClassId = useClassesStore(state => state.activeClassId);
+        const updateClass = useClassesStore(state => state.updateClass);
         const editorContext = useEditorContext();
         const [activeBreakpoint, setActiveBreakpoint] = useState<BreakpointKey>("desktop");
         const [activePseudo, setActivePseudo] = useState<PseudoState>("normal");
@@ -129,7 +127,7 @@ export const createContainerConfig = (
 
           if (activeClassId && activeClass) {
             const newStyles = applyUpdates(activeClass.styles, updates);
-            updateClass(websiteId, activeClassId, { styles: newStyles });
+            updateClass(activeClassId, { styles: newStyles });
             // Trigger editor's hasUnsavedChanges by marking class changes
             if (editorContext) {
               editorContext.setHasUnsavedChanges(true);
@@ -203,6 +201,8 @@ export const createContainerConfig = (
                     options={[
                       { label: "Row", value: "row", icon: "material-symbols-light:arrow-right-alt-rounded" },
                       { label: "Column", value: "column", icon: "material-symbols-light:arrow-downward-rounded" },
+                      { label: "Row Reverse", value: "row-reverse", icon: "material-symbols-light:arrow-left-alt-rounded" },
+                      { label: "Column Reverse", value: "column-reverse", icon: "material-symbols-light:arrow-upward-rounded" },
                     ]}
                   />
                   <ClassOptionGroup
@@ -300,7 +300,7 @@ export const createContainerConfig = (
   },
   inline: true,
   render: ({ classes: appliedClassIds, styles: blockStyles, items: Items, puck, id }) => {
-    const allClasses = useClassesStore(state => state.classes);
+    const allClasses = useClassesStore(state => state.draftClasses || []);
 
     // 1. Get applied classes
     const appliedClasses = (appliedClassIds || [])

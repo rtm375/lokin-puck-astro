@@ -8,5 +8,5 @@ const { t } = Astro.locals;
 ---
 
 <Layout title={t("websites_page.title")}>
-  <WebsitesList client:load />
+  <WebsitesList client:only="react" />
 </Layout>

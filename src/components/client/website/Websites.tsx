@@ -16,6 +16,7 @@ import Appearance from "./pages/Appearance";
 import Users from "./pages/Users";
 import Settings from "./pages/Settings";
 import { LanguageProvider } from "@/providers/LanguageProvider";
+import { QueryProvider } from "@/providers/QueryProvider";
 
 export const Websites = ({ user }: { user: any }) => {
   // The Main Dashboard Layout (Sidebar + Content)
@@ -78,8 +79,10 @@ export const Websites = ({ user }: { user: any }) => {
   ]);
 
   return (
-    <LanguageProvider>
-      <RouterProvider router={router} />
-    </LanguageProvider>
+    <QueryProvider>
+      <LanguageProvider>
+        <RouterProvider router={router} />
+      </LanguageProvider>
+    </QueryProvider>
   );
 };
