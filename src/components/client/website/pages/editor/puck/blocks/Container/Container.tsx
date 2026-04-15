@@ -11,7 +11,7 @@ import { type Class } from "@/types";
 import {
   ClassOptionGroup,
   ClassSizeControl,
-  ClassSpacingControl,
+  ClassBoxModelControl,
   ClassGapControl,
 } from "../shared/ClassControls";
 
@@ -179,6 +179,27 @@ export const createContainerConfig = (
                 cssProperty="minHeight"
               />
 
+              <ClassBoxModelControl
+                label={<Label overridden={isOverridden("marginTop")}>Spacing</Label>}
+                values={current}
+                onChange={handleUpdate}
+                disabled={isAnyOverridden("marginTop", "marginRight", "marginBottom", "marginLeft", "paddingTop", "paddingRight", "paddingBottom", "paddingLeft")}
+                cssProperties={{
+                  margin: {
+                    top: "marginTop",
+                    right: "marginRight",
+                    bottom: "marginBottom",
+                    left: "marginLeft"
+                  },
+                  padding: {
+                    top: "paddingTop",
+                    right: "paddingRight",
+                    bottom: "paddingBottom",
+                    left: "paddingLeft"
+                  }
+                }}
+              />
+
               <ClassOptionGroup
                 label={<Label overridden={isOverridden("display")}>Display</Label>}
                 value={current.display}
@@ -256,33 +277,6 @@ export const createContainerConfig = (
                   />
                 </>
               )}
-
-              <ClassSpacingControl
-                label={<Label overridden={isOverridden("marginTop")}>Margin</Label>}
-                type="margin"
-                values={current}
-                onChange={handleUpdate}
-                disabled={isAnyOverridden("marginTop", "marginRight", "marginBottom", "marginLeft")}
-                cssProperties={{
-                  top: "marginTop",
-                  right: "marginRight",
-                  bottom: "marginBottom",
-                  left: "marginLeft"
-                }}
-              />
-              <ClassSpacingControl
-                label={<Label overridden={isOverridden("paddingTop")}>Padding</Label>}
-                type="padding"
-                values={current}
-                onChange={handleUpdate}
-                disabled={isAnyOverridden("paddingTop", "paddingRight", "paddingBottom", "paddingLeft")}
-                cssProperties={{
-                  top: "paddingTop",
-                  right: "paddingRight",
-                  bottom: "paddingBottom",
-                  left: "paddingLeft"
-                }}
-              />
             </div>
           </div>
         );

@@ -7,6 +7,14 @@
   --text-sm--line-height: 1;
 }
 
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 @import "./puck-vars.css";
 
 body {
