@@ -15,7 +15,7 @@ import {
   ClassSizeControl,
   ClassSpacingControl,
   ClassGapControl,
-} from "../shared/ResponsiveControls";
+} from "../shared/ClassControls";
 
 const baseBlockStyles = {
   normal: {
@@ -163,6 +163,7 @@ export const createContainerConfig = (
                 disabled={isAnyOverridden("maxWidth")}
                 max={2000}
                 description="Maximum width of the container content"
+                cssProperty="maxWidth"
               />
 
               <ClassSizeControl
@@ -177,6 +178,7 @@ export const createContainerConfig = (
                     ? "Add content to the container before setting min height."
                     : "To achieve full height Container use 100vh."
                 }
+                cssProperty="minHeight"
               />
 
               <ClassOptionGroup
@@ -236,6 +238,10 @@ export const createContainerConfig = (
                     values={current}
                     onChange={handleUpdate}
                     disabled={isAnyOverridden("rowGap", "columnGap")}
+                    cssProperties={{
+                      rowGap: "rowGap",
+                      columnGap: "columnGap"
+                    }}
                   />
                   <ClassOptionGroup
                     label={<Label overridden={isOverridden("flexWrap")}>Wrap</Label>}
@@ -257,6 +263,12 @@ export const createContainerConfig = (
                 values={current}
                 onChange={handleUpdate}
                 disabled={isAnyOverridden("marginTop", "marginRight", "marginBottom", "marginLeft")}
+                cssProperties={{
+                  top: "marginTop",
+                  right: "marginRight",
+                  bottom: "marginBottom",
+                  left: "marginLeft"
+                }}
               />
               <ClassSpacingControl
                 label={<Label overridden={isOverridden("paddingTop")}>Padding</Label>}
@@ -264,6 +276,12 @@ export const createContainerConfig = (
                 values={current}
                 onChange={handleUpdate}
                 disabled={isAnyOverridden("paddingTop", "paddingRight", "paddingBottom", "paddingLeft")}
+                cssProperties={{
+                  top: "paddingTop",
+                  right: "paddingRight",
+                  bottom: "paddingBottom",
+                  left: "paddingLeft"
+                }}
               />
             </div>
           </div>

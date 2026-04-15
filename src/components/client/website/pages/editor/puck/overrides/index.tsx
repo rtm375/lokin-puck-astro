@@ -5,6 +5,7 @@ import type { Props } from "../blocks/types";
 import { PluginAutoSwitcher } from "../plugins/PluginAutoSwitcher";
 import { Header } from "../components/Header";
 import { HeaderActions } from "../actions/HeaderActions";
+import { VariablesStyleProvider } from "../blocks/shared/VariablesStyleProvider";
 
 // Static overrides object - will not trigger Puck remounts
 const puckOverrides: Partial<Overrides> = {
@@ -14,6 +15,12 @@ const puckOverrides: Partial<Overrides> = {
   drawerItem: ({ name }) => <DrawerItem name={name as keyof Props} />,
   header: Header,
   headerActions: HeaderActions,
+  iframe: ({ children, document }) => (
+    <>
+      <VariablesStyleProvider />
+      {children}
+    </>
+  ),
 };
 
 export const staticOverrides = {

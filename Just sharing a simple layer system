@@ -1,0 +1,11 @@
+Just sharing a simple layer system I’ve been building (inspired by Mosaic Builder).
+
+I managed to recreate an outline → layers panel with:
+
+drag-to-reorder + copy
+synced hover state both ways
+(hover in editor ↔ highlight in layers, and vice versa)
+
+Right now it’s a bit hacky though. When hovering a layer item, I look up the matching [data-puck-component] inside the preview iframe and fire synthetic mouseover/mouseout events to trigger Puck’s native overlay.
+
+Works, but feels like a workaround. Would be great if Puck exposed hover state in core in the future.

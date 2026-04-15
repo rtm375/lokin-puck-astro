@@ -161,6 +161,27 @@ export const generateClassesCSS = (classes: Class[]): string => {
   return css;
 };
 
+export const generateVariablesCSS = (variables: any[]): string => {
+  const lightVars = variables.filter(v => v.mode === "Light" && !v.is_group);
+  const darkVars = variables.filter(v => v.mode === "Dark" && !v.is_group);
+
+  let css = `:root {\n`;
+  lightVars.forEach(v => {
+    css += `  --lv-${v.id}: ${v.value};\n`;
+  });
+  css += `}\n`;
+
+  if (darkVars.length > 0) {
+    css += `@media (prefers-color-scheme: dark) {\n  :root {\n`;
+    darkVars.forEach(v => {
+      css += `    --lv-${v.id}: ${v.value};\n`;
+    });
+    css += `  }\n}\n`;
+  }
+
+  return css;
+};
+
 const objectToCssProps = (obj: any) => {
   return Object.entries(obj)
     .filter(([_, val]) => typeof val === 'string' || typeof val === 'number')
