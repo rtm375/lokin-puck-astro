@@ -77,10 +77,10 @@ export const ClassSizeControl = ({ label, value, onChange, disabled, units = ["p
   const sliderValue = isEmpty || isAuto || isBound ? min : numericValue;
 
   return (
-    <div className={`flex flex-col gap-1 w-full ${disabled ? 'opacity-60 pointer-events-none' : ''}`}>
+    <div className={`${disabled ? 'opacity-60 pointer-events-none' : ''}`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-[11px] font-medium text-neutral-700">{label}</span>
+          <span className="text-xs text-zinc-400 font-semibold block">{label}</span>
           <VariableBindingButton cssProperty={cssProperty} value={value} onChange={onChange} disabled={disabled} />
         </div>
         <div className="relative flex">
@@ -181,8 +181,8 @@ export const ClassOptionGroup = ({ label, value, onChange, disabled, options, co
   }, [options, controlType, direction]);
 
   return (
-    <div className={`flex flex-col gap-1 w-full mt-1 ${disabled ? 'opacity-60 pointer-events-none' : ''}`}>
-      <span className="text-[11px] font-medium text-neutral-700">{label}</span>
+    <div className={`${disabled ? 'opacity-60 pointer-events-none' : ''}`}>
+      <span className="text-xs text-zinc-400 font-semibold block">{label}</span>
       <div className="flex rounded-md border bg-white border-neutral-300 overflow-hidden w-full *:not-last-of-type:border-r *:not-last-of-type:border-neutral-300">
         {mappedOptions.map((opt: any) => (
           <button
@@ -333,7 +333,7 @@ export const ClassBoxModelControl = ({ label, values, onChange, disabled, cssPro
   const getDisplayValue = (val: any) => {
     if (val === undefined || val === null || val === "") return "0";
     if (isVariableRef(String(val))) return "var";
-    const { value: num, unit } = parseValueUnit(val, "px");
+    const { value: num } = parseValueUnit(val, "px");
     return `${num}`;
   };
 
@@ -346,14 +346,12 @@ export const ClassBoxModelControl = ({ label, values, onChange, disabled, cssPro
     }
   };
 
-  const edges = ["top", "right", "bottom", "left"];
-
   return (
-    <div className={`flex flex-col gap-2 w-full mt-2 ${disabled ? "opacity-60 pointer-events-none" : ""}`}>
-      {label && <span className="text-[11px] font-medium text-neutral-700">{label}</span>}
+    <div className={`${disabled ? "opacity-60 pointer-events-none" : ""}`}>
+      {label && <span className="text-xs text-zinc-400 font-semibold block">{label}</span>}
 
       <div className="relative bg-neutral-50 border border-neutral-200 rounded-lg p-8 select-none">
-        <span className="absolute top-1.5 left-2 text-[9px] font-bold text-neutral-400 uppercase tracking-tight">Margin</span>
+        <span className="absolute top-2 left-2 text-[9px] font-bold text-neutral-400">Margin</span>
 
         {/* Margin Edges */}
         <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 pointer-events-none">
@@ -440,9 +438,7 @@ export const ClassBoxModelControl = ({ label, values, onChange, disabled, cssPro
         </div>
 
         {/* Padding Inner Box */}
-        <div className="relative bg-white border border-dashed border-neutral-300 rounded-md p-8 shadow-sm">
-          <span className="absolute top-1 left-1.5 text-[8px] font-bold text-neutral-400 uppercase tracking-tight">Padding</span>
-
+        <div className="relative bg-white border border-dashed border-neutral-300 rounded-md p-6 shadow-sm">
           <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 pointer-events-none">
             {/* Top */}
             <div className="col-start-2 row-start-1 flex items-start justify-center pt-1 pointer-events-auto">
@@ -526,8 +522,8 @@ export const ClassBoxModelControl = ({ label, values, onChange, disabled, cssPro
             </div>
           </div>
 
-          <div className="w-full h-full min-h-[20px] bg-neutral-50/50 rounded flex items-center justify-center">
-            <Icon icon="lucide:box" className="text-neutral-200" width={16} />
+          <div className="w-full h-full bg-neutral-50/50 rounded flex items-center justify-center">
+            <span className="text-[9px] font-bold text-neutral-400">Padding</span>
           </div>
         </div>
       </div>
@@ -551,7 +547,7 @@ const GapInput = ({ prop, icon, title, values, disabled, locked, onChange, parse
   };
 
   return (
-    <div className={`flex items-center bg-white border ${isBound ? 'border-primary/30 bg-primary/5' : 'border-neutral-200 focus-within:border-neutral-400'} rounded overflow-hidden group transition-colors`}>
+    <div className={`${isBound ? 'border-primary/30 bg-primary/5' : 'border-neutral-200 focus-within:border-neutral-400'} rounded overflow-hidden group transition-colors`}>
       <div className={`w-6 h-7 flex items-center justify-center border-r ${isBound ? 'bg-primary/10 border-primary/20 text-primary' : 'bg-neutral-50 border-neutral-200 text-neutral-400 group-hover:text-primary'} transition-colors relative`} title={title}>
         <Icon icon={icon} width={12} className={isBound ? "opacity-50" : ""} />
       </div>
@@ -594,9 +590,9 @@ export const ClassGapControl = ({ label, values, onChange, disabled, cssProperti
   };
 
   return (
-    <div className={`flex flex-col gap-1 w-full mt-1 ${disabled ? 'opacity-60 pointer-events-none' : ''}`}>
+    <div className={`${disabled ? 'opacity-60 pointer-events-none' : ''}`}>
       <div className="flex items-center justify-between">
-        <span className="text-[11px] font-medium text-neutral-700">{label}</span>
+        <span className="text-xs text-zinc-400 font-semibold block">{label}</span>
         <div className="flex items-center gap-1">
           <VariableBindingButton cssProperty={cssProperties?.rowGap} value={valRow} onChange={handleBindingChange} disabled={disabled} />
           <button

@@ -182,6 +182,7 @@ export interface Class {
   name: string;
   css_class_name?: string; // Generated CSS class name (e.g., LCLS_WFxqwc)
   parent_id: string | null;
+  custom_states?: Array<{ label: string; selector: string }>;
   styles: Record<string, any>;
   sort_order: number;
   created_at: string;

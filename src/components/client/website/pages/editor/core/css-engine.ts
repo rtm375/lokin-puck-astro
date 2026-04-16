@@ -92,7 +92,7 @@ const isObject = (item: any) => {
  * Generate CSS for a single selector with its styles
  * Handles responsive breakpoints and pseudo states
  */
-export const generateCSS = (selector: string, styles: any) => {
+export const generateCSS = (selector: string, styles: any, customStates: Array<{label: string, selector: string}> = styles?._customStates || []) => {
   let css = "";
 
   // Base styles (Normal state, Desktop breakpoint)
@@ -107,6 +107,14 @@ export const generateCSS = (selector: string, styles: any) => {
     const stateStyles = styles[state]?.desktop;
     if (stateStyles && Object.keys(stateStyles).length > 0) {
       css += `${selector}:${state} { ${objectToCssProps(stateStyles)} }\n`;
+    }
+  });
+
+  // Custom states for Desktop
+  customStates.forEach(custom => {
+    const stateStyles = styles[custom.selector]?.desktop;
+    if (stateStyles && Object.keys(stateStyles).length > 0) {
+      css += `${selector}${custom.selector.startsWith(':') ? '' : ' '}${custom.selector} { ${objectToCssProps(stateStyles)} }\n`;
     }
   });
 
@@ -136,6 +144,14 @@ export const generateCSS = (selector: string, styles: any) => {
       }
     });
 
+    // Custom states for this breakpoint
+    customStates.forEach(custom => {
+      const stateBp = styles[custom.selector]?.[bp];
+      if (stateBp && Object.keys(stateBp).length > 0) {
+        bpCss += `${selector}${custom.selector.startsWith(':') ? '' : ' '}${custom.selector} { ${objectToCssProps(stateBp)} }\n`;
+      }
+    });
+
     if (bpCss) {
       css += `${mediaQueries[bp]} {\n${bpCss}}\n`;
     }
@@ -154,7 +170,7 @@ export const generateClassesCSS = (classes: Class[]): string => {
   classes.forEach(cls => {
     const className = getCSSClassName(cls);
     if (cls.styles && Object.keys(cls.styles).length > 0) {
-      css += generateCSS(`.${className}`, cls.styles);
+      css += generateCSS(`.${className}`, cls.styles, cls.custom_states || []);
     }
   });
   

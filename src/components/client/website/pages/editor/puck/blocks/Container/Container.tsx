@@ -26,7 +26,7 @@ const baseBlockStyles = {
 
 const Label = ({ children, overridden }: { children: React.ReactNode, overridden?: boolean }) => {
   return (
-    <div className="flex items-center gap-1.5">
+    <div className="flex items-center gap-1.5 mb-2  ">
       <span className={overridden ? "line-through opacity-40" : ""}>
         {children}
       </span>
@@ -143,17 +143,39 @@ export const createContainerConfig = (
         const current =
           sourceStyles?.[activePseudo]?.[activeBreakpoint] || {};
 
+        const customStates = activeClassId
+          ? activeClass?.custom_states || []
+          : blockStyles?._customStates || [];
+
+        const handleAddCustomState = (label: string, selector: string) => {
+          const newState = { label, selector };
+          if (activeClassId && activeClass) {
+            updateClass(activeClassId, {
+              custom_states: [...(activeClass.custom_states || []), newState]
+            });
+            if (editorContext) editorContext.setHasUnsavedChanges(true);
+          } else {
+            const newStyles = {
+              ...(blockStyles || {}),
+              _customStates: [...(blockStyles?._customStates || []), newState]
+            };
+            onChange(newStyles);
+          }
+          setActivePseudo(selector);
+        };
 
         return (
-          <div className="flex flex-col gap-4 border-t border-zinc-100 pt-3 mt-1">
+          <div className="flex flex-col gap-4">
             <BreakpointPseudoSelector
               activeBreakpoint={activeBreakpoint}
               setActiveBreakpoint={setActiveBreakpoint}
               activePseudo={activePseudo}
               setActivePseudo={setActivePseudo}
+              customStates={customStates}
+              onAddCustomState={handleAddCustomState}
             />
 
-            <div className="space-y-4">
+            <div className="space-y-4 divide-y divide-gray-200 [&>*:not(:last-child)]:pb-4">
               <ClassSizeControl
                 label={<Label overridden={isOverridden("maxWidth")}>Width</Label>}
                 value={current.maxWidth}
@@ -212,8 +234,9 @@ export const createContainerConfig = (
                 ]}
               />
 
-              {(current.display || computed.final.display) !== "block" && (
-                <>
+              {current.display === "flex" && (
+                <div className="flex flex-col gap-2">
+
                   <ClassOptionGroup
                     label={<Label overridden={isOverridden("flexDirection")}>Direction</Label>}
                     value={current.flexDirection}
@@ -275,7 +298,7 @@ export const createContainerConfig = (
                       { label: "Wrap Reverse", value: "wrap-reverse", icon: "lucide:undo-2" },
                     ]}
                   />
-                </>
+                </div>
               )}
             </div>
           </div>

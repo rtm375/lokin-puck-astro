@@ -60,6 +60,7 @@ export const useClassesStore = create<ClassesState>()(
           name: data.name || "New Class",
           css_class_name: data.css_class_name || generateCSSClassName(),
           parent_id: data.parent_id || null,
+          custom_states: data.custom_states || [],
           styles: data.styles || {},
           sort_order: data.sort_order || classes.length,
           created_at: new Date().toISOString(),
