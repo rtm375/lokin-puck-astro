@@ -277,7 +277,7 @@ const SpacingPopout = ({ type, edge, value, onChange, onClose, cssProperty, disa
   return (
     <>
       <div className="fixed inset-0 z-[60] bg-black/50" onClick={onClose} />
-      <div className="absolute z-[70] bg-white shadow-xl border border-neutral-200 rounded-lg p-3 w-48 flex flex-col gap-3 left-1/2 -translate-x-1/2 mt-1 top-0">
+      <div className="absolute z-[70] bg-white shadow-xl border border-neutral-200 rounded-lg p-3 w-48 flex flex-col gap-3 top-1/2 left-1/2 -translate-1/2">
         <div className="flex items-center justify-between border-b border-neutral-100 pb-2">
           <span className="text-xs font-bold uppercase text-neutral-500 tracking-wider">{label}</span>
           <VariableBindingButton
@@ -459,10 +459,13 @@ export const ClassBoxModelControl = ({ label, values, onChange, disabled, cssPro
           )}
         </div>
         {/* Padding Inner Box */}
-        <div className="relative col-start-2 col-span-3 row-start-2 row-span-2 bg-white border border-dashed border-neutral-300 rounded-md p-7 shadow-sm">
-          <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 pointer-events-none">
+        <div className="col-start-2 col-span-3 row-start-2 row-span-2 bg-white border border-dashed border-neutral-300 rounded-md shadow-sm">
+          <div className="grid grid-cols-5 grid-rows-3 pointer-events-none">
+            <div className="col-start-2 col-span-3 row-start-2 w-full h-full bg-neutral-50/50 rounded flex items-center justify-center">
+              <span className="text-xxs font-bold text-neutral-400">Padding</span>
+            </div>
             {/* Top */}
-            <div className="col-start-2 row-start-1 flex items-center justify-center pointer-events-auto mt-2">
+            <div className="col-start-3 row-start-1 flex items-center justify-center pointer-events-auto mt-2">
               <button
                 onClick={() => setActivePopout({ type: "padding", edge: "top" })}
                 className={`text-xs font-medium px-2 py-0.5 rounded hover:bg-neutral-200 transition-colors ${isVariableRef(values?.paddingTop) ? "text-primary bg-primary/5" : "text-neutral-600"}`}
@@ -482,7 +485,7 @@ export const ClassBoxModelControl = ({ label, values, onChange, disabled, cssPro
               )}
             </div>
             {/* Right */}
-            <div className="col-start-3 row-start-2 flex items-center justify-center pointer-events-auto">
+            <div className="col-start-5 row-start-2 flex items-center justify-center pointer-events-auto mr-2">
               <button
                 onClick={() => setActivePopout({ type: "padding", edge: "right" })}
                 className={`text-xs font-medium px-2 py-0.5 rounded hover:bg-neutral-200 transition-colors ${isVariableRef(values?.paddingRight) ? "text-primary bg-primary/5" : "text-neutral-600"}`}
@@ -502,7 +505,7 @@ export const ClassBoxModelControl = ({ label, values, onChange, disabled, cssPro
               )}
             </div>
             {/* Bottom */}
-            <div className="col-start-2 row-start-3 flex items-center justify-center pointer-events-auto mb-2">
+            <div className="col-start-3 row-start-3 flex items-center justify-center pointer-events-auto mb-2">
               <button
                 onClick={() => setActivePopout({ type: "padding", edge: "bottom" })}
                 className={`text-xs font-medium px-2 py-0.5 rounded hover:bg-neutral-200 transition-colors ${isVariableRef(values?.paddingBottom) ? "text-primary bg-primary/5" : "text-neutral-600"}`}
@@ -522,7 +525,7 @@ export const ClassBoxModelControl = ({ label, values, onChange, disabled, cssPro
               )}
             </div>
             {/* Left */}
-            <div className="col-start-1 row-start-2 flex items-center justify-center pointer-events-auto">
+            <div className="col-start-1 row-start-2 flex items-center justify-center pointer-events-auto ml-2">
               <button
                 onClick={() => setActivePopout({ type: "padding", edge: "left" })}
                 className={`text-xs font-medium px-2 py-0.5 rounded hover:bg-neutral-200 transition-colors ${isVariableRef(values?.paddingLeft) ? "text-primary bg-primary/5" : "text-neutral-600"}`}
@@ -541,10 +544,6 @@ export const ClassBoxModelControl = ({ label, values, onChange, disabled, cssPro
                 />
               )}
             </div>
-          </div>
-
-          <div className="w-full h-full bg-neutral-50/50 rounded flex items-center justify-center">
-            <span className="text-xxs font-bold text-neutral-400">Padding</span>
           </div>
         </div>
       </div>

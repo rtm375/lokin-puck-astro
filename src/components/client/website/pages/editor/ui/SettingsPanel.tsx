@@ -12,7 +12,7 @@ export const SettingsPanel = () => {
     : "Element Settings";
 
   return (
-    <div className="flex flex-col h-full w-full">
+    <div className="flex flex-col h-full w-full relative">
       <div className="flex items-center gap-2 p-3 border-b border-gray-200 bg-gray-50 shrink-0 sticky top-0 z-10 w-full">
         <button
           className="p-1 hover:bg-gray-200 rounded text-gray-500 hover:text-gray-900 transition-colors cursor-pointer"
