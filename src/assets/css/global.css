@@ -5,6 +5,7 @@
 @theme {
   --color-primary: #f3602a;
   --text-sm--line-height: 1;
+  --text-xxs: 0.625rem;
 }
 
 @utility no-scrollbar {

@@ -13,7 +13,7 @@ import { isVariableRef } from "./controlTypes";
 const parseValueUnit = (val: any, defaultUnit = "px") => {
   if (val === undefined || val === null || val === "") return { value: "", unit: defaultUnit };
   const str = String(val);
-  
+
   if (isVariableRef(str)) {
     return { value: str, unit: "" }; // keep as is
   }
@@ -591,7 +591,7 @@ export const ResponsiveGapControl = ({
             title="Lock row and column gap"
             className={`h-8 w-full flex items-center justify-center rounded transition-colors cursor-pointer ${isLocked ? 'text-primary bg-primary/10' : 'text-neutral-700 bg-neutral-200 hover:bg-neutral-300'}`}
           >
-            <Icon icon={isLocked ? "lucide:link" : "lucide:unlink"} width={14} />
+            <Icon icon={isLocked ? "lucide:link" : "lucide:unlink"} width={16} />
           </button>
         </div>
       </div>
@@ -705,7 +705,7 @@ export const ResponsiveSpacingControl = ({
             className={`p-1 flex items-center justify-center rounded transition-colors cursor-pointer ${isLocked ? 'text-primary bg-primary/10' : 'text-neutral-500 hover:bg-neutral-200'
               }`}
           >
-            <Icon icon={isLocked ? "lucide:link" : "lucide:unlink"} width={14} />
+            <Icon icon={isLocked ? "lucide:link" : "lucide:unlink"} width={16} />
           </button>
 
           <div className="relative flex">
@@ -914,9 +914,8 @@ export const ClassSizeControl = ({ label, value, onChange, disabled, units = ["p
                       e.preventDefault();
                       handleUnitChange(u);
                     }}
-                    className={`flex items-center justify-center w-full py-1.5 px-2 text-[11px] text-neutral-700 hover:bg-neutral-100 ${
-                      unit === u ? "text-primary bg-primary/5 font-medium" : ""
-                    }`}
+                    className={`flex items-center justify-center w-full py-1.5 px-2 text-[11px] text-neutral-700 hover:bg-neutral-100 ${unit === u ? "text-primary bg-primary/5 font-medium" : ""
+                      }`}
                   >
                     {u}
                   </button>
@@ -1049,7 +1048,7 @@ const SpacingPopout = ({ type, edge, value, onChange, onClose, disabled }: any) 
             title="Set opposite side"
             className="flex-1 h-7 flex items-center justify-center gap-1.5 rounded bg-neutral-50 border border-neutral-200 hover:bg-neutral-100 text-neutral-600 transition-colors"
           >
-            <Icon icon={edge === "top" || edge === "bottom" ? "lucide:unfold-vertical" : "lucide:unfold-horizontal"} width={14} />
+            <Icon icon={edge === "top" || edge === "bottom" ? "lucide:unfold-vertical" : "lucide:unfold-horizontal"} width={16} />
             <span className="text-[9px] font-medium">Both</span>
           </button>
           <button
@@ -1057,7 +1056,7 @@ const SpacingPopout = ({ type, edge, value, onChange, onClose, disabled }: any) 
             title="Set all sides"
             className="flex-1 h-7 flex items-center justify-center gap-1.5 rounded bg-neutral-50 border border-neutral-200 hover:bg-neutral-100 text-neutral-600 transition-colors"
           >
-            <Icon icon="lucide:maximize" width={14} />
+            <Icon icon="lucide:maximize" width={16} />
             <span className="text-[9px] font-medium">All</span>
           </button>
         </div>
@@ -1087,10 +1086,10 @@ export const ClassBoxModelControl = ({ label, values, onChange, disabled }: any)
   return (
     <div className={`flex flex-col gap-2 w-full mt-2 ${disabled ? "opacity-60 pointer-events-none" : ""}`}>
       {label && <span className="text-[11px] font-medium text-neutral-700">{label}</span>}
-      
+
       <div className="relative bg-neutral-50 border border-neutral-200 rounded-lg p-8 select-none">
         <span className="absolute top-1.5 left-2 text-[9px] font-bold text-neutral-400 uppercase tracking-tight">Margin</span>
-        
+
         {/* Margin Edges */}
         <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 pointer-events-none">
           {/* Top */}
@@ -1174,7 +1173,7 @@ export const ClassBoxModelControl = ({ label, values, onChange, disabled }: any)
         {/* Padding Inner Box */}
         <div className="relative bg-white border border-dashed border-neutral-300 rounded-md p-8 shadow-sm">
           <span className="absolute top-1 left-1.5 text-[8px] font-bold text-neutral-400 uppercase tracking-tight">Padding</span>
-          
+
           <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 pointer-events-none">
             {/* Top */}
             <div className="col-start-2 row-start-1 flex items-start justify-center pt-1 pointer-events-auto">

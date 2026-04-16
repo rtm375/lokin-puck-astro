@@ -38,7 +38,7 @@ export const ClassesPlugin = () => {
   useEffect(() => {
     if (serverClasses.length > 0 || (websiteId && serverClasses.length === 0)) {
       // We pass the last updated_at of any class from the server as our version
-      const latestUpdatedAt = serverClasses.length > 0 
+      const latestUpdatedAt = serverClasses.length > 0
         ? serverClasses.reduce((max, c) => (c.updated_at > max ? c.updated_at : max), serverClasses[0].updated_at)
         : "initial";
       initDraft(serverClasses, latestUpdatedAt);
@@ -121,7 +121,7 @@ export const ClassesPlugin = () => {
 
       <div className="p-2 border-b border-zinc-100 flex items-center gap-2">
         <div className="relative flex-1">
-          <Icon icon="mdi:magnify" className="absolute left-2 top-1/2 -translate-y-1/2 text-zinc-400" />
+          <Icon icon="mdi:magnify" className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-800" />
           <input
             type="text"
             placeholder="Search classes..."
@@ -141,7 +141,7 @@ export const ClassesPlugin = () => {
 
       <div className="flex-1 overflow-y-auto py-2">
         {filteredClasses.length === 0 ? (
-          <div className="text-center py-10 text-zinc-400 text-xs italic">
+          <div className="text-center py-10 text-gray-800 text-xs italic">
             No classes found
           </div>
         ) : (
@@ -209,12 +209,12 @@ const ClassItem = ({
             e.stopPropagation();
             setIsExpanded(!isExpanded);
           }}
-          className={`p-0.5 text-zinc-400 hover:text-zinc-600 transition-transform ${isExpanded ? 'rotate-0' : '-rotate-90'} ${children.length === 0 ? 'invisible' : ''}`}
+          className={`p-0.5 text-gray-800 hover:text-zinc-600 transition-transform ${isExpanded ? 'rotate-0' : '-rotate-90'} ${children.length === 0 ? 'invisible' : ''}`}
         >
           <Icon icon="mdi:chevron-down" />
         </button>
 
-        <Icon icon="mdi:tag-outline" className="text-zinc-400 shrink-0" width={14} />
+        <Icon icon="mdi:tag-outline" className="text-gray-800 shrink-0" width={16} />
 
         {isEditing ? (
           <input
@@ -241,7 +241,7 @@ const ClassItem = ({
               addClass(websiteId, { parent_id: item.id, name: "New Sub-class" });
               setIsExpanded(true);
             }}
-            className="p-1 text-zinc-400 hover:text-primary transition-colors"
+            className="p-1 text-gray-800 hover:text-primary transition-colors"
             title="Add sub-class"
           >
             <Icon icon="mdi:plus" />
@@ -251,7 +251,7 @@ const ClassItem = ({
               e.stopPropagation();
               handleRename(item);
             }}
-            className="p-1 text-zinc-400 hover:text-zinc-600 transition-colors"
+            className="p-1 text-gray-800 hover:text-zinc-600 transition-colors"
             title="Rename"
           >
             <Icon icon="mdi:pencil-outline" />
@@ -263,7 +263,7 @@ const ClassItem = ({
                 deleteClass(item.id);
               }
             }}
-            className="p-1 text-zinc-400 hover:text-red-500 transition-colors"
+            className="p-1 text-gray-800 hover:text-red-500 transition-colors"
             title="Delete"
           >
             <Icon icon="mdi:trash-can-outline" />

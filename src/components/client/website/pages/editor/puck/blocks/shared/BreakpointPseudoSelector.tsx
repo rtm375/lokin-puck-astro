@@ -1,6 +1,6 @@
 import { Icon } from "@iconify/react";
 import { type BreakpointKey, PUCK_VIEWPORTS } from "../../config/viewports";
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { createUsePuck } from "@puckeditor/core";
 import { Dropdown } from "./Dropdown";
 
@@ -93,17 +93,17 @@ export const BreakpointPseudoSelector = ({
           trigger={
             <button
               type="button"
-              className="w-full h-8 flex items-center justify-between bg-zinc-100 px-2 rounded border-none outline-none text-[11px] font-medium text-zinc-700 hover:bg-zinc-200 transition-colors"
+              className="w-full h-8 flex items-center justify-between bg-zinc-100 px-2 rounded border-none outline-none text-xs font-medium text-zinc-700 hover:bg-zinc-200 transition-colors"
             >
               <div className="flex items-center gap-1.5">
-                <Icon icon={activeBpObj.icon} width={14} />
+                <Icon icon={activeBpObj.icon} width={16} />
                 {activeBpObj.label}
               </div>
-              <Icon icon="mdi:chevron-down" width={14} />
+              <Icon icon="mdi:chevron-down" width={16} />
             </button>
           }
         >
-          <div className="bg-white border border-zinc-200 shadow-lg py-1">
+          <div className="bg-white shadow-lg py-1">
             {breakpoints.map((bp) => (
               <div
                 key={bp.key}
@@ -114,14 +114,14 @@ export const BreakpointPseudoSelector = ({
                   onClick={() => {
                     handleBreakpointChange(bp.key);
                   }}
-                  className={`w-full flex items-center justify-between px-3 py-1.5 text-[11px] hover:bg-zinc-100 ${activeBreakpoint === bp.key ? "text-primary font-semibold bg-blue-50/50" : "text-zinc-700"
+                  className={`w-full flex items-center justify-between px-3 py-1.5 text-xs hover:bg-zinc-100 ${activeBreakpoint === bp.key ? "text-primary font-semibold bg-blue-50/50" : "text-zinc-700"
                     }`}
                 >
                   <div className="flex items-center gap-2">
-                    <Icon icon={bp.icon} width={14} />
+                    <Icon icon={bp.icon} width={16} />
                     {bp.label}
                   </div>
-                  <Icon icon="mdi:chevron-right" width={14} className="text-zinc-400" />
+                  <Icon icon="mdi:chevron-right" width={16} className="text-gray-800" />
                 </button>
 
                 <div className="absolute top-0 left-full bg-white border border-zinc-200 shadow-lg hidden group-hover:block transition-all">
@@ -133,13 +133,13 @@ export const BreakpointPseudoSelector = ({
                         handleBreakpointChange(bp.key);
                         setActivePseudo(ps.key);
                       }}
-                      className={`w-full whitespace-nowrap text-left px-3 py-1.5 text-[11px] hover:bg-zinc-100 ${activeBreakpoint === bp.key && activePseudo === ps.key
+                      className={`w-full whitespace-nowrap text-left px-3 py-1.5 text-xs hover:bg-zinc-100 ${activeBreakpoint === bp.key && activePseudo === ps.key
                         ? "text-primary font-semibold bg-blue-50/50"
                         : "text-zinc-700"
                         }`}
                     >
                       <div className="flex items-center gap-2">
-                        <Icon icon={ps.icon} width={14} />
+                        <Icon icon={ps.icon} width={16} />
                         {ps.label}
                       </div>
                     </button>
@@ -154,63 +154,60 @@ export const BreakpointPseudoSelector = ({
       {/* Pseudo Dropdown */}
       <div className="flex-1">
         <Dropdown
-          align="full"
+          align="right"
           trigger={
             <button
               type="button"
-              className="w-full h-8 flex items-center justify-between bg-zinc-100 px-2 rounded border-none outline-none text-[11px] font-medium text-zinc-700 hover:bg-zinc-200 transition-colors"
+              className="w-full h-8 flex items-center justify-between bg-zinc-100 px-2 rounded border-none outline-none text-xs font-medium text-zinc-700 hover:bg-zinc-200 transition-colors"
             >
               <div className="flex items-center gap-2">
-                <Icon icon={activePseudoObj.icon} width={14} />
+                <Icon icon={activePseudoObj.icon} width={16} />
                 {activePseudoObj.label}
               </div>
-              <Icon icon="mdi:chevron-down" width={14} />
+              <Icon icon="mdi:chevron-down" width={16} />
             </button>
           }
           onOpenChange={(open) => {
             if (!open) setAddingNew(false);
           }}
         >
-          <div className="bg-white border border-zinc-200 shadow-lg min-w-[160px]">
+          <div className="bg-white shadow-lg">
             {!addingNew ? (
               <>
-                <div className="py-1">
-                  {allPseudoStates.map((ps) => (
-                    <button
-                      key={ps.key}
-                      type="button"
-                      onClick={() => {
-                        setActivePseudo(ps.key);
-                      }}
-                      className={`w-full text-left px-3 py-1.5 text-[11px] hover:bg-zinc-100 ${activePseudo === ps.key ? "text-primary font-semibold bg-blue-50/50" : "text-zinc-700"
-                        }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Icon icon={ps.icon} width={14} />
-                        {ps.label}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-                <div className="border-t border-zinc-100 my-1"></div>
+                {allPseudoStates.map((ps) => (
+                  <button
+                    key={ps.key}
+                    type="button"
+                    onClick={() => {
+                      setActivePseudo(ps.key);
+                    }}
+                    className={`w-full text-left px-3 py-1.5 text-xs hover:bg-zinc-100 ${activePseudo === ps.key ? "text-primary font-semibold bg-blue-50/50" : "text-zinc-700"
+                      }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Icon icon={ps.icon} width={16} />
+                      {ps.label}
+                    </div>
+                  </button>
+                ))}
                 <button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     setAddingNew(true);
                   }}
-                  className="w-full flex items-center gap-1.5 px-3 py-1.5 text-[11px] text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100"
+                  className="w-full flex items-center gap-1.5 px-3 py-1.5 text-xs border-t-1 border-zinc-200 text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100"
                 >
-                  <Icon icon="mdi:plus" width={14} />
+                  <Icon icon="mdi:plus" width={16} />
                   Add new
                 </button>
               </>
             ) : (
               <div className="p-2 flex flex-col gap-2" onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-[11px] font-semibold text-zinc-700">Add Custom State</span>
-                  <button type="button" onClick={() => setAddingNew(false)} className="text-zinc-400 hover:text-zinc-700">
-                    <Icon icon="mdi:close" width={14} />
+                  <span className="text-xs font-semibold text-zinc-700">Add Custom State</span>
+                  <button type="button" onClick={() => setAddingNew(false)} className="text-gray-800 hover:text-zinc-700">
+                    <Icon icon="mdi:close" width={16} />
                   </button>
                 </div>
                 <div>
@@ -219,7 +216,7 @@ export const BreakpointPseudoSelector = ({
                     type="text"
                     value={newLabel}
                     onChange={(e) => setNewLabel(e.target.value)}
-                    className="w-full h-7 bg-zinc-50 border border-zinc-200 rounded px-2 text-[11px] outline-none focus:border-primary"
+                    className="w-full h-7 bg-zinc-50 border border-zinc-200 rounded px-2 text-xs outline-none focus:border-primary"
                     autoFocus
                   />
                 </div>
@@ -229,14 +226,14 @@ export const BreakpointPseudoSelector = ({
                     type="text"
                     value={newSelector}
                     onChange={(e) => setNewSelector(e.target.value)}
-                    className="w-full h-7 bg-zinc-50 border border-zinc-200 rounded px-2 text-[11px] outline-none focus:border-primary font-mono"
+                    className="w-full h-7 bg-zinc-50 border border-zinc-200 rounded px-2 text-xs outline-none focus:border-primary font-mono"
                   />
                 </div>
                 <button
                   type="button"
                   onClick={handleAddCustom}
                   disabled={!newLabel.trim() || !newSelector.trim()}
-                  className="w-full h-7 mt-1 bg-primary text-white rounded text-[11px] font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full h-7 mt-1 bg-primary text-white rounded text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Save
                 </button>

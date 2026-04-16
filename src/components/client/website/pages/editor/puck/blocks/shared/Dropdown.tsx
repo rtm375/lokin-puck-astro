@@ -24,11 +24,10 @@ export const Dropdown = ({
   const [internalOpen, setInternalOpen] = useState(false);
   const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setIsOpen = (val: boolean) => {
-    if (onOpenChange) {
-      onOpenChange(val);
-    } else {
+    if (controlledOpen === undefined) {
       setInternalOpen(val);
     }
+    onOpenChange?.(val);
   };
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -48,7 +47,7 @@ export const Dropdown = ({
   const alignClasses = {
     left: "left-0",
     right: "right-0",
-    full: "left-0 w-full"
+    full: "left-0"
   };
 
   return (
@@ -58,7 +57,7 @@ export const Dropdown = ({
       </div>
       {isOpen && (
         <div
-          className={`absolute top-full mt-1 bg-white border border-zinc-200 shadow-lg rounded ${alignClasses[align]} ${contentClassName}`}
+          className={`absolute top-full mt-1 bg-white border border-zinc-200 shadow-lg rounded min-w-full ${alignClasses[align]} ${contentClassName}`}
           style={{ zIndex }}
           onClick={() => setIsOpen(false)}
         >

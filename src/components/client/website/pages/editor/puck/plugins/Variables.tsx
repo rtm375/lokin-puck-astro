@@ -50,15 +50,15 @@ export const VariablesPlugin = () => {
   // Initialize draft from server data
   useEffect(() => {
     if (serverCollections.length > 0 || (websiteId && serverCollections.length === 0)) {
-      const latestColUpdate = serverCollections.length > 0 
+      const latestColUpdate = serverCollections.length > 0
         ? Math.max(...serverCollections.map(c => new Date(c.updated_at).getTime()))
         : 0;
-      const latestVarUpdate = serverVariables.length > 0 
+      const latestVarUpdate = serverVariables.length > 0
         ? Math.max(...serverVariables.map(v => new Date(v.updated_at).getTime()))
         : 0;
       const latestUpdate = Math.max(latestColUpdate, latestVarUpdate);
       const savedAt = latestUpdate > 0 ? new Date(latestUpdate).toISOString() : "initial";
-      
+
       initDraft(serverCollections, serverVariables, savedAt);
     }
   }, [serverCollections, serverVariables, websiteId, initDraft]);
@@ -189,7 +189,7 @@ export const VariablesPlugin = () => {
               <span className="text-sm font-medium text-zinc-500">Properties</span>
               <button
                 onClick={() => setIsEditingCollection(!isEditingCollection)}
-                className={`p-1 hover:bg-zinc-100 text-zinc-500 transition-colors ${isEditingCollection ? 'text-blue-500' : 'text-zinc-400'}`}
+                className={`p-1 hover:bg-zinc-100 text-zinc-500 transition-colors ${isEditingCollection ? 'text-blue-500' : 'text-gray-800'}`}
                 title="Edit Collection Settings"
               >
                 {isEditingCollection ?
@@ -202,7 +202,7 @@ export const VariablesPlugin = () => {
             {!isEditingCollection && (
               <div className="flex gap-2 px-2">
                 <div className="flex-1">
-                  <label className="text-xs text-zinc-400 font-semibold mb-1 block">Mode</label>
+                  <label className="text-xs text-gray-800 font-semibold mb-1 block">Mode</label>
                   <select
                     className="w-full bg-zinc-100 px-2 h-8 text-sm border-2 border-zinc-200 outline-none"
                     value={activeMode}
@@ -214,7 +214,7 @@ export const VariablesPlugin = () => {
                   </select>
                 </div>
                 <div className="flex-1">
-                  <label className="text-xs text-zinc-400 font-semibold mb-1 block">Skin</label>
+                  <label className="text-xs text-gray-800 font-semibold mb-1 block">Skin</label>
                   <select
                     className="w-full bg-zinc-100 px-2 h-8 text-sm border-2 border-zinc-200 outline-none"
                     value={activeSkin}
@@ -256,7 +256,7 @@ export const VariablesPlugin = () => {
               ))}
 
               {rootVariables.length === 0 && (
-                <div className="text-sm text-zinc-400 text-center mx-2 py-4 border-2 border-dashed border-zinc-300">
+                <div className="text-sm text-gray-800 text-center mx-2 py-4 border-2 border-dashed border-zinc-300">
                   No variables in this collection.
                 </div>
               )}
@@ -366,12 +366,12 @@ const VariableCreator = ({
                     }}
                     className="w-full text-left px-3 py-2 text-sm hover:bg-zinc-100 flex items-center gap-2"
                   >
-                    <Icon icon={type.icon} className="text-zinc-400" />
+                    <Icon icon={type.icon} className="text-gray-800" />
                     {type.label}
                   </button>
                 ))
               ) : (
-                <div className="p-2 text-xs text-zinc-400 text-center">No types enabled in settings</div>
+                <div className="p-2 text-xs text-gray-800 text-center">No types enabled in settings</div>
               )}
               <div className="border-t border-zinc-100">
                 <button
@@ -450,14 +450,14 @@ const VariablePopover = ({
       >
         <div className="p-2 border-b border-zinc-100 flex items-center justify-between">
           <span className="text-sm font-semibold">{title}</span>
-          <button onClick={onClose} className="p-1 hover:bg-zinc-100 text-zinc-400">
+          <button onClick={onClose} className="p-1 hover:bg-zinc-100 text-gray-800">
             <Icon icon="mdi:close" />
           </button>
         </div>
 
         <div className="p-2 py-4 space-y-4">
           <div>
-            <label className="text-xs text-zinc-400 font-semibold mb-1 block">Variable Name</label>
+            <label className="text-xs text-gray-800 font-semibold mb-1 block">Variable Name</label>
             <input
               autoFocus
               className="w-full bg-zinc-100 px-2 h-8 text-sm border-2 border-zinc-200 outline-none focus:ring-1 focus:ring-blue-500"
@@ -470,7 +470,7 @@ const VariablePopover = ({
           <div>
             {variable && (
               <div className="mb-2">
-                <label className="text-xs text-zinc-400 font-semibold mb-1 block">Variable Type</label>
+                <label className="text-xs text-gray-800 font-semibold mb-1 block">Variable Type</label>
                 <select
                   className="w-full bg-zinc-100 px-2 h-8 text-sm border-2 border-zinc-200 outline-none"
                   value={type}
@@ -490,7 +490,7 @@ const VariablePopover = ({
             {type === "text-shadow" && <TextShadowCreator initialValue={value} onChange={setValue} />}
             {type === "simple" && (
               <div>
-                <label className="text-xs text-zinc-400 uppercase font-bold mb-1 block">Value</label>
+                <label className="text-xs text-gray-800 uppercase font-bold mb-1 block">Value</label>
                 <input
                   className="w-full bg-zinc-100 px-2 h-8 text-sm border-2 border-zinc-200 outline-none"
                   value={value}
@@ -645,7 +645,7 @@ const BoxShadowCreator = ({ initialValue, onChange }: { initialValue?: string, o
 
   const Input = ({ label, value, onChange }: any) => (
     <div className="flex-1">
-      <label className="text-[9px] text-zinc-400 uppercase mb-0.5 block">{label}</label>
+      <label className="text-[9px] text-gray-800 uppercase mb-0.5 block">{label}</label>
       <input
         type="text"
         className="w-full bg-zinc-100 px-2 h-8 text-sm border-2 border-zinc-200"
@@ -664,7 +664,7 @@ const BoxShadowCreator = ({ initialValue, onChange }: { initialValue?: string, o
         <Input label="Spread" value={spread} onChange={setSpread} />
       </div>
       <div>
-        <label className="text-[9px] text-zinc-400 uppercase mb-0.5 block">Shadow Color</label>
+        <label className="text-[9px] text-gray-800 uppercase mb-0.5 block">Shadow Color</label>
         <input
           className="w-full bg-zinc-100 px-2 h-8 text-sm border-2 border-zinc-200"
           value={color}
@@ -700,7 +700,7 @@ const TextShadowCreator = ({ initialValue, onChange }: { initialValue?: string, 
 
   const Input = ({ label, value, onChange }: any) => (
     <div className="flex-1">
-      <label className="text-[9px] text-zinc-400 uppercase mb-0.5 block">{label}</label>
+      <label className="text-[9px] text-gray-800 uppercase mb-0.5 block">{label}</label>
       <input
         type="text"
         className="w-full bg-zinc-100 px-2 h-8 text-sm border-2 border-zinc-200"
@@ -718,7 +718,7 @@ const TextShadowCreator = ({ initialValue, onChange }: { initialValue?: string, 
         <Input label="Blur" value={blur} onChange={setBlur} />
       </div>
       <div>
-        <label className="text-[9px] text-zinc-400 uppercase mb-0.5 block">Shadow Color</label>
+        <label className="text-[9px] text-gray-800 uppercase mb-0.5 block">Shadow Color</label>
         <input
           className="w-full bg-zinc-100 px-2 h-8 text-sm border-2 border-zinc-200"
           value={color}
@@ -758,7 +758,7 @@ const VariableTypeMultiSelect = ({ value, onChange }: { value: VariableType[], o
         <span className="truncate text-zinc-600 group-hover:text-zinc-900">
           {selectedLabels || "Select types..."}
         </span>
-        <Icon icon="mdi:chevron-down" className={`text-zinc-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <Icon icon="mdi:chevron-down" className={`text-gray-800 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {isOpen && (
@@ -827,7 +827,7 @@ const CollectionSettings = ({ websiteId, collection, onBack }: { websiteId: stri
     <div className="flex flex-col h-full justify-between">
       <div className="space-y-4 px-2">
         <div>
-          <label className="text-xs text-zinc-400 font-semibold mb-1 block">Collection Name</label>
+          <label className="text-xs text-gray-800 font-semibold mb-1 block">Collection Name</label>
           <input
             className="w-full bg-zinc-100 px-2 h-8 text-sm border-2 border-zinc-200 outline-none"
             value={collection.name}
@@ -836,7 +836,7 @@ const CollectionSettings = ({ websiteId, collection, onBack }: { websiteId: stri
         </div>
 
         <div>
-          <label className="text-xs text-zinc-400 font-semibold mb-1 block">Skins</label>
+          <label className="text-xs text-gray-800 font-semibold mb-1 block">Skins</label>
           <div className="space-y-2">
             {collection.skins.map((skin: string) => (
               <div key={skin} className="flex items-center justify-between bg-zinc-100 px-2 h-8 border-2 border-zinc-200 group">
@@ -868,7 +868,7 @@ const CollectionSettings = ({ websiteId, collection, onBack }: { websiteId: stri
                 {skin !== "Default" && !editingSkin && (
                   <button
                     onClick={() => updateCollection(collection.id, { skins: collection.skins.filter((s: string) => s !== skin) })}
-                    className="text-zinc-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="text-gray-800 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     <Icon icon="mdi:trash-can-outline" />
                   </button>
@@ -904,7 +904,7 @@ const CollectionSettings = ({ websiteId, collection, onBack }: { websiteId: stri
         </div>
 
         <div>
-          <label className="text-xs text-zinc-400 font-semibold mb-1 block">Variable Types</label>
+          <label className="text-xs text-gray-800 font-semibold mb-1 block">Variable Types</label>
           <div className="relative">
             <VariableTypeMultiSelect
               value={collection.variable_types}
@@ -980,7 +980,7 @@ const VariableRow = memo(({
         <div className="flex-1 text-xs font-medium text-zinc-600 truncate">
           {variable.name}
         </div>
-        <div className="flex-1 text-xs text-zinc-400 truncate flex items-center gap-2">
+        <div className="flex-1 text-xs text-gray-800 truncate flex items-center gap-2">
           {variable.value.startsWith("#") || variable.value.startsWith("rgb") ? (
             <div className="w-4 h-4 rounded-full border-2 border-zinc-200 shrink-0" style={{ background: variable.value }} />
           ) : null}
@@ -993,7 +993,7 @@ const VariableRow = memo(({
             e.stopPropagation();
             deleteVariable(variable.id);
           }}
-          className="p-1 hover:text-red-500 text-zinc-400 transition-colors"
+          className="p-1 hover:text-red-500 text-gray-800 transition-colors"
         >
           <Icon icon="mdi:trash-can-outline" />
         </button>
@@ -1070,7 +1070,7 @@ const VariableItem = memo(({
           className={`flex items-center justify-between gap-2 p-2 bg-zinc-100 ${isTarget && targetPosition === "inside" ? "bg-blue-50" : ""}`}
         >
           <div className="flex items-center gap-2 flex-1">
-            <Icon icon="mdi:folder-outline" className="text-zinc-400" />
+            <Icon icon="mdi:folder-outline" className="text-gray-800" />
             <input
               value={variable.name}
               onChange={(e) => updateVariable(variable.id, { name: e.target.value })}
@@ -1081,7 +1081,7 @@ const VariableItem = memo(({
           <div className="flex items-center">
             <button
               onClick={() => deleteVariable(variable.id)}
-              className="hover:bg-zinc-200 text-zinc-400 hover:text-red-500 transition-colors"
+              className="hover:bg-zinc-200 text-gray-800 hover:text-red-500 transition-colors"
               title="Delete Group"
             >
               <Icon icon="mdi:trash-can-outline" />
@@ -1111,7 +1111,7 @@ const VariableItem = memo(({
             />
           ))}
           {childrenVars.length === 0 && (
-            <div className="text-xs text-zinc-400 mx-2 py-2 border-2 border-dashed border-zinc-200 bg-zinc-100 text-center pointer-events-none">
+            <div className="text-xs text-gray-800 mx-2 py-2 border-2 border-dashed border-zinc-200 bg-zinc-100 text-center pointer-events-none">
               Drop variables here
             </div>
           )}

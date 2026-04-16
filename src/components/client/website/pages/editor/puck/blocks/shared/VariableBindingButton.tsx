@@ -19,7 +19,7 @@ export const VariableBindingButton: React.FC<VariableBindingButtonProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  
+
   const draftVariables = useVariablesStore(state => state.draftVariables);
   const variables = useMemo(() => draftVariables || [], [draftVariables]);
 
@@ -75,28 +75,27 @@ export const VariableBindingButton: React.FC<VariableBindingButtonProps> = ({
         onClick={handleToggle}
         disabled={disabled}
         title={isBound ? `Bound to ${boundVariable?.name || 'Variable'}` : 'Bind to Variable'}
-        className={`flex items-center justify-center w-5 h-5 rounded transition-colors ${
-          isBound 
-            ? 'text-primary bg-primary/10 hover:bg-primary/20' 
-            : 'text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100'
-        } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+        className={`flex items-center justify-center w-5 h-5 rounded transition-colors ${isBound
+          ? 'text-primary bg-primary/10 hover:bg-primary/20'
+          : 'text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100'
+          } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
       >
-        <Icon icon="mdi:variable" width={14} />
+        <Icon icon="mdi:variable" width={16} />
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 top-full mt-1 w-48 max-h-64 overflow-y-auto bg-white border border-neutral-200 rounded-md shadow-lg z-50 py-1">
+        <div className="absolute right-0 top-full mt-1 max-h-64 overflow-y-auto bg-white border border-neutral-200 rounded-md shadow-lg z-50 py-1">
           <div className="px-2 py-1 text-[10px] font-semibold text-neutral-500 uppercase tracking-wider border-b border-neutral-100 mb-1">
             Variables
           </div>
-          
+
           {isBound && (
             <button
               onClick={(e) => { e.preventDefault(); handleUnbind(); }}
               className="w-full text-left px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2"
             >
               <Icon icon="lucide:unlink" width={12} />
-              Unbind Variable
+              Unbind
             </button>
           )}
 
@@ -109,9 +108,8 @@ export const VariableBindingButton: React.FC<VariableBindingButtonProps> = ({
                 <button
                   key={v.id}
                   onClick={(e) => { e.preventDefault(); handleSelect(v.id); }}
-                  className={`w-full text-left px-3 py-1.5 text-xs hover:bg-neutral-50 flex items-center justify-between ${
-                    boundVariableId === v.id ? 'bg-primary/5 text-primary font-medium' : 'text-neutral-700'
-                  }`}
+                  className={`w-full text-left px-3 py-1.5 text-xs hover:bg-neutral-50 flex items-center justify-between gap-2 ${boundVariableId === v.id ? 'bg-primary/5 text-primary font-medium' : 'text-neutral-700'
+                    }`}
                 >
                   <span className="truncate">{v.name}</span>
                   {inferredType === 'color' ? (

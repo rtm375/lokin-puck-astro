@@ -46,9 +46,27 @@ export const createContainerConfig = (
     classes: {
       label: "Applied Classes",
       type: "custom",
-      render: ({ value, onChange }) => (
-        <ClassChips value={value} onChange={onChange} />
-      )
+      render: ({ value, onChange }) => {
+        const [open, setOpen] = useState(false);
+        return (
+          <>
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-xs text-gray-800 font-semibold">Classes</span>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  setOpen(!open);
+                }}
+                className="flex items-center justify-center text-gray-800 hover:text-primary transition-all"
+                title="Add Class"
+              >
+                <Icon icon="mdi:plus" width={14} />
+              </button>
+            </div>
+            <ClassChips value={value} onChange={onChange} open={open} setOpen={setOpen} />
+          </>
+        );
+      }
     },
     styles: {
       label: "Styles",
@@ -235,10 +253,9 @@ export const createContainerConfig = (
               />
 
               {current.display === "flex" && (
-                <div className="grid grid-cols-4 gap-2 flex-wrap">
+                <div className="grid grid-cols-2 auto-rows-min items-start gap-x-2 gap-y-3 flex-wrap">
                   <ClassOptionGroup
                     label={<Label overridden={isOverridden("flexDirection")}>Direction</Label>}
-                    variant="compact"
                     value={current.flexDirection}
                     onChange={(val: string) => handleUpdate({ flexDirection: val })}
                     disabled={isAnyOverridden("flexDirection")}
@@ -251,7 +268,6 @@ export const createContainerConfig = (
                   />
                   <ClassOptionGroup
                     label={<Label overridden={isOverridden("alignItems")}>Align</Label>}
-                    variant="compact"
                     value={current.alignItems}
                     onChange={(val: string) => handleUpdate({ alignItems: val })}
                     disabled={isAnyOverridden("alignItems")}
@@ -263,10 +279,10 @@ export const createContainerConfig = (
                       { label: "End", value: "flex-end", icon: "material-symbols-light:align-vertical-bottom" },
                       { label: "Stretch", value: "stretch", icon: "material-symbols-light:align-stretch" },
                     ]}
+                    align="right"
                   />
                   <ClassOptionGroup
                     label={<Label overridden={isOverridden("justifyContent")}>Justify</Label>}
-                    variant="compact"
                     value={current.justifyContent}
                     onChange={(val: string) => handleUpdate({ justifyContent: val })}
                     disabled={isAnyOverridden("justifyContent")}
@@ -281,7 +297,6 @@ export const createContainerConfig = (
                   />
                   <ClassOptionGroup
                     label={<Label overridden={isOverridden("flexWrap")}>Wrap</Label>}
-                    variant="compact"
                     value={current.flexWrap}
                     onChange={(val: string) => handleUpdate({ flexWrap: val })}
                     disabled={isAnyOverridden("flexWrap")}
@@ -290,13 +305,15 @@ export const createContainerConfig = (
                       { label: "No Wrap", value: "nowrap", icon: "lucide:arrow-right" },
                       { label: "Wrap Reverse", value: "wrap-reverse", icon: "lucide:undo-2" },
                     ]}
+                    align="right"
                   />
-                  <div className="col-span-4">
+                  <div className="row-start-3 col-span-2">
                     <ClassGapControl
-                      label={<Label overridden={isOverridden("rowGap")}>Gaps</Label>}
                       values={current}
                       onChange={handleUpdate}
                       disabled={isAnyOverridden("rowGap", "columnGap")}
+                      columnGapOverridden={isOverridden("columnGap")}
+                      rowGapOverridden={isOverridden("rowGap")}
                       cssProperties={{
                         rowGap: "rowGap",
                         columnGap: "columnGap"

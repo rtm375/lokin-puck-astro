@@ -4,7 +4,17 @@ import { useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { useWebsitesStore } from "@/stores/useWebsitesStore";
 
-export const ClassChips = ({ value = [], onChange }: { value: string[], onChange: (val: string[]) => void }) => {
+export const ClassChips = ({
+  value = [],
+  onChange,
+  open: controlledOpen,
+  setOpen: controlledSetOpen
+}: {
+  value: string[],
+  onChange: (val: string[]) => void,
+  open?: boolean,
+  setOpen?: (open: boolean) => void
+}) => {
   const { subdomain } = useParams<{ subdomain: string }>();
   const { websites } = useWebsitesStore();
   const websiteId = websites.find((w) => w.subdomain === subdomain)?.id || "";
@@ -15,7 +25,9 @@ export const ClassChips = ({ value = [], onChange }: { value: string[], onChange
   const setActiveClassId = useClassesStore(state => state.setActiveClassId);
   const addClass = useClassesStore(state => state.addClass);
 
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = controlledSetOpen !== undefined ? controlledSetOpen : setInternalOpen;
   const [search, setSearch] = useState("");
 
   const appliedClasses = useMemo(() =>
@@ -63,35 +75,38 @@ export const ClassChips = ({ value = [], onChange }: { value: string[], onChange
       <div className="flex flex-wrap gap-1.5 items-center relative">
         <div
           onClick={() => setActiveClassId(null)}
-          className={`flex items-center px-2.5 h-7 rounded-full text-[11px] font-bold cursor-pointer transition-all border ${activeClassId === null
+          className={`flex items-center px-3 h-7 text-xs font-bold cursor-pointer transition-all ${activeClassId === null
             ? 'bg-zinc-800 text-white border-zinc-800 shadow-sm'
-            : 'bg-zinc-100 text-zinc-500 border-zinc-200 hover:bg-zinc-200'
+            : 'bg-zinc-100 text-zinc-500'
             }`}
         >
           Base
         </div>
 
         {appliedClasses.map((c: any) => (
-          <div
-            key={c.id}
-            onClick={() => setActiveClassId(activeClassId === c.id ? null : c.id)}
-            className={`flex items-center gap-1.5 p-1.5 py-1 leading-none rounded-full text-[10px] font-semibold cursor-pointer transition-all border ${activeClassId === c.id
-              ? 'bg-primary text-white border-primary shadow-sm'
-              : 'bg-zinc-100 text-zinc-700 border-zinc-200 hover:bg-zinc-200'
-              }`}
-          >
-            {c.name}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onChange(value.filter(id => id !== c.id));
-                if (activeClassId === c.id) setActiveClassId(null);
-              }}
-              className={`hover:text-red-500 transition-colors ${activeClassId === c.id ? 'text-white/70' : 'text-zinc-400'}`}
+          <>
+            <span className="text-xs">»</span>
+            <div
+              key={c.id}
+              onClick={() => setActiveClassId(activeClassId === c.id ? null : c.id)}
+              className={`relative group flex items-center gap-1.5 px-3 h-7 leading-none text-xs font-semibold cursor-pointer transition-all ${activeClassId === c.id
+                ? 'bg-primary/90 text-white shadow-sm'
+                : 'bg-zinc-100 text-gray-800 hover:bg-zinc-200'
+                }`}
             >
-              <Icon icon="mdi:close" width={14} />
-            </button>
-          </div>
+              {c.name}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onChange(value.filter(id => id !== c.id));
+                  if (activeClassId === c.id) setActiveClassId(null);
+                }}
+                className={`absolute right-[-4px] top-[-4px] w-4 h-4 bg-red-500 hidden group-hover:flex text-white rounded-full items-center justify-center transition-colors ${activeClassId === c.id ? 'text-white/70' : 'text-gray-800'}`}
+              >
+                <Icon icon="mdi:close" width={12} />
+              </button>
+            </div>
+          </>
         ))}
         {open && (
           <>
@@ -99,7 +114,7 @@ export const ClassChips = ({ value = [], onChange }: { value: string[], onChange
             <div className="absolute top-full left-0 mt-1 bg-white border border-zinc-200 shadow-2xl rounded-lg min-w-[200px] overflow-hidden z-[70] flex flex-col">
               <div className="p-2 bg-zinc-50 border-b border-zinc-100">
                 <div className="relative">
-                  <Icon icon="mdi:magnify" className="absolute left-2 top-1/2 -translate-y-1/2 text-zinc-400" width={14} />
+                  <Icon icon="mdi:magnify" className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-800" width={16} />
                   <input
                     autoFocus
                     type="text"
@@ -137,24 +152,12 @@ export const ClassChips = ({ value = [], onChange }: { value: string[], onChange
                     Create "{search}"
                   </button>
                 ) : (
-                  <div className="px-3 py-4 text-[11px] text-zinc-400 italic text-center">No classes available</div>
+                  <div className="px-3 py-4 text-[11px] text-gray-800 italic text-center">No classes available</div>
                 )}
               </div>
             </div>
           </>
         )}
-        <div className="relative">
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              setOpen(!open);
-            }}
-            className="w-7 h-7 flex items-center justify-center rounded-full bg-zinc-100 text-zinc-500 hover:bg-zinc-200 hover:text-primary transition-all border border-zinc-200"
-            title="Add Class"
-          >
-            <Icon icon="mdi:plus" width={16} />
-          </button>
-        </div>
       </div>
     </div>
   );

@@ -183,22 +183,22 @@ const LayerContextMenu = ({ x, y, item, index, zone, onClose, appState, dispatch
       onMouseLeave={onClose}
     >
       <button className="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-100 text-left" onClick={() => handleAction("rename")}>
-        <Icon icon="lucide:type" width={14} /> Rename
+        <Icon icon="lucide:type" width={16} /> Rename
       </button>
       <button className="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-100 text-left" onClick={() => handleAction("copy")}>
-        <Icon icon="lucide:copy" width={14} /> Copy
+        <Icon icon="lucide:copy" width={16} /> Copy
       </button>
       <button className="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-100 text-left" onClick={() => handleAction("duplicate")}>
-        <Icon icon="lucide:files" width={14} /> Duplicate
+        <Icon icon="lucide:files" width={16} /> Duplicate
       </button>
       <button className="flex items-center gap-2 px-3 py-1.5 hover:bg-red-50 text-red-600 text-left" onClick={() => handleAction("delete")}>
-        <Icon icon="lucide:trash-2" width={14} /> Delete
+        <Icon icon="lucide:trash-2" width={16} /> Delete
       </button>
       <button className="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-100 text-left" onClick={() => handleAction("pasteBefore")}>
-        <Icon icon="lucide:arrow-up" width={14} /> Paste Before
+        <Icon icon="lucide:arrow-up" width={16} /> Paste Before
       </button>
       <button className="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-100 text-left" onClick={() => handleAction("pasteAfter")}>
-        <Icon icon="lucide:arrow-down" width={14} /> Paste After
+        <Icon icon="lucide:arrow-down" width={16} /> Paste After
       </button>
     </div>
   );
@@ -396,12 +396,12 @@ const LayerNode = ({
             >
               <Icon
                 icon={isExpanded ? "lucide:chevron-down" : "lucide:chevron-right"}
-                width={14}
+                width={16}
               />
             </button>
           )}
         </div>
-        <Icon icon="lucide:layout-grid" width={14} className="shrink-0" />
+        <Icon icon="lucide:layout-grid" width={16} className="shrink-0" />
         {editingId === item.props.id ? (
           <input
             autoFocus

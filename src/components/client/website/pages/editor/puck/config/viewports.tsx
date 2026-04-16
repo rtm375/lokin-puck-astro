@@ -12,25 +12,25 @@ export const PUCK_VIEWPORTS: Viewport[] = [
   {
     width: 360,
     height: "auto",
-    icon: <Icon icon="lucide:smartphone" width={14} />,
+    icon: <Icon icon="lucide:smartphone" width={16} />,
     label: "Mobile",
   },
   {
     width: 768,
     height: "auto",
-    icon: <Icon icon="lucide:tablet" width={14} />,
+    icon: <Icon icon="lucide:tablet" width={16} />,
     label: "Tablet",
   },
   {
     width: 1024,
     height: "auto",
-    icon: <Icon icon="lucide:laptop" width={14} />,
+    icon: <Icon icon="lucide:laptop" width={16} />,
     label: "Laptop",
   },
   {
     width: "100%",
     height: "auto",
-    icon: <Icon icon="lucide:monitor" width={14} />,
+    icon: <Icon icon="lucide:monitor" width={16} />,
     label: "Desktop",
   },
 ];

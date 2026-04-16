@@ -81,7 +81,7 @@ export const ClassSizeControl = ({ label, value, onChange, disabled, units = ["p
     <div className={`${disabled ? 'opacity-60 pointer-events-none' : ''}`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-xs text-zinc-400 font-semibold block">{label}</span>
+          <span className="text-xs text-gray-800 font-semibold block">{label}</span>
           <VariableBindingButton cssProperty={cssProperty} value={value} onChange={onChange} disabled={disabled} />
         </div>
         <div className="relative flex">
@@ -91,7 +91,7 @@ export const ClassSizeControl = ({ label, value, onChange, disabled, units = ["p
               if (!disabled && !isBound) setUnitOpen((s) => !s);
             }}
             disabled={disabled || isBound}
-            className={`flex items-center py-1 px-2 text-[11px] rounded transition-colors ${isBound ? 'opacity-50' : 'hover:bg-neutral-200'}`}
+            className={`flex items-center py-1 px-2 text-xs rounded transition-colors ${isBound ? 'opacity-50' : 'hover:bg-neutral-200'}`}
           >
             {isBound ? '-' : unit}
             <Icon icon="lucide:chevron-down" className="ml-1" width={12} />
@@ -110,7 +110,7 @@ export const ClassSizeControl = ({ label, value, onChange, disabled, units = ["p
                       e.preventDefault();
                       handleUnitChange(u);
                     }}
-                    className={`flex items-center justify-center w-full py-1.5 px-2 text-[11px] text-neutral-700 hover:bg-neutral-100 ${unit === u ? "text-primary bg-primary/5 font-medium" : ""
+                    className={`flex items-center justify-center w-full py-1.5 px-2 text-xs text-neutral-700 hover:bg-neutral-100 ${unit === u ? "text-primary bg-primary/5 font-medium" : ""
                       }`}
                   >
                     {u}
@@ -133,7 +133,7 @@ export const ClassSizeControl = ({ label, value, onChange, disabled, units = ["p
           className={`flex-1 w-full h-1.5 rounded-lg appearance-none cursor-pointer ${isBound ? 'bg-neutral-100 accent-neutral-300' : 'bg-neutral-200 accent-neutral-700'}`}
         />
         {isBound ? (
-          <div className="w-16 h-8 flex items-center justify-center bg-primary/5 text-primary text-[10px] font-medium border border-primary/20 rounded overflow-hidden px-1" title={String(value)}>
+          <div className="w-16 h-8 flex items-center justify-center bg-primary/5 text-primary text-xs font-medium border border-primary/20 rounded overflow-hidden px-1" title={String(value)}>
             <Icon icon="mdi:variable" width={12} className="mr-1 flex-shrink-0" />
             <span className="truncate">Bound</span>
           </div>
@@ -150,7 +150,7 @@ export const ClassSizeControl = ({ label, value, onChange, disabled, units = ["p
         )}
       </div>
       {description && (
-        <span className="text-[10px] text-neutral-500 italic mt-[-2px]">
+        <span className="text-xs text-neutral-500 italic mt-[-2px]">
           {description}
         </span>
       )}
@@ -158,7 +158,7 @@ export const ClassSizeControl = ({ label, value, onChange, disabled, units = ["p
   );
 };
 
-export const ClassOptionGroup = ({ label, value, onChange, disabled, options, controlType, direction, variant }: any) => {
+export const ClassOptionGroup = ({ label, value, onChange, disabled, options, controlType, direction, variant, align }: any) => {
   const mappedOptions = useMemo(() => {
     if (!controlType || !direction) return options;
     return options.map((opt: any) => {
@@ -186,39 +186,39 @@ export const ClassOptionGroup = ({ label, value, onChange, disabled, options, co
 
   return (
     <div className={`${disabled ? 'opacity-60 pointer-events-none' : ''}`}>
-      {label && <span className="text-xs text-zinc-400 font-semibold block mb-1">{label}</span>}
+      {label && <span className="text-xs text-gray-800 font-semibold block mb-1">{label}</span>}
       <Dropdown
-        align={isCompact ? "left" : "full"}
+        align={align}
         trigger={
           <button
             type="button"
-            className={`${isCompact ? 'w-full px-0 justify-center' : 'w-full px-2 justify-between'} h-8 flex items-center bg-zinc-50 rounded border border-neutral-200 outline-none text-[11px] font-medium text-zinc-700 hover:bg-zinc-100 transition-colors`}
+            className={`${isCompact ? 'w-full px-0 justify-center' : 'w-full px-2 justify-between'} h-8 flex items-center bg-zinc-50 rounded border border-neutral-200 outline-none text-xxs font-medium text-zinc-700 hover:bg-zinc-100 transition-colors`}
             title={activeOpt?.label}
           >
             <div className="flex items-center gap-2 overflow-hidden px-1">
               {activeOpt?.icon && (
                 <div className={`flex items-center justify-center transition-transform duration-200 ${activeOpt.rotateClass || ""}`}>
-                  <Icon icon={activeOpt.icon} width={14} />
+                  <Icon icon={activeOpt.icon} width={16} />
                 </div>
               )}
               {!isCompact && <span className="truncate">{activeOpt?.label}</span>}
             </div>
-            {!isCompact && <Icon icon="mdi:chevron-down" width={14} className="text-zinc-400 flex-shrink-0" />}
+            {!isCompact && <Icon icon="mdi:chevron-down" width={16} className="text-gray-800 flex-shrink-0" />}
           </button>
         }
       >
-        <div className="py-1 min-w-[140px]">
+        <div className="py-1 whitespace-nowrap">
           {mappedOptions.map((opt: any) => (
             <button
               key={opt.value}
               type="button"
               onClick={() => onChange(opt.value)}
-              className={`w-full flex items-center gap-2 px-3 py-1.5 text-[11px] text-left hover:bg-zinc-50 transition-colors ${value === opt.value ? "text-primary font-semibold bg-primary/5" : "text-zinc-600"
+              className={`w-full flex items-center gap-2 px-3 py-1.5 text-xs text-left hover:bg-zinc-50 transition-colors ${value === opt.value ? "text-primary font-semibold bg-primary/5" : "text-zinc-600"
                 }`}
             >
               {opt.icon && (
                 <div className={`flex items-center justify-center transition-transform duration-200 ${opt.rotateClass || ""}`}>
-                  <Icon icon={opt.icon} width={14} />
+                  <Icon icon={opt.icon} width={16} />
                 </div>
               )}
               {opt.label}
@@ -279,7 +279,7 @@ const SpacingPopout = ({ type, edge, value, onChange, onClose, cssProperty, disa
       <div className="fixed inset-0 z-[60] bg-black/50" onClick={onClose} />
       <div className="absolute z-[70] bg-white shadow-xl border border-neutral-200 rounded-lg p-3 w-48 flex flex-col gap-3 left-1/2 -translate-x-1/2 mt-1 top-0">
         <div className="flex items-center justify-between border-b border-neutral-100 pb-2">
-          <span className="text-[10px] font-bold uppercase text-neutral-500 tracking-wider">{label}</span>
+          <span className="text-xs font-bold uppercase text-neutral-500 tracking-wider">{label}</span>
           <VariableBindingButton
             cssProperty={cssProperty}
             value={value}
@@ -304,7 +304,7 @@ const SpacingPopout = ({ type, edge, value, onChange, onClose, cssProperty, disa
             <button
               onClick={() => !isBound && setUnitOpen(!unitOpen)}
               disabled={disabled || isBound}
-              className="h-8 px-2 text-[10px] font-medium bg-neutral-50 border border-neutral-200 rounded hover:bg-neutral-100 transition-colors flex items-center gap-1 min-w-[40px] justify-center"
+              className="h-8 px-2 text-xs font-medium bg-neutral-50 border border-neutral-200 rounded hover:bg-neutral-100 transition-colors flex items-center gap-1 min-w-[40px] justify-center"
             >
               {isBound ? "-" : unit}
             </button>
@@ -314,7 +314,7 @@ const SpacingPopout = ({ type, edge, value, onChange, onClose, cssProperty, disa
                   <button
                     key={u}
                     onClick={() => handleUnitChange(u)}
-                    className={`w-full text-left px-2 py-1 text-[10px] hover:bg-neutral-50 ${unit === u ? "text-primary font-bold" : "text-neutral-600"}`}
+                    className={`w-full text-left px-2 py-1 text-xs hover:bg-neutral-50 ${unit === u ? "text-primary font-bold" : "text-neutral-600"}`}
                   >
                     {u}
                   </button>
@@ -330,7 +330,7 @@ const SpacingPopout = ({ type, edge, value, onChange, onClose, cssProperty, disa
             title="Set opposite side"
             className="flex-1 h-7 flex items-center justify-center gap-1.5 rounded bg-neutral-50 border border-neutral-200 hover:bg-neutral-100 text-neutral-600 transition-colors"
           >
-            <Icon icon={edge === "top" || edge === "bottom" ? "lucide:unfold-vertical" : "lucide:unfold-horizontal"} width={14} />
+            <Icon icon={edge === "top" || edge === "bottom" ? "lucide:unfold-vertical" : "lucide:unfold-horizontal"} width={16} />
             <span className="text-[9px] font-medium">Both</span>
           </button>
           <button
@@ -338,7 +338,7 @@ const SpacingPopout = ({ type, edge, value, onChange, onClose, cssProperty, disa
             title="Set all sides"
             className="flex-1 h-7 flex items-center justify-center gap-1.5 rounded bg-neutral-50 border border-neutral-200 hover:bg-neutral-100 text-neutral-600 transition-colors"
           >
-            <Icon icon="lucide:maximize" width={14} />
+            <Icon icon="lucide:maximize" width={16} />
             <span className="text-[9px] font-medium">All</span>
           </button>
         </div>
@@ -368,103 +368,104 @@ export const ClassBoxModelControl = ({ label, values, onChange, disabled, cssPro
 
   return (
     <div className={`${disabled ? "opacity-60 pointer-events-none" : ""}`}>
-      {label && <span className="text-xs text-zinc-400 font-semibold block">{label}</span>}
+      {label && <span className="text-xs text-gray-800 font-semibold block">{label}</span>}
 
-      <div className="relative bg-neutral-50 border border-neutral-200 rounded-lg p-8 select-none">
-        <span className="absolute top-2 left-2 text-[9px] font-bold text-neutral-400">Margin</span>
+      <div className="relative grid grid-cols-5 grid-rows-4 bg-neutral-50 border border-neutral-200 rounded-lg select-none">
+        <span className="absolute top-2 left-2 text-xxs font-bold text-neutral-400">Margin</span>
 
         {/* Margin Edges */}
-        <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 pointer-events-none">
-          {/* Top */}
-          <div className="col-start-2 row-start-1 flex items-start justify-center pt-1.5 pointer-events-auto">
-            <button
-              onClick={() => setActivePopout({ type: "margin", edge: "top" })}
-              className={`text-[10px] font-medium px-1.5 py-0.5 rounded hover:bg-neutral-200 transition-colors ${isVariableRef(values?.marginTop) ? "text-primary bg-primary/5" : "text-neutral-600"}`}
-            >
-              {getDisplayValue(values?.marginTop)}
-            </button>
-            {activePopout?.type === "margin" && activePopout?.edge === "top" && (
-              <SpacingPopout
-                type="margin"
-                edge="top"
-                value={values?.marginTop}
-                cssProperty={cssProperties?.margin?.top}
-                onChange={(val: any, bulk: boolean) => handleSpacingChange("margin", "top", val, bulk)}
-                onClose={() => setActivePopout(null)}
-                disabled={disabled}
-              />
-            )}
-          </div>
-          {/* Right */}
-          <div className="col-start-3 row-start-2 flex items-center justify-end pr-1.5 pointer-events-auto">
-            <button
-              onClick={() => setActivePopout({ type: "margin", edge: "right" })}
-              className={`text-[10px] font-medium px-1.5 py-0.5 rounded hover:bg-neutral-200 transition-colors ${isVariableRef(values?.marginRight) ? "text-primary bg-primary/5" : "text-neutral-600"}`}
-            >
-              {getDisplayValue(values?.marginRight)}
-            </button>
-            {activePopout?.type === "margin" && activePopout?.edge === "right" && (
-              <SpacingPopout
-                type="margin"
-                edge="right"
-                value={values?.marginRight}
-                cssProperty={cssProperties?.margin?.right}
-                onChange={(val: any, bulk: boolean) => handleSpacingChange("margin", "right", val, bulk)}
-                onClose={() => setActivePopout(null)}
-                disabled={disabled}
-              />
-            )}
-          </div>
-          {/* Bottom */}
-          <div className="col-start-2 row-start-3 flex items-end justify-center pb-1.5 pointer-events-auto">
-            <button
-              onClick={() => setActivePopout({ type: "margin", edge: "bottom" })}
-              className={`text-[10px] font-medium px-1.5 py-0.5 rounded hover:bg-neutral-200 transition-colors ${isVariableRef(values?.marginBottom) ? "text-primary bg-primary/5" : "text-neutral-600"}`}
-            >
-              {getDisplayValue(values?.marginBottom)}
-            </button>
-            {activePopout?.type === "margin" && activePopout?.edge === "bottom" && (
-              <SpacingPopout
-                type="margin"
-                edge="bottom"
-                value={values?.marginBottom}
-                cssProperty={cssProperties?.margin?.bottom}
-                onChange={(val: any, bulk: boolean) => handleSpacingChange("margin", "bottom", val, bulk)}
-                onClose={() => setActivePopout(null)}
-                disabled={disabled}
-              />
-            )}
-          </div>
-          {/* Left */}
-          <div className="col-start-1 row-start-2 flex items-center justify-start pl-1.5 pointer-events-auto">
-            <button
-              onClick={() => setActivePopout({ type: "margin", edge: "left" })}
-              className={`text-[10px] font-medium px-1.5 py-0.5 rounded hover:bg-neutral-200 transition-colors ${isVariableRef(values?.marginLeft) ? "text-primary bg-primary/5" : "text-neutral-600"}`}
-            >
-              {getDisplayValue(values?.marginLeft)}
-            </button>
-            {activePopout?.type === "margin" && activePopout?.edge === "left" && (
-              <SpacingPopout
-                type="margin"
-                edge="left"
-                value={values?.marginLeft}
-                cssProperty={cssProperties?.margin?.left}
-                onChange={(val: any, bulk: boolean) => handleSpacingChange("margin", "left", val, bulk)}
-                onClose={() => setActivePopout(null)}
-                disabled={disabled}
-              />
-            )}
-          </div>
+        {/* Top */}
+        <div className="col-start-3 row-start-1 flex items-center justify-center pointer-events-auto">
+          <button
+            title="Margin Top"
+            onClick={() => setActivePopout({ type: "margin", edge: "top" })}
+            className={`text-xs font-medium px-2 py-0.5 rounded hover:bg-neutral-200 transition-colors ${isVariableRef(values?.marginTop) ? "text-primary bg-primary/5" : "text-neutral-600"}`}
+          >
+            {getDisplayValue(values?.marginTop)}
+          </button>
+          {activePopout?.type === "margin" && activePopout?.edge === "top" && (
+            <SpacingPopout
+              type="margin"
+              edge="top"
+              value={values?.marginTop}
+              cssProperty={cssProperties?.margin?.top}
+              onChange={(val: any, bulk: boolean) => handleSpacingChange("margin", "top", val, bulk)}
+              onClose={() => setActivePopout(null)}
+              disabled={disabled}
+            />
+          )}
         </div>
-
+        {/* Right */}
+        <div className="col-start-5 row-start-2 row-span-2 flex items-center justify-center pointer-events-auto">
+          <button
+            title="Margin Right"
+            onClick={() => setActivePopout({ type: "margin", edge: "right" })}
+            className={`text-xs font-medium px-2 py-0.5 rounded hover:bg-neutral-200 transition-colors ${isVariableRef(values?.marginRight) ? "text-primary bg-primary/5" : "text-neutral-600"}`}
+          >
+            {getDisplayValue(values?.marginRight)}
+          </button>
+          {activePopout?.type === "margin" && activePopout?.edge === "right" && (
+            <SpacingPopout
+              type="margin"
+              edge="right"
+              value={values?.marginRight}
+              cssProperty={cssProperties?.margin?.right}
+              onChange={(val: any, bulk: boolean) => handleSpacingChange("margin", "right", val, bulk)}
+              onClose={() => setActivePopout(null)}
+              disabled={disabled}
+            />
+          )}
+        </div>
+        {/* Bottom */}
+        <div className="col-start-3 row-start-4 flex items-center justify-center pointer-events-auto">
+          <button
+            title="Margin Bottom"
+            onClick={() => setActivePopout({ type: "margin", edge: "bottom" })}
+            className={`text-xs font-medium px-2 py-0.5 rounded hover:bg-neutral-200 transition-colors ${isVariableRef(values?.marginBottom) ? "text-primary bg-primary/5" : "text-neutral-600"}`}
+          >
+            {getDisplayValue(values?.marginBottom)}
+          </button>
+          {activePopout?.type === "margin" && activePopout?.edge === "bottom" && (
+            <SpacingPopout
+              type="margin"
+              edge="bottom"
+              value={values?.marginBottom}
+              cssProperty={cssProperties?.margin?.bottom}
+              onChange={(val: any, bulk: boolean) => handleSpacingChange("margin", "bottom", val, bulk)}
+              onClose={() => setActivePopout(null)}
+              disabled={disabled}
+            />
+          )}
+        </div>
+        {/* Left */}
+        <div className="col-start-1 row-start-2 row-span-2 flex items-center justify-center pointer-events-auto">
+          <button
+            title="Margin Left"
+            onClick={() => setActivePopout({ type: "margin", edge: "left" })}
+            className={`text-xs font-medium px-2 py-0.5 rounded hover:bg-neutral-200 transition-colors ${isVariableRef(values?.marginLeft) ? "text-primary bg-primary/5" : "text-neutral-600"}`}
+          >
+            {getDisplayValue(values?.marginLeft)}
+          </button>
+          {activePopout?.type === "margin" && activePopout?.edge === "left" && (
+            <SpacingPopout
+              type="margin"
+              edge="left"
+              value={values?.marginLeft}
+              cssProperty={cssProperties?.margin?.left}
+              onChange={(val: any, bulk: boolean) => handleSpacingChange("margin", "left", val, bulk)}
+              onClose={() => setActivePopout(null)}
+              disabled={disabled}
+            />
+          )}
+        </div>
         {/* Padding Inner Box */}
-        <div className="relative bg-white border border-dashed border-neutral-300 rounded-md p-6 shadow-sm">
+        <div className="relative col-start-2 col-span-3 row-start-2 row-span-2 bg-white border border-dashed border-neutral-300 rounded-md p-7 shadow-sm">
           <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 pointer-events-none">
             {/* Top */}
-            <div className="col-start-2 row-start-1 flex items-start justify-center pt-1 pointer-events-auto">
+            <div className="col-start-2 row-start-1 flex items-center justify-center pointer-events-auto mt-2">
               <button
                 onClick={() => setActivePopout({ type: "padding", edge: "top" })}
-                className={`text-[10px] font-medium px-1.5 py-0.5 rounded hover:bg-neutral-100 transition-colors ${isVariableRef(values?.paddingTop) ? "text-primary bg-primary/5" : "text-neutral-600"}`}
+                className={`text-xs font-medium px-2 py-0.5 rounded hover:bg-neutral-200 transition-colors ${isVariableRef(values?.paddingTop) ? "text-primary bg-primary/5" : "text-neutral-600"}`}
               >
                 {getDisplayValue(values?.paddingTop)}
               </button>
@@ -481,10 +482,10 @@ export const ClassBoxModelControl = ({ label, values, onChange, disabled, cssPro
               )}
             </div>
             {/* Right */}
-            <div className="col-start-3 row-start-2 flex items-center justify-end pr-1 pointer-events-auto">
+            <div className="col-start-3 row-start-2 flex items-center justify-center pointer-events-auto">
               <button
                 onClick={() => setActivePopout({ type: "padding", edge: "right" })}
-                className={`text-[10px] font-medium px-1.5 py-0.5 rounded hover:bg-neutral-100 transition-colors ${isVariableRef(values?.paddingRight) ? "text-primary bg-primary/5" : "text-neutral-600"}`}
+                className={`text-xs font-medium px-2 py-0.5 rounded hover:bg-neutral-200 transition-colors ${isVariableRef(values?.paddingRight) ? "text-primary bg-primary/5" : "text-neutral-600"}`}
               >
                 {getDisplayValue(values?.paddingRight)}
               </button>
@@ -501,10 +502,10 @@ export const ClassBoxModelControl = ({ label, values, onChange, disabled, cssPro
               )}
             </div>
             {/* Bottom */}
-            <div className="col-start-2 row-start-3 flex items-end justify-center pb-1 pointer-events-auto">
+            <div className="col-start-2 row-start-3 flex items-center justify-center pointer-events-auto mb-2">
               <button
                 onClick={() => setActivePopout({ type: "padding", edge: "bottom" })}
-                className={`text-[10px] font-medium px-1.5 py-0.5 rounded hover:bg-neutral-100 transition-colors ${isVariableRef(values?.paddingBottom) ? "text-primary bg-primary/5" : "text-neutral-600"}`}
+                className={`text-xs font-medium px-2 py-0.5 rounded hover:bg-neutral-200 transition-colors ${isVariableRef(values?.paddingBottom) ? "text-primary bg-primary/5" : "text-neutral-600"}`}
               >
                 {getDisplayValue(values?.paddingBottom)}
               </button>
@@ -521,10 +522,10 @@ export const ClassBoxModelControl = ({ label, values, onChange, disabled, cssPro
               )}
             </div>
             {/* Left */}
-            <div className="col-start-1 row-start-2 flex items-center justify-start pl-1 pointer-events-auto">
+            <div className="col-start-1 row-start-2 flex items-center justify-center pointer-events-auto">
               <button
                 onClick={() => setActivePopout({ type: "padding", edge: "left" })}
-                className={`text-[10px] font-medium px-1.5 py-0.5 rounded hover:bg-neutral-100 transition-colors ${isVariableRef(values?.paddingLeft) ? "text-primary bg-primary/5" : "text-neutral-600"}`}
+                className={`text-xs font-medium px-2 py-0.5 rounded hover:bg-neutral-200 transition-colors ${isVariableRef(values?.paddingLeft) ? "text-primary bg-primary/5" : "text-neutral-600"}`}
               >
                 {getDisplayValue(values?.paddingLeft)}
               </button>
@@ -543,37 +544,40 @@ export const ClassBoxModelControl = ({ label, values, onChange, disabled, cssPro
           </div>
 
           <div className="w-full h-full bg-neutral-50/50 rounded flex items-center justify-center">
-            <span className="text-[9px] font-bold text-neutral-400">Padding</span>
+            <span className="text-xxs font-bold text-neutral-400">Padding</span>
           </div>
         </div>
       </div>
+
     </div>
   );
 };
 
 
-const GapInput = ({ prop, icon, title, values, disabled, locked, onChange, parseValueUnit }: any) => {
+const GapInput = ({ prop, values, disabled, onChange, cssProperty }: any) => {
   const val = values?.[prop] || "";
   const { value: num, unit } = parseValueUnit(val, "px");
   const isBound = isVariableRef(String(val));
+  const [unitOpen, setUnitOpen] = useState(false);
+  const units = ["px", "rem", "em", "%", "vh", "vw"];
 
   const handleGapChange = (newVal: string) => {
     if (disabled || isBound) return;
-    if (locked) {
-      onChange({ rowGap: newVal, columnGap: newVal });
-    } else {
-      onChange({ ...values, [prop]: newVal });
-    }
+    onChange({ [prop]: newVal });
+  };
+
+  const handleUnitChange = (newUnit: string) => {
+    if (disabled || isBound) return;
+    onChange({ [prop]: num === "" ? "" : `${num}${newUnit}` });
+    setUnitOpen(false);
   };
 
   return (
-    <div className={`${isBound ? 'border-primary/30 bg-primary/5' : 'border-neutral-200 focus-within:border-neutral-400'} rounded overflow-hidden group transition-colors`}>
-      <div className={`w-6 h-7 flex items-center justify-center border-r ${isBound ? 'bg-primary/10 border-primary/20 text-primary' : 'bg-neutral-50 border-neutral-200 text-neutral-400 group-hover:text-primary'} transition-colors relative`} title={title}>
-        <Icon icon={icon} width={12} className={isBound ? "opacity-50" : ""} />
-      </div>
+    <div className={`${isBound ? 'border-primary/30 bg-primary/5' : 'border-neutral-200 focus-within:border-neutral-400 bg-white'} flex items-center rounded border transition-colors h-8`}>
       {isBound ? (
-        <div className="w-full h-7 text-xs px-1.5 flex items-center text-primary font-medium truncate" title={String(val)}>
-          var
+        <div className="flex-1 flex items-center px-2 gap-1.5 min-w-0" title={String(val)}>
+          <Icon icon="mdi:variable" width={12} className="text-primary flex-shrink-0" />
+          <span className="text-[10px] text-primary font-bold truncate uppercase tracking-tight">Bound</span>
         </div>
       ) : (
         <input
@@ -581,55 +585,115 @@ const GapInput = ({ prop, icon, title, values, disabled, locked, onChange, parse
           value={num}
           disabled={disabled}
           onChange={(e) => handleGapChange(e.target.value === "" ? "" : `${e.target.value}${unit || 'px'}`)}
-          className="w-full min-w-0 h-7 text-xs px-1.5 outline-none bg-transparent"
+          className="w-full min-w-0 h-full text-xs px-2 outline-none bg-transparent"
           placeholder="0"
         />
       )}
+      <div className="flex items-center pr-0.5 border-l border-neutral-100 bg-neutral-50/50">
+        <VariableBindingButton
+          cssProperty={cssProperty}
+          value={val}
+          onChange={(v: string) => onChange({ [prop]: v })}
+          disabled={disabled}
+        />
+        <div className="relative">
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              if (!disabled && !isBound) setUnitOpen(!unitOpen);
+            }}
+            disabled={disabled || isBound}
+            className={`h-6 px-1.5 text-[9px] font-bold rounded hover:bg-neutral-100 transition-colors ${isBound ? 'opacity-50' : 'text-neutral-500'}`}
+          >
+            {isBound ? '-' : (unit || 'px').toUpperCase()}
+          </button>
+          {unitOpen && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setUnitOpen(false)} />
+              <div className="absolute right-0 top-full mt-1 bg-white border border-neutral-200 shadow-lg rounded py-1 z-50 min-w-[50px]">
+                {units.map((u) => (
+                  <button
+                    key={u}
+                    onClick={(e) => { e.preventDefault(); handleUnitChange(u); }}
+                    className={`w-full text-left px-3 py-1 text-[10px] hover:bg-neutral-50 ${unit === u ? "text-primary font-bold bg-primary/5" : "text-neutral-600"}`}
+                  >
+                    {u.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
 
-export const ClassGapControl = ({ label, values, onChange, disabled, cssProperties }: any) => {
+export const ClassGapControl = ({ label, values, onChange, disabled, cssProperties, columnGapOverridden, rowGapOverridden }: any) => {
   const [locked, setLocked] = useState(true);
 
-  const valRow = values?.rowGap;
-
-  const handleBindingChange = (newVal: string) => {
+  const handleGapChange = (updates: any) => {
+    if (disabled) return;
     if (locked) {
+      const val = Object.values(updates)[0];
       onChange({
-        rowGap: newVal,
-        columnGap: newVal,
+        ...values,
+        rowGap: val,
+        columnGap: val,
       });
     } else {
       onChange({
         ...values,
-        rowGap: newVal,
-        columnGap: newVal,
+        ...updates,
       });
     }
   };
 
   return (
     <div className={`${disabled ? 'opacity-60 pointer-events-none' : ''}`}>
-      <div className="flex items-center justify-between">
-        <span className="text-xs text-zinc-400 font-semibold block">{label}</span>
-        <div className="flex items-center gap-1">
-          <VariableBindingButton cssProperty={cssProperties?.rowGap} value={valRow} onChange={handleBindingChange} disabled={disabled} />
+      {label && <div className="mb-1">{label}</div>}
+      <div className="flex items-center justify-between gap-2 mb-2 px-0.5">
+        <div className="flex items-center gap-1 flex-1">
+          <span className={`text-xs text-gray-800 font-semibold block ${columnGapOverridden ? 'line-through opacity-50' : ''}`}>
+            Col gap
+          </span>
+          {columnGapOverridden && <Icon icon="lucide:lock" width={8} className="text-zinc-300" />}
+        </div>
+        <div className="flex items-center gap-1 flex-1 justify-between">
+          <div>
+            {rowGapOverridden && <Icon icon="lucide:lock" width={8} className="text-zinc-300" />}
+            <span className={`text-xs text-gray-800 font-semibold block ${rowGapOverridden ? 'line-through opacity-50' : ''}`}>
+              Row gap
+            </span>
+          </div>
           <button
             onClick={(e) => { e.preventDefault(); if (!disabled) setLocked(!locked); }}
             disabled={disabled}
-            className={`p-1 rounded transition-all ${locked ? 'bg-primary/10 text-primary' : 'text-neutral-400 hover:bg-neutral-100'}`}
+            title={locked ? "Unlink Gaps" : "Link Gaps"}
+            className={`p-1 rounded-full transition-all ${locked ? 'bg-primary/20 text-primary' : 'text-neutral-800 hover:bg-neutral-200'}`}
           >
-            <Icon icon={locked ? "lucide:link" : "lucide:unlink"} width={12} />
+            <Icon icon={locked ? "lucide:link" : "lucide:unlink"} width={10} />
           </button>
         </div>
       </div>
-      <div className="flex gap-1.5">
+      <div className="flex gap-2">
         <div className="flex-1">
-          <GapInput prop="rowGap" icon="lucide:rows" title="Row Gap" values={values} disabled={disabled} locked={locked} onChange={onChange} parseValueUnit={parseValueUnit} />
+          <GapInput
+            prop="columnGap"
+            values={values}
+            disabled={disabled}
+            onChange={handleGapChange}
+            cssProperty={cssProperties?.columnGap}
+          />
         </div>
         <div className="flex-1">
-          <GapInput prop="columnGap" icon="lucide:columns" title="Column Gap" values={values} disabled={disabled} locked={locked} onChange={onChange} parseValueUnit={parseValueUnit} />
+          <GapInput
+            prop="rowGap"
+            values={values}
+            disabled={disabled}
+            onChange={handleGapChange}
+            cssProperty={cssProperties?.rowGap}
+          />
         </div>
       </div>
     </div>
