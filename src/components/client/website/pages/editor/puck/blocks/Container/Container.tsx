@@ -26,7 +26,7 @@ const baseBlockStyles = {
 
 const Label = ({ children, overridden }: { children: React.ReactNode, overridden?: boolean }) => {
   return (
-    <div className="flex items-center gap-1.5 mb-2  ">
+    <div className="flex items-center gap-1.5 mb-2">
       <span className={overridden ? "line-through opacity-40" : ""}>
         {children}
       </span>
@@ -228,17 +228,17 @@ export const createContainerConfig = (
                 onChange={(val: string) => handleUpdate({ display: val })}
                 disabled={isAnyOverridden("display")}
                 options={[
-                  { label: "Block", value: "block" },
-                  { label: "Flex", value: "flex" },
-                  { label: "Grid", value: "grid" },
+                  { label: "Block", value: "block", icon: "clarity:blocks-group-line" },
+                  { label: "Flex", value: "flex", icon: "material-symbols-light:flex-no-wrap-rounded" },
+                  { label: "Grid", value: "grid", icon: "flowbite:grid-outline" },
                 ]}
               />
 
               {current.display === "flex" && (
-                <div className="flex flex-col gap-2">
-
+                <div className="grid grid-cols-4 gap-2 flex-wrap">
                   <ClassOptionGroup
                     label={<Label overridden={isOverridden("flexDirection")}>Direction</Label>}
+                    variant="compact"
                     value={current.flexDirection}
                     onChange={(val: string) => handleUpdate({ flexDirection: val })}
                     disabled={isAnyOverridden("flexDirection")}
@@ -250,7 +250,23 @@ export const createContainerConfig = (
                     ]}
                   />
                   <ClassOptionGroup
+                    label={<Label overridden={isOverridden("alignItems")}>Align</Label>}
+                    variant="compact"
+                    value={current.alignItems}
+                    onChange={(val: string) => handleUpdate({ alignItems: val })}
+                    disabled={isAnyOverridden("alignItems")}
+                    controlType="align"
+                    direction={current.flexDirection || computed.final.flexDirection}
+                    options={[
+                      { label: "Start", value: "flex-start", icon: "material-symbols-light:align-vertical-top" },
+                      { label: "Center", value: "center", icon: "material-symbols-light:align-vertical-center" },
+                      { label: "End", value: "flex-end", icon: "material-symbols-light:align-vertical-bottom" },
+                      { label: "Stretch", value: "stretch", icon: "material-symbols-light:align-stretch" },
+                    ]}
+                  />
+                  <ClassOptionGroup
                     label={<Label overridden={isOverridden("justifyContent")}>Justify</Label>}
+                    variant="compact"
                     value={current.justifyContent}
                     onChange={(val: string) => handleUpdate({ justifyContent: val })}
                     disabled={isAnyOverridden("justifyContent")}
@@ -264,31 +280,8 @@ export const createContainerConfig = (
                     ]}
                   />
                   <ClassOptionGroup
-                    label={<Label overridden={isOverridden("alignItems")}>Align</Label>}
-                    value={current.alignItems}
-                    onChange={(val: string) => handleUpdate({ alignItems: val })}
-                    disabled={isAnyOverridden("alignItems")}
-                    controlType="align"
-                    direction={current.flexDirection || computed.final.flexDirection}
-                    options={[
-                      { label: "Start", value: "flex-start", icon: "material-symbols-light:align-vertical-top" },
-                      { label: "Center", value: "center", icon: "material-symbols-light:align-vertical-center" },
-                      { label: "End", value: "flex-end", icon: "material-symbols-light:align-vertical-bottom" },
-                      { label: "Stretch", value: "stretch", icon: "material-symbols-light:align-stretch" },
-                    ]}
-                  />
-                  <ClassGapControl
-                    label={<Label overridden={isOverridden("rowGap")}>Gaps</Label>}
-                    values={current}
-                    onChange={handleUpdate}
-                    disabled={isAnyOverridden("rowGap", "columnGap")}
-                    cssProperties={{
-                      rowGap: "rowGap",
-                      columnGap: "columnGap"
-                    }}
-                  />
-                  <ClassOptionGroup
                     label={<Label overridden={isOverridden("flexWrap")}>Wrap</Label>}
+                    variant="compact"
                     value={current.flexWrap}
                     onChange={(val: string) => handleUpdate({ flexWrap: val })}
                     disabled={isAnyOverridden("flexWrap")}
@@ -298,6 +291,18 @@ export const createContainerConfig = (
                       { label: "Wrap Reverse", value: "wrap-reverse", icon: "lucide:undo-2" },
                     ]}
                   />
+                  <div className="col-span-4">
+                    <ClassGapControl
+                      label={<Label overridden={isOverridden("rowGap")}>Gaps</Label>}
+                      values={current}
+                      onChange={handleUpdate}
+                      disabled={isAnyOverridden("rowGap", "columnGap")}
+                      cssProperties={{
+                        rowGap: "rowGap",
+                        columnGap: "columnGap"
+                      }}
+                    />
+                  </div>
                 </div>
               )}
             </div>

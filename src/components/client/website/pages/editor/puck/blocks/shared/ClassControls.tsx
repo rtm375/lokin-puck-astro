@@ -1,5 +1,6 @@
 import { Icon } from "@iconify/react";
 import { useState, useMemo } from "react";
+import { Dropdown } from "./Dropdown";
 import { VariableBindingButton } from "./VariableBindingButton";
 import { isVariableRef } from "./controlTypes";
 
@@ -157,7 +158,7 @@ export const ClassSizeControl = ({ label, value, onChange, disabled, units = ["p
   );
 };
 
-export const ClassOptionGroup = ({ label, value, onChange, disabled, options, controlType, direction }: any) => {
+export const ClassOptionGroup = ({ label, value, onChange, disabled, options, controlType, direction, variant }: any) => {
   const mappedOptions = useMemo(() => {
     if (!controlType || !direction) return options;
     return options.map((opt: any) => {
@@ -180,32 +181,51 @@ export const ClassOptionGroup = ({ label, value, onChange, disabled, options, co
     });
   }, [options, controlType, direction]);
 
+  const activeOpt = mappedOptions.find((o: any) => o.value === value) || mappedOptions[0];
+  const isCompact = variant === "compact";
+
   return (
     <div className={`${disabled ? 'opacity-60 pointer-events-none' : ''}`}>
-      <span className="text-xs text-zinc-400 font-semibold block">{label}</span>
-      <div className="flex rounded-md border bg-white border-neutral-300 overflow-hidden w-full *:not-last-of-type:border-r *:not-last-of-type:border-neutral-300">
-        {mappedOptions.map((opt: any) => (
+      {label && <span className="text-xs text-zinc-400 font-semibold block mb-1">{label}</span>}
+      <Dropdown
+        align={isCompact ? "left" : "full"}
+        trigger={
           <button
-            key={opt.value}
-            disabled={disabled}
-            onClick={(e) => {
-              e.preventDefault();
-              onChange(value === opt.value ? "" : opt.value);
-            }}
-            title={opt.label}
-            className={`h-8 cursor-pointer flex flex-1 items-center justify-center transition-all ${value === opt.value ? "bg-primary/10 text-primary" : "text-gray-500 bg-neutral-50 hover:text-primary hover:bg-primary/10"
-              }`}
+            type="button"
+            className={`${isCompact ? 'w-full px-0 justify-center' : 'w-full px-2 justify-between'} h-8 flex items-center bg-zinc-50 rounded border border-neutral-200 outline-none text-[11px] font-medium text-zinc-700 hover:bg-zinc-100 transition-colors`}
+            title={activeOpt?.label}
           >
-            {opt.icon ? (
-              <div className={`flex items-center justify-center transition-transform duration-200 ${opt.rotateClass || ""}`}>
-                <Icon icon={opt.icon} width={15} />
-              </div>
-            ) : (
-              <span className="text-[10px] font-semibold">{opt.label}</span>
-            )}
+            <div className="flex items-center gap-2 overflow-hidden px-1">
+              {activeOpt?.icon && (
+                <div className={`flex items-center justify-center transition-transform duration-200 ${activeOpt.rotateClass || ""}`}>
+                  <Icon icon={activeOpt.icon} width={14} />
+                </div>
+              )}
+              {!isCompact && <span className="truncate">{activeOpt?.label}</span>}
+            </div>
+            {!isCompact && <Icon icon="mdi:chevron-down" width={14} className="text-zinc-400 flex-shrink-0" />}
           </button>
-        ))}
-      </div>
+        }
+      >
+        <div className="py-1 min-w-[140px]">
+          {mappedOptions.map((opt: any) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => onChange(opt.value)}
+              className={`w-full flex items-center gap-2 px-3 py-1.5 text-[11px] text-left hover:bg-zinc-50 transition-colors ${value === opt.value ? "text-primary font-semibold bg-primary/5" : "text-zinc-600"
+                }`}
+            >
+              {opt.icon && (
+                <div className={`flex items-center justify-center transition-transform duration-200 ${opt.rotateClass || ""}`}>
+                  <Icon icon={opt.icon} width={14} />
+                </div>
+              )}
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </Dropdown>
     </div>
   );
 };
