@@ -83,11 +83,10 @@ export const ClassChips = ({
           Base
         </div>
 
-        {appliedClasses.map((c: any) => (
-          <>
+        {appliedClasses.length > 0 && appliedClasses.map((c: any, index: number) => (
+          <div key={index}>
             <span className="text-xs">»</span>
             <div
-              key={c.id}
               onClick={() => setActiveClassId(activeClassId === c.id ? null : c.id)}
               className={`relative group flex items-center gap-1.5 px-3 h-7 leading-none text-xs font-semibold cursor-pointer transition-all ${activeClassId === c.id
                 ? 'bg-primary/90 text-white shadow-sm'
@@ -106,7 +105,7 @@ export const ClassChips = ({
                 <Icon icon="mdi:close" width={12} />
               </button>
             </div>
-          </>
+          </div>
         ))}
         {open && (
           <>

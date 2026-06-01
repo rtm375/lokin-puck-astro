@@ -1,5 +1,6 @@
 import { Icon } from "@iconify/react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { Dropdown } from "./Dropdown";
 import { VariableBindingButton } from "./VariableBindingButton";
 import { isVariableRef } from "./controlTypes";
@@ -99,7 +100,7 @@ export const ClassSizeControl = ({ label, value, onChange, disabled, units = ["p
           {unitOpen && !isBound && (
             <>
               <div
-                className="fixed inset-0 z-40"
+                className="absolute inset-0 z-40"
                 onClick={() => setUnitOpen(false)}
               />
               <div className="absolute right-0 top-full mt-1 flex flex-col bg-white shadow-lg z-50 min-w-[50px] border border-neutral-100 rounded overflow-hidden">
@@ -274,10 +275,18 @@ const SpacingPopout = ({ type, edge, value, onChange, onClose, cssProperty, disa
     onChange(updates, true);
   };
 
-  return (
-    <>
-      <div className="fixed inset-0 z-[60] bg-black/50" onClick={onClose} />
-      <div className="absolute z-[70] bg-white shadow-xl border border-neutral-200 rounded-lg p-3 w-48 flex flex-col gap-3 top-1/2 left-1/2 -translate-1/2">
+  const content = (
+    <div
+      className="absolute inset-0 z-[60] bg-black/20 backdrop-blur-sm flex items-center justify-center pointer-events-auto"
+      onClick={(e) => {
+        e.stopPropagation();
+        onClose();
+      }}
+    >
+      <div
+        className="bg-white shadow-xl border border-neutral-200 rounded-lg p-3 w-48 flex flex-col gap-3"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between border-b border-neutral-100 pb-2">
           <span className="text-xs font-bold uppercase text-neutral-500 tracking-wider">{label}</span>
           <VariableBindingButton
@@ -302,7 +311,7 @@ const SpacingPopout = ({ type, edge, value, onChange, onClose, cssProperty, disa
           </div>
           <div className="relative">
             <button
-              onClick={() => !isBound && setUnitOpen(!unitOpen)}
+              onClick={(e) => { e.stopPropagation(); if (!isBound) setUnitOpen(!unitOpen); }}
               disabled={disabled || isBound}
               className="h-8 px-2 text-xs font-medium bg-neutral-50 border border-neutral-200 rounded hover:bg-neutral-100 transition-colors flex items-center gap-1 min-w-[40px] justify-center"
             >
@@ -313,7 +322,7 @@ const SpacingPopout = ({ type, edge, value, onChange, onClose, cssProperty, disa
                 {units.map((u) => (
                   <button
                     key={u}
-                    onClick={() => handleUnitChange(u)}
+                    onClick={(e) => { e.stopPropagation(); handleUnitChange(u); }}
                     className={`w-full text-left px-2 py-1 text-xs hover:bg-neutral-50 ${unit === u ? "text-primary font-bold" : "text-neutral-600"}`}
                   >
                     {u}
@@ -326,7 +335,7 @@ const SpacingPopout = ({ type, edge, value, onChange, onClose, cssProperty, disa
 
         <div className="flex gap-1 pt-1 border-t border-neutral-100">
           <button
-            onClick={setBothSides}
+            onClick={(e) => { e.stopPropagation(); setBothSides(); }}
             title="Set opposite side"
             className="flex-1 h-7 flex items-center justify-center gap-1.5 rounded bg-neutral-50 border border-neutral-200 hover:bg-neutral-100 text-neutral-600 transition-colors"
           >
@@ -334,7 +343,7 @@ const SpacingPopout = ({ type, edge, value, onChange, onClose, cssProperty, disa
             <span className="text-[9px] font-medium">Both</span>
           </button>
           <button
-            onClick={setAllSides}
+            onClick={(e) => { e.stopPropagation(); setAllSides(); }}
             title="Set all sides"
             className="flex-1 h-7 flex items-center justify-center gap-1.5 rounded bg-neutral-50 border border-neutral-200 hover:bg-neutral-100 text-neutral-600 transition-colors"
           >
@@ -343,8 +352,15 @@ const SpacingPopout = ({ type, edge, value, onChange, onClose, cssProperty, disa
           </button>
         </div>
       </div>
-    </>
+    </div>
   );
+
+  const mountPoint = typeof document !== "undefined" ? document.getElementById("puck-settings-overlay") : null;
+  if (!mountPoint) {
+    return content;
+  }
+
+  return createPortal(content, mountPoint);
 };
 
 export const ClassBoxModelControl = ({ label, values, onChange, disabled, cssProperties }: any) => {
@@ -608,7 +624,7 @@ const GapInput = ({ prop, values, disabled, onChange, cssProperty }: any) => {
           </button>
           {unitOpen && (
             <>
-              <div className="fixed inset-0 z-40" onClick={() => setUnitOpen(false)} />
+              <div className="absolute inset-0 z-40" onClick={() => setUnitOpen(false)} />
               <div className="absolute right-0 top-full mt-1 bg-white border border-neutral-200 shadow-lg rounded py-1 z-50 min-w-[50px]">
                 {units.map((u) => (
                   <button

@@ -37,6 +37,8 @@ export const SettingsPanel = () => {
       <div className="flex-1 overflow-y-auto overflow-x-hidden h-full w-full no-scrollbar">
         <Puck.Fields />
       </div>
+      {/* Portal target for dropdowns/popouts that should be constrained to the sidebar */}
+      <div id="puck-settings-overlay" className="absolute inset-0 pointer-events-none z-[60]" />
     </div>
   );
 };
